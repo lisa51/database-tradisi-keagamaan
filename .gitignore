@@ -1,0 +1,43 @@
+# Core WordPress - root files
+index.php
+license.txt
+readme.html
+wp-activate.php
+wp-blog-header.php
+wp-comments-post.php
+wp-config.php
+wp-cron.php
+wp-links-opml.php
+wp-load.php
+wp-login.php
+wp-mail.php
+wp-settings.php
+wp-signup.php
+wp-trackback.php
+xmlrpc.php
+local-xdebuginfo.php
+
+# Core WordPress - folders
+/wp-admin/
+/wp-includes/
+
+# Kecuali wp-config-sample.php (boleh di-track sebagai referensi)
+!wp-config-sample.php
+
+# Uploads & cache
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backup*/
+
+# Log & temporary files
+*.log
+.htaccess
+.DS_Store
+Thumbs.db
+
+
+# Ignore semua tema bawaan WordPress default (tidak dipakai untuk project ini)
+wp-content/themes/twentytwentyfive/
+wp-content/themes/twentytwentyfour/
+wp-content/themes/twentytwentythree/
