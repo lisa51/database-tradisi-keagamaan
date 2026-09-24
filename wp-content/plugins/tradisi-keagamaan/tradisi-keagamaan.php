@@ -19,7 +19,7 @@ function tk_register_post_type() {
         ],
         'public' => true,
         'has_archive' => true,
-        'show_in_rest' => true, // penting untuk Gutenberg & API
+        'show_in_rest' => true,
         'menu_icon' => 'dashicons-book-alt',
         'supports' => ['title', 'editor', 'thumbnail', 'excerpt'],
         'rewrite' => ['slug' => 'tradisi'],
@@ -35,7 +35,7 @@ function tk_register_taxonomy_agama() {
             'singular_name' => 'Agama',
         ],
         'public' => true,
-        'hierarchical' => true, // seperti kategori
+        'hierarchical' => true,
         'show_in_rest' => true,
         'rewrite' => ['slug' => 'agama'],
     ]);
@@ -57,7 +57,7 @@ function tk_register_taxonomy_wilayah() {
 }
 add_action('init', 'tk_register_taxonomy_wilayah');
 
-// 4. Register Taxonomy: Kategori Tradisi (misal: ritual, perayaan, upacara adat)
+// 4. Register Taxonomy: Kategori Tradisi
 function tk_register_taxonomy_kategori() {
     register_taxonomy('kategori-tradisi', 'tradisi', [
         'labels' => [
@@ -71,6 +71,30 @@ function tk_register_taxonomy_kategori() {
     ]);
 }
 add_action('init', 'tk_register_taxonomy_kategori');
+
+// ============================================================
+// 5. Tags Support + Template Loader untuk Single Tradisi
+// ============================================================
+
+function tk_add_tags_to_tradisi() {
+    register_taxonomy_for_object_type('post_tag', 'tradisi');
+}
+add_action('init', 'tk_add_tags_to_tradisi');
+
+function tk_single_tradisi_template($template) {
+    if (is_singular('tradisi')) {
+        $custom_template = plugin_dir_path(__FILE__) . 'templates/single-tradisi.php';
+        if (file_exists($custom_template)) {
+            return $custom_template;
+        }
+    }
+    return $template;
+}
+add_filter('single_template', 'tk_single_tradisi_template');
+
+// ============================================================
+// 6. ACF Field Group — TEMPEL HASIL EXPORT DI BAWAH INI
+// ============================================================
 
 add_action( 'acf/include_fields', function() {
 	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
