@@ -310,7 +310,7 @@ function tk_stats_shortcode() {
     return $html;
 }
 
-// ===== Font Google: DM Serif Display (judul) + DM Sans (teks) =====
+// ===== 9. Font Google: DM Serif Display (judul) + DM Sans (teks) =====
 add_action( 'wp_enqueue_scripts', 'tk_enqueue_fonts' );
 function tk_enqueue_fonts() {
     wp_enqueue_style(
@@ -319,4 +319,138 @@ function tk_enqueue_fonts() {
         array(),
         null
     );
+}
+
+// ===== Koleksi + pencarian: [tk_koleksi] =====
+add_shortcode( 'tk_koleksi', 'tk_koleksi_shortcode' );
+function tk_koleksi_shortcode( $atts ) {
+    $atts = shortcode_atts( array( 'per_halaman' => 9 ), $atts, 'tk_koleksi' );
+
+    // Ambil input pencarian dari URL (sudah disanitasi)
+    $cari = isset( $_GET['cari'] ) ? sanitize_text_field( wp_unslash( $_GET['cari'] ) ) : '';
+    $prov = isset( $_GET['provinsi'] ) ? sanitize_title( wp_unslash( $_GET['provinsi'] ) ) : '';
+    $hal  = isset( $_GET['hal'] ) ? max( 1, absint( $_GET['hal'] ) ) : 1;
+
+    $args = array(
+        'post_type'      => 'tradisi',
+        'post_status'    => 'publish',
+        'posts_per_page' => absint( $atts['per_halaman'] ),
+        'paged'          => $hal,
+    );
+    if ( $cari !== '' ) {
+        $args['s'] = $cari;
+    }
+    if ( $prov !== '' ) {
+        $args['tax_query'] = array( array(
+            'taxonomy' => 'wilayah',
+            'field'    => 'slug',
+            'terms'    => $prov,
+        ) );
+    }
+    $q = new WP_Query( $args );
+
+    $daftar_prov = get_terms( array(
+        'taxonomy'   => 'wilayah',
+        'hide_empty' => true,
+        'parent'     => 0,
+    ) );
+    $url_dasar = get_permalink();
+
+    $ikon_pin  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
+    $ikon_peta = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6"/></svg>';
+
+    ob_start();
+    ?>
+    <section class="tk-jelajah" id="jelajahi">
+      <div class="tk-jelajah-head">
+        <div>
+          <span class="tk-label">Pencarian Arsip</span>
+          <h2 class="tk-jelajah-judul">Jelajahi Tradisi Lokal</h2>
+        </div>
+        <span class="tk-jumlah">Menampilkan <?php echo esc_html( number_format_i18n( $q->found_posts ) ); ?> tradisi</span>
+      </div>
+      <form class="tk-cari" method="get" action="<?php echo esc_url( $url_dasar ); ?>#jelajahi">
+        <input type="search" name="cari" placeholder="Cari nama tradisi..." value="<?php echo esc_attr( $cari ); ?>">
+        <select name="provinsi">
+          <option value="">Pilih Provinsi</option>
+          <?php if ( ! is_wp_error( $daftar_prov ) ) : foreach ( $daftar_prov as $t ) : ?>
+            <option value="<?php echo esc_attr( $t->slug ); ?>" <?php selected( $prov, $t->slug ); ?>><?php echo esc_html( $t->name ); ?></option>
+          <?php endforeach; endif; ?>
+        </select>
+        <button type="submit">Cari</button>
+        <?php if ( $cari !== '' || $prov !== '' ) : ?>
+          <a class="tk-reset" href="<?php echo esc_url( $url_dasar ); ?>#jelajahi">× Hapus pencarian</a>
+        <?php endif; ?>
+      </form>
+    </section>
+
+    <section class="tk-koleksi">
+      <div class="tk-koleksi-head">
+        <h2>Koleksi Tradisi Lokal</h2>
+        <span class="tk-jumlah-kecil"><?php echo esc_html( $q->post_count ); ?> item tampil</span>
+      </div>
+
+      <?php if ( $q->have_posts() ) : ?>
+        <div class="tk-grid">
+          <?php while ( $q->have_posts() ) : $q->the_post();
+            $id   = get_the_ID();
+            $kat  = get_the_terms( $id, 'kategori-tradisi' );
+            $kat  = ( $kat && ! is_wp_error( $kat ) ) ? implode( ', ', wp_list_pluck( $kat, 'name' ) ) : '';
+            $wil  = get_the_terms( $id, 'wilayah' );
+            $wil  = ( $wil && ! is_wp_error( $wil ) ) ? implode( ', ', wp_list_pluck( $wil, 'name' ) ) : '';
+            $asal = get_post_meta( $id, 'asal_daerah', true );
+            $desk = get_post_meta( $id, 'deskripsi_singkat', true );
+            $tags = get_the_terms( $id, 'post_tag' );
+          ?>
+            <article class="tk-kartu">
+              <a class="tk-kartu-media" href="<?php the_permalink(); ?>">
+                <?php if ( has_post_thumbnail() ) { the_post_thumbnail( 'medium_large', array( 'loading' => 'lazy' ) ); } ?>
+                <?php if ( $kat ) : ?><span class="tk-badge-kat"><?php echo esc_html( $kat ); ?></span><?php endif; ?>
+                <span class="tk-badge-status">Terpublikasi</span>
+              </a>
+              <div class="tk-kartu-isi">
+                <h3 class="tk-kartu-judul"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+                <?php if ( $asal ) : ?>
+                  <p class="tk-lok"><?php echo $ikon_pin; ?><span><?php echo esc_html( $asal ); ?></span></p>
+                <?php endif; ?>
+                <?php if ( $wil ) : ?>
+                  <p class="tk-lok tk-lok-2"><?php echo $ikon_peta; ?><span><?php echo esc_html( $wil ); ?></span></p>
+                <?php endif; ?>
+                <?php if ( $desk ) : ?>
+                  <p class="tk-kartu-desk"><?php echo esc_html( wp_trim_words( $desk, 25 ) ); ?></p>
+                <?php endif; ?>
+                <div class="tk-kartu-kaki">
+                  <span class="tk-tag"><?php
+                    if ( $tags && ! is_wp_error( $tags ) ) {
+                        echo esc_html( '# ' . implode( '   # ', wp_list_pluck( array_slice( $tags, 0, 2 ), 'name' ) ) );
+                    }
+                  ?></span>
+                  <a class="tk-detail" href="<?php the_permalink(); ?>">Lihat Detail →</a>
+                </div>
+              </div>
+            </article>
+          <?php endwhile; ?>
+        </div>
+
+        <?php if ( $q->max_num_pages > 1 ) : ?>
+          <nav class="tk-halaman">
+            <?php echo paginate_links( array(
+                'base'      => add_query_arg( 'hal', '%#%', $url_dasar ),
+                'format'    => '',
+                'current'   => $hal,
+                'total'     => $q->max_num_pages,
+                'add_args'  => array_filter( array( 'cari' => $cari, 'provinsi' => $prov ) ),
+                'prev_text' => '‹ Sebelumnya',
+                'next_text' => 'Berikutnya ›',
+            ) ); ?>
+          </nav>
+        <?php endif; ?>
+
+      <?php else : ?>
+        <p class="tk-kosong">Tidak ada tradisi yang cocok dengan pencarian Anda.</p>
+      <?php endif; ?>
+    </section>
+    <?php
+    wp_reset_postdata();
+    return ob_get_clean();
 }
