@@ -1,0 +1,661 @@
+/* =============================================================================
+   WARISI (Warisan Religi Indonesia) — Stylesheet utama
+   -----------------------------------------------------------------------------
+   Dimuat otomatis oleh plugin (includes/assets.php).
+   JANGAN salin lagi ke Appearance → Customize → Additional CSS.
+
+   DAFTAR ISI
+     1. Token warna & font      (ubah warna situs cukup di sini)
+     2. Dasar & tipografi
+     3. Header & menu
+     4. Tata letak Beranda
+     5. Komponen bersama        (tombol, label, badge)
+     6. [tk_hero]
+     7. [tk_stats]
+     8. [tk_koleksi] panel Jelajahi
+     9. [tk_koleksi] grid & card
+    10. Halaman single tradisi
+    11. Responsif               (semua @media dikumpulkan di akhir)
+
+   Konvensi nama class:
+     .tk-*               komponen buatan plugin (shortcode)
+     .single-tradisi__*  bagian template single-tradisi.php (gaya BEM)
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. Token warna & font
+   ============================================================================= */
+:root {
+  /* Warna utama */
+  --tk-accent:       #c4552d; /* oranye: tombol, link, aksen      */
+  --tk-accent-gelap: #a8431f; /* oranye saat hover                */
+  --tk-coklat:       #3b2314; /* badge kategori, teks gelap       */
+  --tk-hijau:        #1f7a4d; /* badge "Terpublikasi"             */
+  --tk-emas:         #e8a93d; /* aksen abstrak, label lokasi hero */
+
+  /* Latar & teks */
+  --tk-krem:     #fbf7f1; /* latar halaman                  */
+  --tk-krem-tua: #f3e7da; /* latar kotak sekunder / aktif   */
+  --tk-teks:     #2b2622; /* teks utama                     */
+  --tk-abu:      #6f6760; /* teks sekunder                  */
+  --tk-garis:    #eadfd3; /* border & garis pemisah         */
+
+  /* Font (dimuat dari Google Fonts, lihat includes/assets.php) */
+  --tk-font-judul: "DM Serif Display", Georgia, serif;
+  --tk-font-teks:  "DM Sans", system-ui, sans-serif;
+
+  /* Ukuran umum */
+  --tk-radius: 12px;
+  --tk-lebar:  1200px; /* lebar maksimum konten Beranda */
+}
+
+
+/* =============================================================================
+   2. Dasar & tipografi
+   ============================================================================= */
+body {
+  background: var(--tk-krem);
+  color: var(--tk-teks);
+  font-family: var(--tk-font-teks);
+}
+
+h1, h2, h3, h4,
+.entry-title,
+.main-title {
+  font-family: var(--tk-font-judul);
+  font-weight: 400;
+  color: var(--tk-teks);
+}
+
+a       { color: var(--tk-accent); }
+a:hover { color: var(--tk-accent-gelap); }
+
+
+/* =============================================================================
+   3. Header & menu (GeneratePress)
+   ============================================================================= */
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--tk-garis);
+}
+.main-title a {
+  color: var(--tk-teks);
+  font-size: 26px;
+}
+.site-description {
+  margin-top: 2px;
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+
+/* Item menu */
+.main-navigation .main-nav ul li a {
+  margin: 0 2px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 36px;
+  color: var(--tk-teks);
+}
+.main-navigation .main-nav ul li:not([class*="current-menu-"]):hover > a,
+.main-navigation .main-nav ul li:not([class*="current-menu-"]):focus > a {
+  background: var(--tk-krem);
+  color: var(--tk-accent);
+}
+/* Item halaman aktif */
+.main-navigation .main-nav ul li[class*="current-menu-"] > a {
+  background: var(--tk-krem-tua);
+  color: var(--tk-accent-gelap);
+}
+
+/* Tombol "+ Tambah Tradisi" di menu (item menu dengan CSS class: tk-menu-cta) */
+.main-navigation .main-nav ul li.tk-menu-cta > a {
+  margin-left: 12px;
+  background: var(--tk-accent);
+  color: #fff;
+  font-weight: 700;
+}
+.main-navigation .main-nav ul li.tk-menu-cta:not([class*="current-menu-"]):hover > a {
+  background: var(--tk-accent-gelap);
+  color: #fff;
+}
+
+
+/* =============================================================================
+   4. Tata letak Beranda
+   ============================================================================= */
+/* Konten di tengah dan sejajar header, latar krem terlihat */
+.home .inside-article {
+  max-width: var(--tk-lebar);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 32px 24px;
+  background: transparent;
+}
+
+/* Saat menu "/#jelajahi" diklik, beri jarak dari atas layar */
+#jelajahi { scroll-margin-top: 24px; }
+
+
+/* =============================================================================
+   5. Komponen bersama
+   ============================================================================= */
+/* Tombol */
+.tk-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.tk-btn-utama       { background: var(--tk-accent); color: #fff; }
+.tk-btn-utama:hover { background: var(--tk-accent-gelap); color: #fff; }
+.tk-btn-garis       { background: #fff; color: var(--tk-teks); border: 1px solid var(--tk-garis); }
+.tk-btn-garis:hover { border-color: var(--tk-accent); color: var(--tk-accent); }
+
+/* Label kecil huruf kapital (mis. "PENCARIAN ARSIP") */
+.tk-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--tk-accent);
+}
+
+/* Pill bulat (tag di halaman single) */
+.tag-pill {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* =============================================================================
+   6. [tk_hero]
+   ============================================================================= */
+.tk-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: center;
+  padding: 16px 0 40px;
+}
+/* Cahaya bulat lembut di pojok kanan atas (dekorasi) */
+.tk-hero::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -120px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 169, 61, .18), transparent 70%);
+  pointer-events: none;
+}
+.tk-hero > * { position: relative; }
+
+.tk-hero-label {
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 999px;
+  background: var(--tk-krem-tua);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--tk-accent-gelap);
+}
+.tk-hero-judul {
+  margin: 18px 0 16px;
+  font-size: clamp(34px, 4.4vw, 54px);
+  line-height: 1.1;
+}
+.tk-hero-desk {
+  max-width: 520px;
+  margin: 0 0 24px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--tk-abu);
+}
+.tk-hero-tombol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Tiga poin kecil berwarna */
+.tk-hero-poin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--tk-garis);
+  list-style: none;
+  font-size: 12px;
+  color: var(--tk-abu);
+}
+.tk-hero-poin li { display: flex; align-items: center; gap: 8px; margin: 0; }
+.tk-dot        { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+.tk-dot-hijau  { background: var(--tk-hijau); }
+.tk-dot-emas   { background: var(--tk-emas); }
+.tk-dot-oranye { background: var(--tk-accent); }
+
+/* Kartu tradisi unggulan (kanan) */
+.tk-hero-kartu {
+  display: block;
+  padding: 10px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 18px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 20px 40px rgba(59, 35, 20, .10);
+  transform: rotate(1deg);
+  transition: transform .25s;
+}
+.tk-hero-kartu:hover { transform: rotate(0) translateY(-3px); }
+.tk-hero-media {
+  position: relative;
+  aspect-ratio: 4 / 3.2;
+  overflow: hidden;
+  border-radius: var(--tk-radius);
+  background: var(--tk-krem-tua);
+  line-height: 0;
+}
+.tk-hero-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tk-hero-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 48px 16px 14px;
+  background: linear-gradient(transparent, rgba(20, 12, 6, .85));
+  line-height: 1.35;
+  color: #fff;
+}
+.tk-hero-lokasi {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--tk-emas);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--tk-coklat);
+}
+.tk-hero-kartu-judul {
+  font-family: var(--tk-font-judul);
+  font-size: 22px;
+  font-weight: 400;
+}
+.tk-hero-kartu-desk { font-size: 12px; opacity: .85; }
+.tk-hero-kartu-kaki {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 6px 2px;
+  font-size: 11.5px;
+  color: var(--tk-abu);
+}
+
+
+/* =============================================================================
+   7. [tk_stats]
+   ============================================================================= */
+.tk-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0 32px;
+}
+.tk-stat {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+  text-align: center;
+}
+.tk-stat-angka {
+  display: block;
+  font-family: var(--tk-font-judul);
+  font-size: 2.2rem;
+  line-height: 1.2;
+  color: var(--tk-teks);
+}
+.tk-stat-label {
+  display: block;
+  font-size: .9rem;
+  color: var(--tk-abu);
+}
+
+
+/* =============================================================================
+   8. [tk_koleksi] panel Jelajahi
+   ============================================================================= */
+.tk-jelajah {
+  min-width: 0;
+  margin: 32px 0 40px;
+  padding: 24px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.tk-jelajah-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.tk-jelajah-judul { margin: 4px 0 0; font-size: 28px; }
+.tk-jumlah {
+  padding: 4px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 999px;
+  background: var(--tk-krem);
+  font-size: 12px;
+  color: var(--tk-abu);
+}
+
+/* Form: [kolom cari] [dropdown provinsi] [tombol] */
+.tk-cari {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  gap: 12px;
+}
+.tk-cari input,
+.tk-cari select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 10px;
+  background: var(--tk-krem);
+  font-family: inherit;
+  font-size: 14px;
+}
+.tk-cari button {
+  height: 44px;
+  padding: 0 32px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--tk-accent);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tk-cari button:hover { background: var(--tk-accent-gelap); }
+.tk-reset { grid-column: 1 / -1; font-size: 13px; }
+
+
+/* =============================================================================
+   9. [tk_koleksi] grid & card
+   ============================================================================= */
+.tk-koleksi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--tk-garis);
+}
+.tk-koleksi-head h2 { margin: 0; font-size: 22px; }
+.tk-jumlah-kecil {
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+
+.tk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* Card */
+.tk-kartu {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--tk-garis);
+  border-radius: 14px;
+  background: #fff;
+  transition: box-shadow .2s, transform .2s;
+}
+.tk-kartu:hover {
+  box-shadow: 0 8px 24px rgba(59, 35, 20, .12);
+  transform: translateY(-2px);
+}
+
+/* Gambar + badge */
+.tk-kartu-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--tk-krem-tua);
+  line-height: 0;
+}
+.tk-kartu-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tk-badge-kat,
+.tk-badge-status {
+  position: absolute;
+  top: 12px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #fff;
+}
+.tk-badge-kat    { left: 12px; max-width: 60%; background: var(--tk-coklat); }
+.tk-badge-status {
+  right: 12px;
+  background: var(--tk-hijau);
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+/* Isi card */
+.tk-kartu-isi {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 18px 18px 16px;
+}
+.tk-kartu-judul        { margin: 0 0 10px; font-size: 21px; line-height: 1.25; }
+.tk-kartu-judul a       { color: var(--tk-teks); text-decoration: none; }
+.tk-kartu-judul a:hover { color: var(--tk-accent); }
+
+/* Lokasi 2 baris: asal_daerah (abu) + wilayah (tebal) */
+.tk-lok {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--tk-abu);
+}
+.tk-lok svg { flex-shrink: 0; margin-top: 2px; color: var(--tk-accent); }
+.tk-lok-2   { font-weight: 600; color: var(--tk-teks); }
+
+.tk-kartu-desk {
+  margin: 10px 0 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--tk-abu);
+}
+
+/* Kaki card: kata kunci + "Lihat Detail" (selalu di bawah) */
+.tk-kartu-kaki {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--tk-garis);
+}
+.tk-tag { font-size: 11.5px; color: var(--tk-abu); }
+.tk-detail {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--tk-accent);
+}
+
+/* Hasil pencarian kosong */
+.tk-kosong {
+  padding: 40px;
+  border: 1px dashed var(--tk-garis);
+  border-radius: 14px;
+  background: #fff;
+  text-align: center;
+  color: var(--tk-abu);
+}
+
+/* Nomor halaman */
+.tk-halaman { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 28px; }
+.tk-halaman .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  text-decoration: none;
+  color: var(--tk-teks);
+}
+.tk-halaman .page-numbers.current {
+  border-color: var(--tk-accent);
+  background: var(--tk-accent);
+  color: #fff;
+}
+
+
+/* =============================================================================
+   10. Halaman single tradisi (templates/single-tradisi.php)
+   ============================================================================= */
+.single-tradisi {
+  max-width: 800px;
+  margin: 32px auto;
+  padding: 0 20px;
+}
+.single-tradisi__meta-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.single-tradisi__title { margin: 8px 0 16px; font-size: 30px; }
+.single-tradisi__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--tk-garis);
+  font-size: 14px;
+  color: var(--tk-abu);
+}
+.single-tradisi__featured-img img {
+  width: 100%;
+  margin-bottom: 24px;
+  border-radius: var(--tk-radius);
+}
+
+/* Kotak abstrak (deskripsi_singkat) */
+.single-tradisi__abstract {
+  margin-bottom: 24px;
+  padding: 18px 20px;
+  border-left: 4px solid var(--tk-emas);
+  border-radius: 8px;
+  background: var(--tk-krem-tua);
+  font-style: italic;
+  color: var(--tk-coklat);
+}
+.single-tradisi__abstract-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.single-tradisi__content    { font-size: 16px; line-height: 1.7; }
+.single-tradisi__content h2 { margin-top: 28px; font-size: 20px; }
+
+/* Kata kunci (tags) */
+.single-tradisi__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 28px 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--tk-garis);
+}
+.single-tradisi__tags .tag-pill {
+  background: var(--tk-krem-tua);
+  color: var(--tk-accent-gelap);
+}
+
+/* Galeri foto */
+.tk-galeri {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+.tk-galeri img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+
+/* =============================================================================
+   11. Responsif
+   ============================================================================= */
+/* Tablet */
+@media (max-width: 900px) {
+  .tk-hero       { grid-template-columns: 1fr; gap: 32px; }
+  .tk-hero-kartu { transform: none; }
+  .tk-grid       { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* HP */
+@media (max-width: 600px) {
+  .tk-stats,
+  .tk-grid,
+  .tk-cari { grid-template-columns: 1fr; }
+}
