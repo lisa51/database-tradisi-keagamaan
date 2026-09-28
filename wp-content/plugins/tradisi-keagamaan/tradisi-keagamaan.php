@@ -455,7 +455,7 @@ function tk_koleksi_shortcode( $atts ) {
     return ob_get_clean();
 }
 
-// ===== Menu: link anchor (#...) tidak ditandai sebagai halaman aktif =====
+// ===== 11. Menu: link anchor (#...) tidak ditandai sebagai halaman aktif =====
 add_filter( 'nav_menu_css_class', 'tk_menu_anchor_tidak_aktif', 10, 2 );
 function tk_menu_anchor_tidak_aktif( $classes, $item ) {
     if ( 'custom' === $item->type && false !== strpos( $item->url, '#' ) ) {
@@ -468,3 +468,92 @@ function tk_menu_anchor_tidak_aktif( $classes, $item ) {
     }
     return $classes;
 }
+
+// ===== Hero Beranda: [tk_hero] =====
+add_shortcode( 'tk_hero', 'tk_hero_shortcode' );
+function tk_hero_shortcode( $atts ) {
+    $atts = shortcode_atts( array(
+        'label'     => 'Database Digital Tradisi Keagamaan Indonesia',
+        'judul'     => 'Mengenal, Mendokumentasikan, dan Merawat Tradisi Keagamaan Indonesia',
+        'deskripsi' => 'WARISI adalah ruang digital untuk mendokumentasikan kekayaan tradisi keagamaan yang tumbuh dan berkembang di berbagai daerah Indonesia.',
+        'id'        => 0,
+    ), $atts, 'tk_hero' );
+
+    // Tradisi unggulan: dari atribut id, atau pembaca terbanyak, atau yang terbaru
+    $unggulan = null;
+    $id = absint( $atts['id'] );
+    if ( $id && 'tradisi' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) {
+        $unggulan = get_post( $id );
+    }
+    if ( ! $unggulan ) {
+        $hasil = get_posts( array(
+            'post_type'      => 'tradisi',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'meta_key'       => 'tk_view_count',
+            'orderby'        => 'meta_value_num',
+            'order'          => 'DESC',
+        ) );
+        if ( ! $hasil ) {
+            $hasil = get_posts( array(
+                'post_type'      => 'tradisi',
+                'post_status'    => 'publish',
+                'posts_per_page' => 1,
+            ) );
+        }
+        $unggulan = $hasil ? $hasil[0] : null;
+    }
+
+    $hal_tambah  = get_page_by_path( 'tambah-tradisi' );
+    $url_tambah  = $hal_tambah ? get_permalink( $hal_tambah ) : home_url( '/tambah-tradisi/' );
+    $url_jelajah = home_url( '/#jelajahi' );
+
+    ob_start();
+    ?>
+    <section class="tk-hero">
+      <div class="tk-hero-teks">
+        <span class="tk-hero-label"><?php echo esc_html( $atts['label'] ); ?></span>
+        <h1 class="tk-hero-judul"><?php echo esc_html( $atts['judul'] ); ?></h1>
+        <p class="tk-hero-desk"><?php echo esc_html( $atts['deskripsi'] ); ?></p>
+        <div class="tk-hero-tombol">
+          <a class="tk-btn tk-btn-utama" href="<?php echo esc_url( $url_jelajah ); ?>">Jelajahi Tradisi</a>
+          <a class="tk-btn tk-btn-garis" href="<?php echo esc_url( $url_tambah ); ?>">+ Tambah Tradisi</a>
+        </div>
+        <ul class="tk-hero-poin">
+          <li><span class="tk-dot tk-dot-hijau"></span>Format Standar Arsip</li>
+          <li><span class="tk-dot tk-dot-emas"></span>Kurasi Antar Wilayah</li>
+          <li><span class="tk-dot tk-dot-oranye"></span>Aksesibilitas Terbuka</li>
+        </ul>
+      </div>
+
+      <?php if ( $unggulan ) :
+        $uid  = $unggulan->ID;
+        $wil  = get_the_terms( $uid, 'wilayah' );
+        $wil  = ( $wil && ! is_wp_error( $wil ) ) ? $wil[0]->name : '';
+        $desk = get_post_meta( $uid, 'deskripsi_singkat', true );
+        $baca = (int) get_post_meta( $uid, 'tk_view_count', true );
+      ?>
+        <a class="tk-hero-kartu" href="<?php echo esc_url( get_permalink( $uid ) ); ?>">
+          <div class="tk-hero-media">
+            <?php echo get_the_post_thumbnail( $uid, 'large' ); ?>
+            <div class="tk-hero-overlay">
+              <?php if ( $wil ) : ?>
+                <span class="tk-hero-lokasi">Tradisi <?php echo esc_html( $wil ); ?></span>
+              <?php endif; ?>
+              <strong class="tk-hero-kartu-judul"><?php echo esc_html( get_the_title( $uid ) ); ?></strong>
+              <?php if ( $desk ) : ?>
+                <span class="tk-hero-kartu-desk"><?php echo esc_html( wp_trim_words( $desk, 14 ) ); ?></span>
+              <?php endif; ?>
+            </div>
+          </div>
+          <div class="tk-hero-kartu-kaki">
+            <span>✓ Koleksi Terverifikasi Kurator</span>
+            <span><?php echo esc_html( number_format_i18n( $baca ) ); ?> pembaca</span>
+          </div>
+        </a>
+      <?php endif; ?>
+    </section>
+    <?php
+    return ob_get_clean();
+}
+
