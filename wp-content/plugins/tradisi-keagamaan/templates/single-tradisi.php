@@ -1,131 +1,157 @@
 <?php
 /**
- * Template untuk halaman Single Tradisi
- * Lokasi: wp-content/plugins/tradisi-keagamaan/templates/single-tradisi.php
+ * Template halaman detail tradisi (/tradisi/nama-tradisi/).
+ *
+ * Dipasang otomatis oleh includes/post-types.php.
+ * Logika data ada di includes/single.php → file ini hanya HTML.
+ * Gaya ada di assets/css/warisi.css, bagian "10. Halaman single tradisi".
+ *
+ * Urutan bagian:
+ *   1. Link kembali
+ *   2. Badge kategori + status, judul, tanggal terbit
+ *   3. Baris meta: penulis, asal daerah, wilayah, pembaca
+ *   4. Gambar utama
+ *   5. Abstrak (deskripsi_singkat)
+ *   6. Kotak info: tanggal perayaan, agama, wilayah
+ *   7. Isi artikel
+ *   8. Galeri foto
+ *   9. Kata kunci + sumber referensi
+ *  10. Tradisi terkait
+ *
+ * Bagian yang datanya kosong otomatis tidak ditampilkan.
+ *
+ * @package TradisiKeagamaan
  */
 
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 get_header();
 
-while (have_posts()) :
+while ( have_posts() ) :
     the_post();
 
-    $post_id          = get_the_ID();
-    $deskripsi_singkat = get_field('deskripsi_singkat');
-    $asal_daerah       = get_field('asal_daerah');
-    $sumber_referensi  = get_field('sumber_referensi');
-    $galeri_foto       = get_field('galeri_foto');
-    $video_terkait     = get_field('video_terkait');
+    $id = get_the_ID();
+    $d  = tk_single_get_data( $id );
 
-    $wilayah_terms  = get_the_terms($post_id, 'wilayah');
-    $kategori_terms = get_the_terms($post_id, 'kategori-tradisi');
-    $tags           = get_the_tags($post_id);
-?>
+    // Kotak info (label => nilai). Baris kosong dilewati.
+    $info = array_filter( array(
+        'Tanggal Perayaan' => $d['tanggal'],
+        'Agama'            => $d['agama'],
+        'Wilayah'          => $d['wilayah'],
+    ) );
+    ?>
 
 <div class="container">
-    <article class="single-tradisi">
+  <article class="tk-single">
 
-        <div class="single-tradisi__meta-top">
-            <?php if ($kategori_terms && !is_wp_error($kategori_terms)) : ?>
-                <span class="tag-pill" style="background:#4A2511;color:#fff;">
-                    <?php echo esc_html($kategori_terms[0]->name); ?>
-                </span>
-            <?php endif; ?>
-            <span style="color:#9C8C78;font-size:13px;">
-                <?php echo esc_html(get_the_date()); ?>
-            </span>
-        </div>
+    <?php /* 1. Link kembali */ ?>
+    <a class="tk-single__kembali" href="<?php echo esc_url( tk_url_jelajahi() ); ?>">← Kembali ke koleksi</a>
 
-        <h1 class="single-tradisi__title"><?php the_title(); ?></h1>
-
-        <div class="single-tradisi__meta">
-            <span><strong>Penulis:</strong> <?php the_author(); ?></span>
-            <?php if ($asal_daerah) : ?>
-                <span>&bull; <strong>Lokasi:</strong> <?php echo esc_html($asal_daerah); ?></span>
-            <?php endif; ?>
-            <?php if ($wilayah_terms && !is_wp_error($wilayah_terms)) : ?>
-                <span>&bull; <strong>Wilayah:</strong> <?php echo esc_html($wilayah_terms[0]->name); ?></span>
-            <?php endif; ?>
-            <span>&bull; <strong>Pembaca:</strong> <?php echo number_format_i18n(tk_get_view_count($post_id)); ?></span>
-        </div>
-
-        <?php if (has_post_thumbnail()) : ?>
-            <div class="single-tradisi__featured-img">
-                <?php the_post_thumbnail('large', ['style' => 'width:100%;height:auto;']); ?>
-            </div>
+    <?php /* 2. Badge, judul, tanggal terbit */ ?>
+    <header class="tk-single__head">
+      <div class="tk-single__badges">
+        <?php if ( $d['kategori'] ) : ?>
+          <span class="tk-pill tk-pill--kat"><?php echo esc_html( $d['kategori'] ); ?></span>
         <?php endif; ?>
+        <span class="tk-pill tk-pill--status">Terpublikasi</span>
+        <span class="tk-single__tgl"><?php echo esc_html( get_the_date() ); ?></span>
+      </div>
 
-        <?php if ($deskripsi_singkat) : ?>
-            <div class="single-tradisi__abstract">
-                <span class="single-tradisi__abstract-label">Abstrak / Ringkasan Eksekutif</span>
-                <?php echo esc_html($deskripsi_singkat); ?>
-            </div>
+      <h1 class="tk-single__title"><?php the_title(); ?></h1>
+
+      <?php /* 3. Baris meta */ ?>
+      <ul class="tk-single__meta">
+        <li><?php echo tk_icon( 'user' ); ?><?php the_author(); ?></li>
+        <?php if ( $d['asal'] ) : ?>
+          <li><?php echo tk_icon( 'pin' ); ?><?php echo esc_html( $d['asal'] ); ?></li>
         <?php endif; ?>
-
-        <div class="single-tradisi__content">
-            <?php the_content(); ?>
-        </div>
-
-        <?php if ($video_terkait) : ?>
-            <div class="single-tradisi__video" style="margin:24px 0;">
-                <?php echo wp_oembed_get(esc_url($video_terkait)); ?>
-            </div>
+        <?php if ( $d['wilayah'] ) : ?>
+          <li><?php echo tk_icon( 'gedung' ); ?><?php echo esc_html( $d['wilayah'] ); ?></li>
         <?php endif; ?>
+        <li><?php echo tk_icon( 'mata' ); ?><?php echo esc_html( number_format_i18n( $d['pembaca'] ) ); ?> pembaca</li>
+      </ul>
+    </header>
 
-        <?php 
-        // Galeri foto: aman untuk format ID, array, atau daftar ID dipisah koma
-        if ( $galeri_foto ) :
-            // Kalau isinya satu foto (field Image), jadikan daftar berisi satu foto
-            if ( is_array( $galeri_foto ) && ( isset( $galeri_foto['ID'] ) || isset( $galeri_foto['url'] ) ) ) {
-                $galeri_foto = array( $galeri_foto );
-            }
-            if ( ! is_array( $galeri_foto ) ) {
-                $galeri_foto = array_filter( array_map( 'absint', explode( ',', (string) $galeri_foto ) ) );
-            }
-        ?>
+    <?php /* 4. Gambar utama */ ?>
+    <?php if ( has_post_thumbnail() ) : ?>
+      <figure class="tk-single__featured-img"><?php the_post_thumbnail( 'large' ); ?></figure>
+    <?php endif; ?>
+
+    <?php /* 5. Abstrak */ ?>
+    <?php if ( $d['abstrak'] ) : ?>
+      <div class="tk-single__abstract">
+        <span class="tk-single__abstract-label">Abstrak / Ringkasan</span>
+        <?php echo esc_html( $d['abstrak'] ); ?>
+      </div>
+    <?php endif; ?>
+
+    <?php /* 6. Kotak info */ ?>
+    <?php if ( $info ) : ?>
+      <dl class="tk-single__info">
+        <?php foreach ( $info as $label => $nilai ) : ?>
+          <div>
+            <dt><?php echo esc_html( $label ); ?></dt>
+            <dd><?php echo esc_html( $nilai ); ?></dd>
+          </div>
+        <?php endforeach; ?>
+      </dl>
+    <?php endif; ?>
+
+    <?php /* 7. Isi artikel */ ?>
+    <div class="tk-single__content"><?php the_content(); ?></div>
+
+    <?php /* 8. Galeri foto */ ?>
+    <?php if ( $d['galeri'] ) : ?>
+      <section class="tk-single__section">
+        <h2 class="tk-single__section-title">Galeri Foto</h2>
         <div class="tk-galeri">
-            <?php foreach ( $galeri_foto as $foto ) :
-                if ( is_array( $foto ) ) {
-                    $foto_id = isset( $foto['ID'] ) ? absint( $foto['ID'] ) : ( isset( $foto['id'] ) ? absint( $foto['id'] ) : 0 );
-                } else {
-                    $foto_id = absint( $foto );
-                }
-                if ( ! $foto_id ) {
-                    continue;
-                }
-            ?>
+          <?php foreach ( $d['galeri'] as $foto_id ) : ?>
             <a href="<?php echo esc_url( wp_get_attachment_image_url( $foto_id, 'large' ) ); ?>" target="_blank" rel="noopener">
-                <?php echo wp_get_attachment_image( $foto_id, 'medium', false, array( 'loading' => 'lazy' ) ); ?>
+              <?php echo wp_get_attachment_image( $foto_id, 'medium', false, array( 'loading' => 'lazy' ) ); ?>
             </a>
-            <?php endforeach; ?>
+          <?php endforeach; ?>
         </div>
+      </section>
+    <?php endif; ?>
+
+    <?php /* 9. Kata kunci + sumber */ ?>
+    <?php if ( $d['tags'] || $d['sumber'] ) : ?>
+      <footer class="tk-single__kaki">
+        <?php if ( $d['tags'] ) : ?>
+          <div class="tk-single__tags">
+            <span class="tk-label">Kata Kunci</span>
+            <?php foreach ( $d['tags'] as $tag ) : ?>
+              <a class="tag-pill" href="<?php echo esc_url( get_term_link( $tag ) ); ?>">#<?php echo esc_html( $tag->name ); ?></a>
+            <?php endforeach; ?>
+          </div>
         <?php endif; ?>
 
-        <?php if ($tags) : ?>
-            <div class="single-tradisi__tags">
-                <strong style="font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#9C8C78;">
-                    Kata Kunci:
-                </strong>
-                <?php foreach ($tags as $tag) : ?>
-                    <span class="tag-pill">#<?php echo esc_html($tag->name); ?></span>
-                <?php endforeach; ?>
-            </div>
+        <?php if ( $d['sumber'] ) : ?>
+          <p class="tk-single__sumber">
+            <?php echo tk_icon( 'link' ); ?>
+            <span>Sumber: <a href="<?php echo esc_url( $d['sumber'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $d['sumber'] ); ?></a></span>
+          </p>
         <?php endif; ?>
+      </footer>
+    <?php endif; ?>
 
-        <?php if ($sumber_referensi) : ?>
-            <div style="margin-top:20px;font-size:13px;color:#6B5D4F;">
-                <strong>Sumber Referensi:</strong>
-                <a href="<?php echo esc_url($sumber_referensi); ?>" target="_blank" rel="noopener">
-                    <?php echo esc_html($sumber_referensi); ?>
-                </a>
-            </div>
-        <?php endif; ?>
+  </article>
 
-    </article>
+  <?php /* 10. Tradisi terkait */ ?>
+  <?php $terkait = tk_single_get_terkait( $id ); ?>
+  <?php if ( $terkait ) : ?>
+    <section class="tk-single__terkait">
+      <div class="tk-koleksi-head"><h2>Tradisi Terkait</h2></div>
+      <div class="tk-grid">
+        <?php foreach ( $terkait as $terkait_id ) { echo tk_koleksi_render_kartu( $terkait_id ); } ?>
+      </div>
+    </section>
+  <?php endif; ?>
 </div>
 
-<?php
+    <?php
 endwhile;
 
 get_footer();

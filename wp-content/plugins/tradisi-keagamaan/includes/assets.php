@@ -22,7 +22,18 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-add_action( 'wp_enqueue_scripts', 'tk_enqueue_assets' );
+/*
+ * PENTING, URUTAN MUAT:
+ * GeneratePress menyisipkan CSS dari Customizer (warna, font, padding menu,
+ * latar body) sebagai CSS inline pada handle 'generate-style'. Kalau warisi.css
+ * dimuat SEBELUM CSS itu, aturan umum seperti body, a, h1, dan menu kalah.
+ *
+ * Karena itu:
+ *   - hook memakai prioritas 20 (setelah tema selesai mendaftarkan CSS-nya), dan
+ *   - warisi.css dijadikan "bergantung" pada 'generate-style', sehingga
+ *     WordPress selalu mencetaknya SETELAH CSS GeneratePress.
+ */
+add_action( 'wp_enqueue_scripts', 'tk_enqueue_assets', 20 );
 
 /**
  * Daftarkan font dan CSS plugin.
@@ -35,11 +46,17 @@ function tk_enqueue_assets() {
         null
     );
 
+    // Muat setelah CSS tema (kalau tema GeneratePress aktif).
+    $deps = array( 'tk-fonts' );
+    if ( wp_style_is( 'generate-style', 'registered' ) ) {
+        $deps[] = 'generate-style';
+    }
+
     $css_file = 'assets/css/warisi.css';
     wp_enqueue_style(
         'tk-warisi',
         TK_URL . $css_file,
-        array( 'tk-fonts' ),
+        $deps,
         filemtime( TK_PATH . $css_file )
     );
 }

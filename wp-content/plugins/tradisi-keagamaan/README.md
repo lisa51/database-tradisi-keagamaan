@@ -18,12 +18,13 @@ tradisi-keagamaan/
 │   ├── view-counter.php         Penghitung pembaca (meta tk_view_count).
 │   ├── assets.php               Memuat font Google + warisi.css.
 │   ├── menu.php                 Perbaikan menu anchor (#jelajahi).
+│   ├── single.php               Data & logika untuk halaman single tradisi.
 │   └── shortcodes/
 │       ├── hero.php             [tk_hero]
 │       ├── stats.php            [tk_stats]
 │       └── koleksi.php          [tk_koleksi]
 └── templates/
-    └── single-tradisi.php       Tampilan halaman detail tradisi.
+    └── single-tradisi.php       Tampilan halaman detail tradisi (HTML saja).
 ```
 
 Semua fungsi memakai awalan `tk_` supaya tidak bentrok dengan plugin lain.
@@ -83,6 +84,17 @@ Susunan Beranda saat ini:
 [tk_stats]
 [tk_koleksi]
 ```
+
+## Halaman single tradisi
+
+Template `templates/single-tradisi.php` hanya berisi HTML. Semua data diambil lewat `tk_single_get_data()` di `includes/single.php`.
+
+Urutan bagian: link kembali → badge kategori & status → judul → meta (penulis, asal daerah, wilayah, pembaca) → gambar utama → abstrak → kotak info (tanggal perayaan, agama, wilayah) → isi → galeri → kata kunci & sumber → tradisi terkait.
+
+- Bagian yang datanya kosong tidak ditampilkan.
+- Data dibaca dengan `get_post_meta()`, jadi halaman tetap tampil walaupun ACF nonaktif.
+- Galeri memakai `tk_get_galeri_ids()`, yang sudah mendukung field Image (sekarang) maupun Gallery (ACF Pro). Template tidak perlu diubah saat upgrade.
+- Tradisi terkait: 3 tradisi dengan kategori atau wilayah yang sama, memakai card yang sama dengan Beranda.
 
 ## CSS
 
