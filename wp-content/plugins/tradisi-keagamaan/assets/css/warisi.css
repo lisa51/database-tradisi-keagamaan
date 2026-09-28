@@ -15,7 +15,8 @@
      8. [tk_koleksi] panel Jelajahi
      9. [tk_koleksi] grid & card
     10. Halaman single tradisi
-    11. Responsif               (semua @media dikumpulkan di akhir)
+    11. [tk_peta]               (peta interaktif)
+    12. Responsif               (semua @media dikumpulkan di akhir)
 
    Konvensi nama class:
      .tk-*               komponen buatan plugin (shortcode)
@@ -767,13 +768,127 @@ a:hover { color: var(--tk-accent-gelap); }
 
 
 /* =============================================================================
-   11. Responsif
+   11. [tk_peta] — peta interaktif (Leaflet)
+   ============================================================================= */
+/* Susunan: peta (kiri) + panel detail (kanan) */
+.tk-peta-wrap--panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+}
+.tk-peta {
+  min-width: 0;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: var(--tk-krem-tua);
+  z-index: 0; /* agar peta tidak menutupi menu/header */
+}
+
+/* Pin bulat oranye */
+.tk-pin span {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--tk-accent);
+  box-shadow: 0 2px 6px rgba(59, 35, 20, .35);
+  transition: transform .15s;
+}
+.tk-pin:hover span { transform: scale(1.2); }
+
+/* Pin grup: beberapa tradisi di titik yang sama, berisi angka jumlahnya */
+.tk-pin--grup span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--tk-coklat);
+  font-family: var(--tk-font-teks);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Panel detail */
+.tk-peta-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+  overflow-y: auto;
+}
+.tk-peta-panel-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.tk-peta-panel-judul  { margin: 0; font-size: 22px; line-height: 1.2; }
+.tk-peta-panel-lokasi { margin: 0; font-size: 13px; font-weight: 600; color: var(--tk-teks); }
+.tk-peta-panel-desk   { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--tk-abu); }
+.tk-peta-panel .tk-detail { margin-top: 4px; }
+
+/* Daftar tradisi dalam satu titik */
+.tk-peta-daftar {
+  width: 100%;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tk-peta-daftar li { margin: 0 0 8px; }
+.tk-peta-daftar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 8px;
+  background: var(--tk-krem);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  color: var(--tk-teks);
+  cursor: pointer;
+}
+.tk-peta-daftar-item:hover { border-color: var(--tk-accent); }
+.tk-peta-daftar-item strong { font-size: 14px; }
+.tk-peta-daftar-item span   { font-size: 12px; color: var(--tk-abu); }
+
+/* Tombol kembali dari detail ke daftar */
+.tk-peta-kembali {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tk-accent);
+  cursor: pointer;
+}
+
+/* Popup kecil (peta di halaman single) */
+.tk-peta-popup { font-family: var(--tk-font-teks); }
+.tk-peta-popup .tk-peta-panel-judul { margin: 6px 0 4px; font-size: 17px; }
+.tk-peta-popup p { margin: 0 0 6px; }
+
+
+/* =============================================================================
+   12. Responsif
    ============================================================================= */
 /* Tablet */
 @media (max-width: 900px) {
   .tk-hero       { grid-template-columns: 1fr; gap: 32px; }
   .tk-hero-kartu { transform: none; }
   .tk-grid       { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tk-peta-wrap--panel { grid-template-columns: 1fr; } /* panel pindah ke bawah peta */
 }
 
 /* HP */

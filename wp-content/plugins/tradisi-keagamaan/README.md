@@ -10,7 +10,10 @@ tradisi-keagamaan/
 ├── README.md                    Dokumen ini.
 ├── assets/
 │   └── css/
-│       └── warisi.css           Semua CSS situs (warna, header, Beranda, single).
+│       └── warisi.css           Semua CSS situs (warna, header, Beranda, single, peta).
+│   ├── js/
+│   │   └── peta.js              Script peta interaktif (Leaflet).
+│   └── vendor/leaflet/          (opsional) salinan lokal Leaflet untuk server internal.
 ├── includes/
 │   ├── helpers.php              Fungsi bantu: nama term, ikon SVG, URL.
 │   ├── post-types.php           CPT "tradisi", taxonomy, tags, template single.
@@ -22,7 +25,8 @@ tradisi-keagamaan/
 │   └── shortcodes/
 │       ├── hero.php             [tk_hero]
 │       ├── stats.php            [tk_stats]
-│       └── koleksi.php          [tk_koleksi]
+│       ├── koleksi.php          [tk_koleksi]
+│       └── peta.php             [tk_peta] + peta kecil di halaman single
 └── templates/
     └── single-tradisi.php       Tampilan halaman detail tradisi (HTML saja).
 ```
@@ -43,6 +47,7 @@ Semua fungsi memakai awalan `tk_` supaya tidak bentrok dengan plugin lain.
 | ACF | `tanggal_perayaan` | Date picker (format `d/m/Y`) |
 | ACF | `sumber_referensi` | URL |
 | ACF | `galeri_foto` | Image (1 foto). Ganti ke Gallery setelah ACF Pro |
+| ACF | `latitude`, `longitude` | Number. Koordinat pin di peta. Kosong = tidak tampil di peta |
 | Meta | `tk_view_count` | Jumlah pembaca (otomatis) |
 
 ## Shortcode
@@ -76,6 +81,19 @@ Tanpa atribut. Menghitung tradisi terbit, provinsi (term `wilayah` level teratas
 ```
 
 Membaca parameter URL `?cari=`, `?provinsi=` (slug wilayah), dan `?hal=`. Panel pencarian punya `id="jelajahi"`, jadi menu `/#jelajahi` langsung menggulir ke sana.
+
+### `[tk_peta]`: peta interaktif
+
+```
+[tk_peta]
+[tk_peta tinggi="600"]
+```
+
+Peta sebaran semua tradisi yang koordinatnya sudah diisi. Klik pin untuk menampilkan detail di panel kanan (di HP, panel pindah ke bawah peta).
+
+Tradisi dengan koordinat yang sama (selisih kurang dari ±11 meter) digabung menjadi satu pin cokelat berangka. Klik pin itu untuk melihat daftar tradisinya, lalu klik salah satu nama untuk detailnya. Batas penggabungan diatur lewat `PRESISI_GRUP` di `assets/js/peta.js`. Sebisa mungkin, isi koordinat **lokasi upacara**, bukan pusat kota, supaya pin terpisah dengan sendirinya. Halaman single juga otomatis menampilkan peta kecil kalau koordinatnya ada.
+
+Cara mengisi koordinat: buka Google Maps, klik kanan lokasi, klik angka koordinat untuk menyalin (contoh `-8.4095, 115.1889`). Angka pertama masuk ke **Latitude**, angka kedua ke **Longitude**.
 
 Susunan Beranda saat ini:
 
@@ -130,3 +148,4 @@ Menu utama dibuat di **Appearance → Menus** dengan lokasi **Primary Menu**.
 - Font diambil dari Google Fonts. Kalau server internal tidak punya akses internet, font perlu di-host lokal (lihat komentar di `includes/assets.php`).
 - Setelah memindahkan situs atau mengubah slug, buka **Settings → Permalinks** lalu klik **Save**.
 - Plugin cache halaman bisa membuat view counter tidak bertambah.
+- **Peta:** Leaflet diambil dari CDN jsDelivr, kecuali folder `assets/vendor/leaflet/` berisi `leaflet.js` dan `leaflet.css` (salin dari folder `dist` di https://leafletjs.com/download.html). Gambar peta (tile) tetap diambil dari OpenStreetMap, jadi pengunjung butuh akses internet. OpenStreetMap membatasi pemakaian berat; untuk trafik tinggi pertimbangkan penyedia tile lain.

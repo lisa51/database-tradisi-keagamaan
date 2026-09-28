@@ -9,6 +9,10 @@
  *   sumber_referensi   url          Link sumber (wajib untuk konten kutipan).
  *   galeri_foto        image        SATU foto (ACF gratis). Ganti ke 'gallery'
  *                                   setelah memakai ACF Pro.
+ *   latitude           number       Garis lintang titik peta (Indonesia: ±-11 s.d. 6).
+ *   longitude          number       Garis bujur titik peta (Indonesia: ±95 s.d. 141).
+ *                                   Keduanya dipakai [tk_peta] dan peta di
+ *                                   halaman single. Kosong = tidak tampil di peta.
  *
  * CARA MEMPERBARUI:
  *   1. Ubah field lewat menu ACF → Field Groups.
@@ -77,6 +81,28 @@ function tk_register_acf_fields() {
                 'return_format' => 'array',
                 'library'       => 'all',
                 'preview_size'  => 'medium',
+            ),
+            array(
+                'key'          => 'field_tk_latitude',
+                'label'        => 'Latitude',
+                'name'         => 'latitude',
+                'type'         => 'number',
+                'instructions' => 'Buka Google Maps, klik kanan lokasi, klik angka koordinat untuk menyalin. Angka pertama = latitude (contoh: -8.4095).',
+                'min'          => -90,
+                'max'          => 90,
+                'step'         => 'any',
+                'wrapper'      => array( 'width' => '50' ),
+            ),
+            array(
+                'key'          => 'field_tk_longitude',
+                'label'        => 'Longitude',
+                'name'         => 'longitude',
+                'type'         => 'number',
+                'instructions' => 'Angka kedua dari Google Maps = longitude (contoh: 115.1889).',
+                'min'          => -180,
+                'max'          => 180,
+                'step'         => 'any',
+                'wrapper'      => array( 'width' => '50' ),
             ),
         ),
         'location'    => array(

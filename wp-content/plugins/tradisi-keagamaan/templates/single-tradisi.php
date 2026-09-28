@@ -15,8 +15,9 @@
  *   6. Kotak info: tanggal perayaan, agama, wilayah
  *   7. Isi artikel
  *   8. Galeri foto
- *   9. Kata kunci + sumber referensi
- *  10. Tradisi terkait
+ *   9. Lokasi di peta (kalau koordinat diisi)
+ *  10. Kata kunci + sumber referensi
+ *  11. Tradisi terkait
  *
  * Bagian yang datanya kosong otomatis tidak ditampilkan.
  *
@@ -116,7 +117,16 @@ while ( have_posts() ) :
       </section>
     <?php endif; ?>
 
-    <?php /* 9. Kata kunci + sumber */ ?>
+    <?php /* 9. Lokasi di peta */ ?>
+    <?php $titik = tk_peta_get_titik( array( $id ) ); ?>
+    <?php if ( $titik ) : ?>
+      <section class="tk-single__section">
+        <h2 class="tk-single__section-title">Lokasi</h2>
+        <?php echo tk_peta_render( $titik, array( 'tinggi' => 320, 'panel' => false ) ); ?>
+      </section>
+    <?php endif; ?>
+
+    <?php /* 10. Kata kunci + sumber */ ?>
     <?php if ( $d['tags'] || $d['sumber'] ) : ?>
       <footer class="tk-single__kaki">
         <?php if ( $d['tags'] ) : ?>
@@ -139,7 +149,7 @@ while ( have_posts() ) :
 
   </article>
 
-  <?php /* 10. Tradisi terkait */ ?>
+  <?php /* 11. Tradisi terkait */ ?>
   <?php $terkait = tk_single_get_terkait( $id ); ?>
   <?php if ( $terkait ) : ?>
     <section class="tk-single__terkait">

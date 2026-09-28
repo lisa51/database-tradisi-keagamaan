@@ -59,4 +59,43 @@ function tk_enqueue_assets() {
         $deps,
         filemtime( TK_PATH . $css_file )
     );
+
+    tk_register_peta_assets();
+}
+
+/**
+ * Daftarkan (belum memuat) Leaflet + script peta.
+ *
+ * File ini baru benar-benar dimuat saat peta dipakai, lewat tk_peta_enqueue()
+ * di includes/shortcodes/peta.php. Halaman tanpa peta tidak ikut berat.
+ *
+ * Sumber Leaflet:
+ *   - Kalau folder assets/vendor/leaflet/ berisi leaflet.js & leaflet.css,
+ *     pakai salinan lokal (disarankan untuk server internal).
+ *   - Kalau tidak ada, ambil dari CDN jsDelivr.
+ *
+ * Cara menyiapkan salinan lokal: unduh leaflet dari https://leafletjs.com/download.html,
+ * lalu salin isi folder "dist" ke assets/vendor/leaflet/.
+ */
+function tk_register_peta_assets() {
+    $versi = '1.9.4';
+    $lokal = 'assets/vendor/leaflet/';
+
+    if ( file_exists( TK_PATH . $lokal . 'leaflet.js' ) ) {
+        $base = TK_URL . $lokal;
+    } else {
+        $base = 'https://cdn.jsdelivr.net/npm/leaflet@' . $versi . '/dist/';
+    }
+
+    wp_register_style( 'tk-leaflet', $base . 'leaflet.css', array(), $versi );
+    wp_register_script( 'tk-leaflet', $base . 'leaflet.js', array(), $versi, true );
+
+    $js_file = 'assets/js/peta.js';
+    wp_register_script(
+        'tk-peta',
+        TK_URL . $js_file,
+        array( 'tk-leaflet' ),
+        filemtime( TK_PATH . $js_file ),
+        true
+    );
 }
