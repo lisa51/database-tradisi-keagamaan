@@ -144,6 +144,8 @@ Setiap kiriman di antrean menampilkan:
 - **Checklist kelengkapan**: foto utama, abstrak, isi ≥150 kata, sumber, asal daerah, wilayah, kategori, koordinat. Kriteria diatur di `tk_kelengkapan()` (`includes/kurasi-alur.php`).
 - Tombol **Pratinjau**, **Edit**, **Terbitkan**, serta panel **Minta Revisi / Tolak** dan **Riwayat**.
 
+Di bawah antrean ada **Riwayat Kurasi Saya**: semua tradisi yang pernah Anda terbitkan, minta revisi, atau tolak, dengan tab saringan (Semua, Diterbitkan, Diminta Revisi, Ditolak), status terkini, dan tombol **Lihat** (terbit), **Pratinjau** (menunggu/perlu revisi), atau **Pulihkan** (ditolak, kembali menjadi Draf). Daftar ini memakai meta `_tk_dikurasi_oleh`; riwayat lama diisi otomatis sekali jalan dengan mencocokkan nama kurator.
+
 Riwayat (siapa melakukan apa, kapan, dan catatannya) juga tampil di kotak **Pengirim & Riwayat Kurasi** di sidebar editor tradisi wp-admin. Kalau kurator menerbitkan langsung dari editor, tetap tercatat dan pengirim tetap diberi tahu.
 
 ### Pengaturan awal (sekali saja)
@@ -175,6 +177,7 @@ Dikirim lewat `wp_mail()`. Di LocalWP tidak terkirim sungguhan; lihat tab **Mail
 | `_tk_perlu_revisi` | 1 = dikembalikan untuk revisi |
 | `_tk_catatan` | Catatan revisi / alasan tolak terakhir |
 | `_tk_token` | Token link revisi tamu |
+| `_tk_dikurasi_oleh` | ID kurator yang pernah memutuskan (satu baris per kurator) |
 
 ## Halaman single tradisi
 

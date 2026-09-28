@@ -22,6 +22,15 @@
  *                      pengirim dapat email berisi alasan.
  *   - Panel "Riwayat" (tk_log_render()).
  *
+ * Di bawah antrean: "Riwayat Kurasi Saya"
+ *   Semua tradisi yang pernah diputuskan kurator yang sedang login, dengan
+ *   filter keputusan (Semua / Diterbitkan / Diminta Revisi / Ditolak),
+ *   status terkini, dan tombol untuk melihatnya kembali:
+ *     Terpublikasi          → Lihat (halaman publik)
+ *     Menunggu / Perlu Revisi → Pratinjau
+ *     Ditolak (Trash)       → Pulihkan (kembali ke Draf, lalu bisa dipratinjau)
+ *   Parameter URL: ?riwayat=terbitkan|revisi|tolak, ?rhal=2 (halaman).
+ *
  * Keamanan:
  *   Semua aksi dikirim lewat POST ke admin-post.php dengan nonce per kiriman,
  *   lalu dicek ulang hak aksesnya di tk_kurasi_handle().
@@ -105,7 +114,164 @@ function tk_kurasi_shortcode() {
     </section>
     <?php
 
+    echo tk_kurasi_render_riwayat_saya();
+
     return ob_get_clean();
+}
+
+/** Jumlah baris per halaman di "Riwayat Kurasi Saya". */
+define( 'TK_RIWAYAT_PER_HALAMAN', 15 );
+
+/**
+ * Daftar tradisi yang pernah diputuskan kurator yang sedang login.
+ *
+ * @return string HTML.
+ */
+function tk_kurasi_render_riwayat_saya() {
+    $user_id = get_current_user_id();
+
+    // phpcs:disable WordPress.Security.NonceVerification -- hanya filter tampilan.
+    $filter = isset( $_GET['riwayat'] ) ? sanitize_key( $_GET['riwayat'] ) : '';
+    $hal    = isset( $_GET['rhal'] ) ? max( 1, absint( $_GET['rhal'] ) ) : 1;
+    // phpcs:enable
+    if ( ! in_array( $filter, tk_log_aksi_kurator(), true ) ) {
+        $filter = '';
+    }
+
+    $ids = get_posts( array(
+        'post_type'      => 'tradisi',
+        'post_status'    => array( 'publish', 'pending', 'draft', 'trash' ),
+        'posts_per_page' => 300,
+        'fields'         => 'ids',
+        'orderby'        => 'modified',
+        'order'          => 'DESC',
+        'meta_query'     => array(
+            array(
+                'key'   => '_tk_dikurasi_oleh',
+                'value' => $user_id,
+                'type'  => 'NUMERIC',
+            ),
+        ),
+    ) );
+
+    // Pasangkan setiap tradisi dengan keputusan terakhir kurator ini, lalu saring.
+    $baris = array();
+    $hitung = array_fill_keys( tk_log_aksi_kurator(), 0 );
+    foreach ( $ids as $id ) {
+        $terakhir = tk_log_terakhir_oleh( $id, $user_id );
+        if ( ! $terakhir ) {
+            continue;
+        }
+        $hitung[ $terakhir['aksi'] ]++;
+        if ( '' === $filter || $filter === $terakhir['aksi'] ) {
+            $baris[] = array( 'id' => $id, 'log' => $terakhir );
+        }
+    }
+
+    // Urutkan dari keputusan terbaru.
+    usort( $baris, function ( $a, $b ) {
+        return strcmp( $b['log']['waktu'], $a['log']['waktu'] );
+    } );
+
+    $total_hal = max( 1, (int) ceil( count( $baris ) / TK_RIWAYAT_PER_HALAMAN ) );
+    $hal       = min( $hal, $total_hal );
+    $tampil    = array_slice( $baris, ( $hal - 1 ) * TK_RIWAYAT_PER_HALAMAN, TK_RIWAYAT_PER_HALAMAN );
+
+    $label_log = tk_log_label();
+    $tab       = array(
+        ''          => array( 'Semua', array_sum( $hitung ) ),
+        'terbitkan' => array( 'Diterbitkan', $hitung['terbitkan'] ),
+        'revisi'    => array( 'Diminta Revisi', $hitung['revisi'] ),
+        'tolak'     => array( 'Ditolak', $hitung['tolak'] ),
+    );
+    $url_dasar = remove_query_arg( array( 'riwayat', 'rhal', 'kurasi' ), tk_url_kurasi() );
+
+    ob_start();
+    ?>
+    <section class="tk-riwayat-saya" id="riwayat-saya">
+      <div class="tk-koleksi-head"><h2>Riwayat Kurasi Saya</h2></div>
+
+      <nav class="tk-tab" aria-label="Saring riwayat">
+        <?php foreach ( $tab as $kunci => $data ) : ?>
+          <a class="tk-tab-item<?php echo $kunci === $filter ? ' is-aktif' : ''; ?>"
+             href="<?php echo esc_url( ( $kunci ? add_query_arg( 'riwayat', $kunci, $url_dasar ) : $url_dasar ) . '#riwayat-saya' ); ?>">
+            <?php echo esc_html( $data[0] ); ?> <span><?php echo esc_html( number_format_i18n( $data[1] ) ); ?></span>
+          </a>
+        <?php endforeach; ?>
+      </nav>
+
+      <?php if ( ! $tampil ) : ?>
+        <p class="tk-kosong">Belum ada tradisi yang Anda kurasi<?php echo $filter ? ' dengan keputusan ini' : ''; ?>.</p>
+      <?php else : ?>
+        <ul class="tk-riwayat-daftar">
+          <?php foreach ( $tampil as $r ) :
+              $post = get_post( $r['id'] );
+              list( $status_label, $status_mod ) = tk_status_kiriman( $post );
+              ?>
+            <li>
+              <div class="tk-riwayat-thumb"><?php echo get_the_post_thumbnail( $post, 'thumbnail' ); ?></div>
+              <div class="tk-riwayat-isi">
+                <strong class="tk-riwayat-judul"><?php echo esc_html( get_the_title( $post ) ); ?></strong>
+                <span class="tk-riwayat-meta">
+                  Anda: <?php echo esc_html( isset( $label_log[ $r['log']['aksi'] ] ) ? $label_log[ $r['log']['aksi'] ] : $r['log']['aksi'] ); ?>
+                  · <?php echo esc_html( mysql2date( 'j M Y', $r['log']['waktu'] ) ); ?>
+                  · <?php echo esc_html( tk_nama_pengirim( $post->ID ) ); ?>
+                </span>
+              </div>
+              <span class="tk-status tk-status--<?php echo esc_attr( $status_mod ); ?>"><?php echo esc_html( $status_label ); ?></span>
+              <div class="tk-riwayat-aksi"><?php echo tk_kurasi_tombol_lihat( $post ); ?></div>
+
+              <details class="tk-kurasi-panel">
+                <summary>Riwayat lengkap</summary>
+                <?php echo tk_log_render( $post->ID ); // phpcs:ignore WordPress.Security.EscapeOutput -- sudah di-escape. ?>
+              </details>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+
+        <?php if ( $total_hal > 1 ) : ?>
+          <nav class="tk-halaman" aria-label="Halaman riwayat">
+            <?php echo paginate_links( array(
+                'base'      => add_query_arg( 'rhal', '%#%', $filter ? add_query_arg( 'riwayat', $filter, $url_dasar ) : $url_dasar ) . '#riwayat-saya',
+                'format'    => '',
+                'current'   => $hal,
+                'total'     => $total_hal,
+                'prev_text' => '‹ Sebelumnya',
+                'next_text' => 'Berikutnya ›',
+            ) ); ?>
+          </nav>
+        <?php endif; ?>
+      <?php endif; ?>
+    </section>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Tombol untuk melihat kembali sebuah tradisi, sesuai statusnya sekarang.
+ *
+ * @param WP_Post $post
+ * @return string HTML.
+ */
+function tk_kurasi_tombol_lihat( $post ) {
+    switch ( $post->post_status ) {
+        case 'publish':
+            return sprintf( '<a class="tk-btn-kecil" href="%s" target="_blank" rel="noopener">Lihat</a>', esc_url( get_permalink( $post ) ) );
+
+        case 'trash':
+            // Tradisi di Trash tidak bisa dipratinjau; pulihkan dulu (kembali ke Draf).
+            if ( ! current_user_can( 'delete_post', $post->ID ) ) {
+                return '';
+            }
+            $url = wp_nonce_url( admin_url( 'post.php?post=' . $post->ID . '&action=untrash' ), 'untrash-post_' . $post->ID );
+            return sprintf(
+                '<a class="tk-btn-kecil" href="%s" onclick="return confirm(\'Pulihkan tradisi ini dari Trash? Statusnya akan menjadi Draf.\');">Pulihkan</a>',
+                esc_url( $url )
+            );
+
+        default: // pending, draft
+            return sprintf( '<a class="tk-btn-kecil" href="%s" target="_blank" rel="noopener">Pratinjau</a>', esc_url( get_preview_post_link( $post ) ) );
+    }
 }
 
 /**
