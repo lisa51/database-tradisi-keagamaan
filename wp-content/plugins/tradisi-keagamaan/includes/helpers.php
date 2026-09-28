@@ -40,20 +40,27 @@ function tk_term_names( $post_id, $taxonomy, $sep = ', ', $limit = 0 ) {
 }
 
 /**
- * Ikon SVG kecil (14px) yang mengikuti warna teks (currentColor).
+ * Ikon SVG garis yang mengikuti warna teks (currentColor).
  *
- * @param string $name Nama ikon: 'pin' (lokasi) atau 'gedung' (wilayah).
+ * Contoh:
+ *   tk_icon( 'pin' )         // 14px, untuk lokasi di card
+ *   tk_icon( 'buku', 22 )    // 22px, untuk kotak stats
+ *
+ * @param string $name Nama ikon: 'pin', 'gedung', atau 'buku'.
+ * @param int    $size Ukuran dalam piksel. Default 14.
  * @return string Markup SVG, atau string kosong kalau nama tidak dikenal.
  */
-function tk_icon( $name ) {
+function tk_icon( $name, $size = 14 ) {
     $paths = array(
         'pin'    => '<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
         'gedung' => '<path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6"/>',
+        'buku'   => '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
     );
     if ( ! isset( $paths[ $name ] ) ) {
         return '';
     }
-    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">'
+    $size = absint( $size );
+    return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
         . $paths[ $name ] . '</svg>';
 }
 

@@ -5,10 +5,21 @@
  * Pemakaian:
  *   [tk_stats]
  *
+ * Tampilan tiap kotak (sesuai draf):
+ *   ┌─────────────────────────────┐
+ *   │ 24                    [ikon] │
+ *   │ Tradisi Terdokumentasi       │
+ *   │ keterangan kecil             │
+ *   └─────────────────────────────┘
+ *
  * Sumber angka (hanya tradisi berstatus "publish"):
  *   Tradisi         Jumlah post "tradisi".
  *   Provinsi        Jumlah term "wilayah" level teratas yang dipakai.
  *   Kabupaten/Kota  Jumlah nilai unik field "asal_daerah".
+ *
+ * Untuk mengubah label, keterangan, ikon, atau warna ikon, cukup ubah
+ * array $items di tk_stats_shortcode(). Warna ikon yang tersedia:
+ * 'oranye', 'abu', 'emas' (lihat .tk-stat-ikon--* di warisi.css).
  *
  * CATATAN: kalau struktur "wilayah" diubah menjadi 2 level
  * (pulau → provinsi), fungsi tk_stats_count_provinsi() perlu disesuaikan.
@@ -29,17 +40,45 @@ add_shortcode( 'tk_stats', 'tk_stats_shortcode' );
  */
 function tk_stats_shortcode() {
     $items = array(
-        'Tradisi'        => (int) wp_count_posts( 'tradisi' )->publish,
-        'Provinsi'       => tk_stats_count_provinsi(),
-        'Kabupaten/Kota' => tk_stats_count_kabupaten(),
+        array(
+            'angka' => (int) wp_count_posts( 'tradisi' )->publish,
+            'label' => 'Tradisi Terdokumentasi',
+            'ket'   => 'Tercatat dalam arsip WARISI',
+            'ikon'  => 'buku',
+            'warna' => 'oranye',
+        ),
+        array(
+            'angka' => tk_stats_count_provinsi(),
+            'label' => 'Provinsi',
+            'ket'   => 'Persebaran tradisi di Indonesia',
+            'ikon'  => 'pin',
+            'warna' => 'abu',
+        ),
+        array(
+            'angka' => tk_stats_count_kabupaten(),
+            'label' => 'Kabupaten/Kota',
+            'ket'   => 'Wilayah asal tradisi',
+            'ikon'  => 'gedung',
+            'warna' => 'emas',
+        ),
     );
 
     $html = '<div class="tk-stats">';
-    foreach ( $items as $label => $angka ) {
+    foreach ( $items as $item ) {
         $html .= sprintf(
-            '<div class="tk-stat"><span class="tk-stat-angka">%s</span><span class="tk-stat-label">%s</span></div>',
-            esc_html( number_format_i18n( $angka ) ),
-            esc_html( $label )
+            '<div class="tk-stat">'
+                . '<div class="tk-stat-teks">'
+                    . '<span class="tk-stat-angka">%1$s</span>'
+                    . '<span class="tk-stat-label">%2$s</span>'
+                    . '<span class="tk-stat-ket">%3$s</span>'
+                . '</div>'
+                . '<span class="tk-stat-ikon tk-stat-ikon--%4$s">%5$s</span>'
+            . '</div>',
+            esc_html( number_format_i18n( $item['angka'] ) ),
+            esc_html( $item['label'] ),
+            esc_html( $item['ket'] ),
+            esc_attr( $item['warna'] ),
+            tk_icon( $item['ikon'], 22 )
         );
     }
     return $html . '</div>';

@@ -316,6 +316,7 @@ a:hover { color: var(--tk-accent-gelap); }
 
 /* =============================================================================
    7. [tk_stats]
+   Kotak: teks (angka, label, keterangan) di kiri, ikon di kanan atas.
    ============================================================================= */
 .tk-stats {
   display: grid;
@@ -324,25 +325,52 @@ a:hover { color: var(--tk-accent-gelap); }
   margin: 24px 0 32px;
 }
 .tk-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
   min-width: 0;
-  padding: 20px;
+  padding: 22px 22px 20px;
   border: 1px solid var(--tk-garis);
   border-radius: var(--tk-radius);
   background: #fff;
-  text-align: center;
 }
+.tk-stat-teks { min-width: 0; }
 .tk-stat-angka {
   display: block;
   font-family: var(--tk-font-judul);
   font-size: 2.2rem;
-  line-height: 1.2;
+  line-height: 1.1;
   color: var(--tk-teks);
 }
 .tk-stat-label {
   display: block;
-  font-size: .9rem;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tk-teks);
+}
+.tk-stat-ket {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
   color: var(--tk-abu);
 }
+
+/* Kotak ikon */
+.tk-stat-ikon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+.tk-stat-ikon--oranye { background: #fbe9e1; border-color: #f2c9b8; color: var(--tk-accent); }
+.tk-stat-ikon--abu    { background: #f1efec; border-color: #dcd7d1; color: var(--tk-abu); }
+.tk-stat-ikon--emas   { background: #fcf1dd; border-color: #f0d5a3; color: #b97a14; }
 
 
 /* =============================================================================
