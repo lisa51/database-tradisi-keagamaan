@@ -236,3 +236,87 @@ add_action( 'acf/include_fields', function() {
 ) );
 } );
 
+
+// ============================================================
+// 7. View Counter untuk Tradisi
+// ============================================================
+
+/**
+ * Tambah 1 hitungan setiap kali halaman Single Tradisi dibuka.
+ * Disimpan sebagai post meta 'tk_view_count'.
+ */
+function tk_track_view_count() {
+    if (is_singular('tradisi') && !is_admin()) {
+        $post_id = get_the_ID();
+        $views = (int) get_post_meta($post_id, 'tk_view_count', true);
+        update_post_meta($post_id, 'tk_view_count', $views + 1);
+    }
+}
+add_action('wp_head', 'tk_track_view_count');
+
+/**
+ * Helper function untuk ambil jumlah views — dipakai di template.
+ */
+function tk_get_view_count($post_id) {
+    $views = (int) get_post_meta($post_id, 'tk_view_count', true);
+    return $views;
+}
+
+// ===== 8. Stats counter: [tk_stats] =====
+add_shortcode( 'tk_stats', 'tk_stats_shortcode' );
+function tk_stats_shortcode() {
+    global $wpdb;
+
+    // Jumlah tradisi yang sudah terbit
+    $jml_tradisi = (int) wp_count_posts( 'tradisi' )->publish;
+
+    // Jumlah provinsi = term 'wilayah' level teratas yang dipakai
+    $jml_provinsi = wp_count_terms( array(
+        'taxonomy'   => 'wilayah',
+        'hide_empty' => true,
+        'parent'     => 0,
+    ) );
+    $jml_provinsi = is_wp_error( $jml_provinsi ) ? 0 : (int) $jml_provinsi;
+
+    // Jumlah kabupaten/kota = nilai unik field asal_daerah
+    $jml_kab = (int) $wpdb->get_var( $wpdb->prepare(
+        "SELECT COUNT(DISTINCT TRIM(pm.meta_value))
+         FROM {$wpdb->postmeta} pm
+         INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+         WHERE pm.meta_key = %s
+           AND pm.meta_value <> ''
+           AND p.post_type = %s
+           AND p.post_status = 'publish'",
+        'asal_daerah',
+        'tradisi'
+    ) );
+
+    $items = array(
+        array( $jml_tradisi,  'Tradisi' ),
+        array( $jml_provinsi, 'Provinsi' ),
+        array( $jml_kab,      'Kabupaten/Kota' ),
+    );
+
+    $html = '<div class="tk-stats">';
+    foreach ( $items as $item ) {
+        $html .= sprintf(
+            '<div class="tk-stat"><span class="tk-stat-angka">%s</span><span class="tk-stat-label">%s</span></div>',
+            esc_html( number_format_i18n( $item[0] ) ),
+            esc_html( $item[1] )
+        );
+    }
+    $html .= '</div>';
+
+    return $html;
+}
+
+// ===== Font Google: DM Serif Display (judul) + DM Sans (teks) =====
+add_action( 'wp_enqueue_scripts', 'tk_enqueue_fonts' );
+function tk_enqueue_fonts() {
+    wp_enqueue_style(
+        'tk-fonts',
+        'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap',
+        array(),
+        null
+    );
+}

@@ -47,6 +47,7 @@ while (have_posts()) :
             <?php if ($wilayah_terms && !is_wp_error($wilayah_terms)) : ?>
                 <span>&bull; <strong>Wilayah:</strong> <?php echo esc_html($wilayah_terms[0]->name); ?></span>
             <?php endif; ?>
+            <span>&bull; <strong>Pembaca:</strong> <?php echo number_format_i18n(tk_get_view_count($post_id)); ?></span>
         </div>
 
         <?php if (has_post_thumbnail()) : ?>
