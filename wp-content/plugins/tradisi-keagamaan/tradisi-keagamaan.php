@@ -321,7 +321,7 @@ function tk_enqueue_fonts() {
     );
 }
 
-// ===== Koleksi + pencarian: [tk_koleksi] =====
+// ===== 10. Koleksi + pencarian: [tk_koleksi] =====
 add_shortcode( 'tk_koleksi', 'tk_koleksi_shortcode' );
 function tk_koleksi_shortcode( $atts ) {
     $atts = shortcode_atts( array( 'per_halaman' => 9 ), $atts, 'tk_koleksi' );
@@ -453,4 +453,18 @@ function tk_koleksi_shortcode( $atts ) {
     <?php
     wp_reset_postdata();
     return ob_get_clean();
+}
+
+// ===== Menu: link anchor (#...) tidak ditandai sebagai halaman aktif =====
+add_filter( 'nav_menu_css_class', 'tk_menu_anchor_tidak_aktif', 10, 2 );
+function tk_menu_anchor_tidak_aktif( $classes, $item ) {
+    if ( 'custom' === $item->type && false !== strpos( $item->url, '#' ) ) {
+        $classes = array_diff( $classes, array(
+            'current-menu-item',
+            'current_page_item',
+            'current-menu-ancestor',
+            'current-menu-parent',
+        ) );
+    }
+    return $classes;
 }
