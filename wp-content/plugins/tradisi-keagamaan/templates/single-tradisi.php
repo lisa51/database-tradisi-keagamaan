@@ -73,13 +73,33 @@ while (have_posts()) :
             </div>
         <?php endif; ?>
 
-        <?php if ($galeri_foto) : ?>
-            <div class="single-tradisi__gallery">
-                <?php foreach ($galeri_foto as $foto) : ?>
-                    <img src="<?php echo esc_url($foto['sizes']['medium']); ?>"
-                         alt="<?php echo esc_attr($foto['alt']); ?>">
-                <?php endforeach; ?>
-            </div>
+        <?php 
+        // Galeri foto: aman untuk format ID, array, atau daftar ID dipisah koma
+        if ( $galeri_foto ) :
+            // Kalau isinya satu foto (field Image), jadikan daftar berisi satu foto
+            if ( is_array( $galeri_foto ) && ( isset( $galeri_foto['ID'] ) || isset( $galeri_foto['url'] ) ) ) {
+                $galeri_foto = array( $galeri_foto );
+            }
+            if ( ! is_array( $galeri_foto ) ) {
+                $galeri_foto = array_filter( array_map( 'absint', explode( ',', (string) $galeri_foto ) ) );
+            }
+        ?>
+        <div class="tk-galeri">
+            <?php foreach ( $galeri_foto as $foto ) :
+                if ( is_array( $foto ) ) {
+                    $foto_id = isset( $foto['ID'] ) ? absint( $foto['ID'] ) : ( isset( $foto['id'] ) ? absint( $foto['id'] ) : 0 );
+                } else {
+                    $foto_id = absint( $foto );
+                }
+                if ( ! $foto_id ) {
+                    continue;
+                }
+            ?>
+            <a href="<?php echo esc_url( wp_get_attachment_image_url( $foto_id, 'large' ) ); ?>" target="_blank" rel="noopener">
+                <?php echo wp_get_attachment_image( $foto_id, 'medium', false, array( 'loading' => 'lazy' ) ); ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
         <?php endif; ?>
 
         <?php if ($tags) : ?>
