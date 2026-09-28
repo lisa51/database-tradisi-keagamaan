@@ -1,0 +1,332 @@
+/* =============================================================================
+   WARISI — base.css
+   Token, dasar, header & menu, tata letak, dan komponen bersama.
+   -----------------------------------------------------------------------------
+   Dimuat pertama oleh includes/core/assets.php (juga di halaman login).
+   File CSS lain hanya memakai token di sini; UBAH WARNA SITUS CUKUP DI SINI.
+   JANGAN salin CSS ke Appearance → Customize → Additional CSS.
+
+   DAFTAR ISI
+     1. Token warna, font, ukuran
+     2. Dasar & tipografi
+     3. Header & menu (GeneratePress)
+     4. Tata letak halaman
+     5. Komponen bersama: tombol, label, pill, status, pesan, kosong,
+        judul bagian, nomor halaman
+
+   KONVENSI
+     .tk-*                      komponen plugin
+     .tk-blok__bagian           gaya BEM untuk template (mis. .tk-single__meta)
+     .tk-komponen--varian       varian (mis. .tk-status--publish)
+     .is-aktif                  status interaktif
+   JANGAN memberi gaya lewat class "single-tradisi": WordPress memasangnya di
+   <body> halaman detail tradisi, sehingga ikut mengenai seluruh halaman.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. Token warna, font, ukuran
+   ============================================================================= */
+:root {
+  /* Warna merek */
+  --tk-accent:        #c4552d; /* oranye: tombol, link, aksen          */
+  --tk-accent-gelap:  #a8431f; /* oranye saat hover                    */
+  --tk-accent-muda:   #fbe9e1; /* latar lembut oranye                  */
+  --tk-accent-garis:  #f2c9b8; /* garis lembut oranye                  */
+  --tk-coklat:        #3b2314; /* badge kategori, teks gelap           */
+  --tk-emas:          #e8a93d; /* aksen abstrak, label lokasi hero     */
+  --tk-emas-tua:      #b97a14; /* ikon emas                            */
+
+  /* Latar & teks */
+  --tk-krem:          #fbf7f1; /* latar halaman                        */
+  --tk-krem-tua:      #f3e7da; /* latar kotak sekunder / item aktif    */
+  --tk-teks:          #2b2622; /* teks utama                           */
+  --tk-abu:           #6f6760; /* teks sekunder                        */
+  --tk-garis:         #eadfd3; /* border & garis pemisah               */
+  --tk-netral-bg:     #f1efec; /* latar abu lembut (status draf)       */
+  --tk-netral-garis:  #dcd7d1;
+
+  /* Warna status */
+  --tk-hijau:         #1f7a4d; /* terpublikasi, terbitkan              */
+  --tk-hijau-gelap:   #17603c;
+  --tk-hijau-bg:      #e8f4ee;
+  --tk-hijau-garis:   #b9dcc8;
+  --tk-kuning-teks:   #8a5a0c; /* menunggu, revisi, peringatan         */
+  --tk-kuning-bg:     #fcf1dd;
+  --tk-kuning-garis:  #f0d5a3;
+  --tk-merah:         #9a2f1b; /* ditolak, gagal, lewat batas          */
+  --tk-merah-bg:      #fbe9e6;
+  --tk-merah-garis:   #e2a497;
+
+  /* Bayangan */
+  --tk-bayangan:      0 8px 24px rgba(59, 35, 20, .12);
+  --tk-bayangan-besar: 0 20px 40px rgba(59, 35, 20, .10);
+
+  /* Font (dimuat dari Google Fonts, lihat TK_FONTS_URL di config.php) */
+  --tk-font-judul: "DM Serif Display", Georgia, serif;
+  --tk-font-teks:  "DM Sans", system-ui, sans-serif;
+
+  /* Ukuran */
+  --tk-radius:     12px;
+  --tk-radius-kecil: 8px;
+  --tk-lebar:      1200px; /* lebar maksimum konten Beranda */
+}
+
+
+/* =============================================================================
+   2. Dasar & tipografi
+   ============================================================================= */
+body {
+  background: var(--tk-krem);
+  color: var(--tk-teks);
+  font-family: var(--tk-font-teks);
+}
+
+h1, h2, h3, h4,
+.entry-title,
+.main-title {
+  font-family: var(--tk-font-judul);
+  font-weight: 400;
+  color: var(--tk-teks);
+}
+
+a       { color: var(--tk-accent); }
+a:hover { color: var(--tk-accent-gelap); }
+
+
+/* =============================================================================
+   3. Header & menu (GeneratePress)
+   ============================================================================= */
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--tk-garis);
+}
+.main-title a {
+  color: var(--tk-teks);
+  font-size: 26px;
+}
+.site-description {
+  margin-top: 2px;
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+
+/* Item menu */
+.main-navigation .main-nav ul li a {
+  margin: 0 2px;
+  padding: 0 14px;
+  border-radius: var(--tk-radius-kecil);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 36px;
+  color: var(--tk-teks);
+}
+.main-navigation .main-nav ul li:not([class*="current-menu-"]):hover > a,
+.main-navigation .main-nav ul li:not([class*="current-menu-"]):focus > a {
+  background: var(--tk-krem);
+  color: var(--tk-accent);
+}
+/* Item halaman aktif */
+.main-navigation .main-nav ul li[class*="current-menu-"] > a {
+  background: var(--tk-krem-tua);
+  color: var(--tk-accent-gelap);
+}
+
+/* Tombol "+ Tambah Tradisi" (item menu dengan CSS class: tk-menu-cta) */
+.main-navigation .main-nav ul li.tk-menu-cta > a {
+  margin-left: 12px;
+  background: var(--tk-accent);
+  color: #fff;
+  font-weight: 700;
+}
+.main-navigation .main-nav ul li.tk-menu-cta:not([class*="current-menu-"]):hover > a {
+  background: var(--tk-accent-gelap);
+  color: #fff;
+}
+
+
+/* =============================================================================
+   4. Tata letak halaman
+   ============================================================================= */
+/* Beranda: konten di tengah & sejajar header, latar krem terlihat */
+.home .inside-article {
+  max-width: var(--tk-lebar);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 32px 24px;
+  background: transparent;
+}
+
+/* Saat menu "/#jelajahi" diklik, beri jarak dari atas layar */
+#jelajahi { scroll-margin-top: 24px; }
+
+
+/* =============================================================================
+   5. Komponen bersama
+   ============================================================================= */
+
+/* --- Tombol besar (.tk-btn) ------------------------------------------------ */
+.tk-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.tk-btn-utama,
+.tk-btn-utama:focus       { background: var(--tk-accent); color: #fff; }
+.tk-btn-utama:hover       { background: var(--tk-accent-gelap); color: #fff; }
+.tk-btn-garis,
+.tk-btn-garis:focus       { background: #fff; border-color: var(--tk-garis); color: var(--tk-teks); }
+.tk-btn-garis:hover       { background: #fff; border-color: var(--tk-accent); color: var(--tk-accent); }
+
+/* --- Tombol kecil (.tk-btn-kecil) ------------------------------------------ */
+.tk-btn-kecil {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--tk-teks);
+}
+.tk-btn-kecil:hover,
+.tk-btn-kecil:focus         { background: #fff; border-color: var(--tk-accent); color: var(--tk-accent); }
+
+.tk-btn-kecil--terbit,
+.tk-btn-kecil--terbit:focus { background: var(--tk-hijau); border-color: var(--tk-hijau); color: #fff; }
+.tk-btn-kecil--terbit:hover { background: var(--tk-hijau-gelap); border-color: var(--tk-hijau-gelap); color: #fff; }
+
+.tk-btn-kecil--revisi,
+.tk-btn-kecil--revisi:focus { background: var(--tk-kuning-bg); border-color: var(--tk-emas); color: var(--tk-kuning-teks); }
+.tk-btn-kecil--revisi:hover { background: var(--tk-kuning-bg); border-color: var(--tk-kuning-teks); color: var(--tk-kuning-teks); }
+
+.tk-btn-kecil--tolak,
+.tk-btn-kecil--tolak:focus  { background: #fff; border-color: var(--tk-merah-garis); color: var(--tk-merah); }
+.tk-btn-kecil--tolak:hover  { background: var(--tk-merah-bg); border-color: var(--tk-merah); color: var(--tk-merah); }
+
+/* Semua tombol <button> milik plugin: rapikan bawaan browser/tema */
+button.tk-btn,
+button.tk-btn-kecil { cursor: pointer; font-family: inherit; line-height: 1; }
+
+/* --- Label kecil huruf kapital (mis. "PENCARIAN ARSIP") -------------------- */
+.tk-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--tk-accent);
+}
+
+/* --- Badge kotak (.tk-pill) — kategori & "Terpublikasi" --------------------- */
+.tk-pill {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #fff;
+}
+.tk-pill--kat    { background: var(--tk-coklat); }
+.tk-pill--status {
+  background: var(--tk-hijau);
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+/* --- Pill bulat (.tag-pill) — kata kunci ------------------------------------ */
+.tag-pill {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* --- Label status kiriman (.tk-status) -------------------------------------- */
+.tk-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tk-status--pending { background: var(--tk-kuning-bg);   color: var(--tk-kuning-teks); }
+.tk-status--publish { background: var(--tk-hijau-bg);    color: var(--tk-hijau); }
+.tk-status--draft   { background: var(--tk-netral-bg);   color: var(--tk-abu); }
+.tk-status--revisi  { background: var(--tk-accent-muda); color: var(--tk-accent-gelap); }
+.tk-status--trash   { background: var(--tk-merah-bg);    color: var(--tk-merah); }
+
+/* --- Pesan (.tk-notice) ------------------------------------------------------ */
+.tk-notice {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.tk-notice--sukses { background: var(--tk-hijau-bg);  border-color: var(--tk-hijau-garis); color: var(--tk-hijau-gelap); }
+.tk-notice--info   { background: var(--tk-krem-tua);  border-color: var(--tk-garis);       color: var(--tk-coklat); }
+.tk-notice--gagal  { background: var(--tk-merah-bg);  border-color: var(--tk-merah-garis); color: var(--tk-merah); }
+
+/* --- Kotak kosong (.tk-kosong) ---------------------------------------------- */
+.tk-kosong {
+  padding: 40px;
+  border: 1px dashed var(--tk-garis);
+  border-radius: 14px;
+  background: #fff;
+  text-align: center;
+  color: var(--tk-abu);
+}
+
+/* --- Judul bagian bergaris bawah (.tk-koleksi-head) -------------------------- */
+.tk-koleksi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--tk-garis);
+}
+.tk-koleksi-head h2 { margin: 0; font-size: 22px; }
+.tk-jumlah-kecil {
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+
+/* --- Nomor halaman (.tk-halaman) -------------------------------------------- */
+.tk-halaman { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 28px; }
+.tk-halaman .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: #fff;
+  font-size: 14px;
+  text-decoration: none;
+  color: var(--tk-teks);
+}
+.tk-halaman .page-numbers.current {
+  border-color: var(--tk-accent);
+  background: var(--tk-accent);
+  color: #fff;
+}

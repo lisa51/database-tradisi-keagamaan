@@ -11,7 +11,8 @@
  *
  * Parameter URL yang dibaca (dikirim oleh form pencarian):
  *   ?cari=pasola        Cari kata di judul/isi tradisi.
- *   ?provinsi=bali      Filter berdasarkan slug term "wilayah".
+ *   ?provinsi=bali      Filter berdasarkan slug term "wilayah" (level teratas).
+ *   ?kategori=kematian  Filter berdasarkan slug term "kategori-tradisi".
  *   ?hal=2              Nomor halaman (pagination).
  *
  * Panel pencarian punya id="jelajahi", sehingga menu "/#jelajahi"
@@ -19,6 +20,7 @@
  *
  * Struktur fungsi:
  *   tk_koleksi_shortcode()     Fungsi utama, merangkai semua bagian.
+ *   tk_koleksi_filter_taksonomi() Daftar dropdown filter (provinsi, kategori).
  *   tk_koleksi_get_filter()    Baca & bersihkan input dari URL.
  *   tk_koleksi_query()         Jalankan WP_Query sesuai filter.
  *   tk_koleksi_render_form()   HTML panel "Jelajahi Tradisi Lokal".
@@ -76,22 +78,63 @@ function tk_koleksi_shortcode( $atts ) {
 }
 
 /**
- * Baca input pencarian dari URL dan bersihkan (sanitasi).
+ * Dropdown filter berbasis taxonomy yang tampil di panel Jelajahi.
  *
- * @return array{cari:string, provinsi:string, hal:int}
+ * Untuk menambah filter baru (misalnya agama), cukup tambahkan satu baris:
+ *   'pilih_agama' => array( 'taxonomy' => 'agama', 'label' => 'Semua Agama', 'hanya_induk' => false ),
+ * Kolom form & CSS menyesuaikan otomatis.
+ *
+ * Kunci array = nama parameter di URL.
+ *   PENTING: jangan pakai nama yang sama dengan nama taxonomy (agama, wilayah,
+ *   kategori-tradisi) atau parameter bawaan WordPress (s, p, cat, tag, page,
+ *   paged, name, author, year, m). Nama itu dibaca WordPress sendiri dan
+ *   membuat Beranda berubah menjadi halaman arsip.
+ *   taxonomy     Nama taxonomy.
+ *   label        Teks pilihan kosong (tanpa filter).
+ *   hanya_induk  true = hanya term level teratas (mis. provinsi, bukan kabupaten).
+ *
+ * @return array[]
  */
-function tk_koleksi_get_filter() {
-    $get = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification -- form GET publik, hanya untuk filter.
-
+function tk_koleksi_filter_taksonomi() {
     return array(
-        'cari'     => isset( $get['cari'] ) ? sanitize_text_field( $get['cari'] ) : '',
-        'provinsi' => isset( $get['provinsi'] ) ? sanitize_title( $get['provinsi'] ) : '',
-        'hal'      => isset( $get['hal'] ) ? max( 1, absint( $get['hal'] ) ) : 1,
+        'provinsi' => array( 'taxonomy' => 'wilayah', 'label' => 'Semua Provinsi', 'hanya_induk' => true ),
+        'kategori' => array( 'taxonomy' => 'kategori-tradisi', 'label' => 'Semua Kategori', 'hanya_induk' => false ),
     );
 }
 
 /**
+ * Baca input pencarian dari URL dan bersihkan (sanitasi).
+ *
+ * @return array Kunci: cari, hal, dan setiap kunci dari tk_koleksi_filter_taksonomi().
+ */
+function tk_koleksi_get_filter() {
+    $get = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification -- form GET publik, hanya untuk filter.
+
+    $filter = array(
+        'cari' => isset( $get['cari'] ) ? sanitize_text_field( $get['cari'] ) : '',
+        'hal'  => isset( $get['hal'] ) ? max( 1, absint( $get['hal'] ) ) : 1,
+    );
+    foreach ( array_keys( tk_koleksi_filter_taksonomi() ) as $kunci ) {
+        $filter[ $kunci ] = isset( $get[ $kunci ] ) ? sanitize_title( $get[ $kunci ] ) : '';
+    }
+    return $filter;
+}
+
+/**
+ * Nilai filter yang sedang aktif (tanpa nomor halaman), untuk dibawa ke
+ * link pagination dan untuk mengecek apakah ada filter.
+ *
+ * @param array $filter
+ * @return string[]
+ */
+function tk_koleksi_filter_aktif( $filter ) {
+    unset( $filter['hal'] );
+    return array_filter( $filter, 'strlen' );
+}
+
+/**
  * Jalankan query tradisi sesuai filter.
+ * Beberapa filter taxonomy digabung dengan AND (harus cocok semua).
  *
  * @param array $filter      Hasil tk_koleksi_get_filter().
  * @param int   $per_halaman Jumlah card per halaman.
@@ -109,32 +152,34 @@ function tk_koleksi_query( $filter, $per_halaman ) {
         $args['s'] = $filter['cari'];
     }
 
-    if ( '' !== $filter['provinsi'] ) {
-        $args['tax_query'] = array( array(
-            'taxonomy' => 'wilayah',
-            'field'    => 'slug',
-            'terms'    => $filter['provinsi'],
-        ) );
+    $tax_query = array( 'relation' => 'AND' );
+    foreach ( tk_koleksi_filter_taksonomi() as $kunci => $conf ) {
+        if ( '' !== $filter[ $kunci ] ) {
+            $tax_query[] = array(
+                'taxonomy' => $conf['taxonomy'],
+                'field'    => 'slug',
+                'terms'    => $filter[ $kunci ],
+            );
+        }
+    }
+    if ( count( $tax_query ) > 1 ) {
+        $args['tax_query'] = $tax_query;
     }
 
     return new WP_Query( $args );
 }
 
 /**
- * HTML panel "Jelajahi Tradisi Lokal" (kolom cari + dropdown provinsi).
+ * HTML panel "Jelajahi Tradisi Lokal": kolom cari + dropdown filter + tombol.
  *
  * @param array $filter Filter aktif (untuk mengisi ulang form).
  * @param int   $total  Total tradisi yang cocok.
  * @return string HTML.
  */
 function tk_koleksi_render_form( $filter, $total ) {
-    $url_dasar   = get_permalink();
-    $daftar_prov = get_terms( array(
-        'taxonomy'   => 'wilayah',
-        'hide_empty' => true,
-        'parent'     => 0, // Hanya level teratas (provinsi).
-    ) );
-    $ada_filter  = '' !== $filter['cari'] || '' !== $filter['provinsi'];
+    $url_dasar  = get_permalink();
+    $dropdown   = tk_koleksi_filter_taksonomi();
+    $ada_filter = (bool) tk_koleksi_filter_aktif( $filter );
 
     ob_start();
     ?>
@@ -147,19 +192,28 @@ function tk_koleksi_render_form( $filter, $total ) {
         <span class="tk-jumlah">Menampilkan <?php echo esc_html( number_format_i18n( $total ) ); ?> tradisi</span>
       </div>
 
-      <form class="tk-cari" method="get" action="<?php echo esc_url( $url_dasar ); ?>#jelajahi">
-        <input type="search" name="cari" placeholder="Cari nama tradisi..." value="<?php echo esc_attr( $filter['cari'] ); ?>">
+      <form class="tk-cari" method="get" action="<?php echo esc_url( $url_dasar ); ?>#jelajahi"
+            style="--tk-jumlah-filter: <?php echo count( $dropdown ); ?>">
+        <input type="search" name="cari" placeholder="Cari nama tradisi..." aria-label="Cari nama tradisi" value="<?php echo esc_attr( $filter['cari'] ); ?>">
 
-        <select name="provinsi">
-          <option value="">Pilih Provinsi</option>
-          <?php if ( ! is_wp_error( $daftar_prov ) ) : ?>
-            <?php foreach ( $daftar_prov as $term ) : ?>
-              <option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $filter['provinsi'], $term->slug ); ?>>
-                <?php echo esc_html( $term->name ); ?>
-              </option>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </select>
+        <?php foreach ( $dropdown as $kunci => $conf ) :
+            $terms = get_terms( array(
+                'taxonomy'   => $conf['taxonomy'],
+                'hide_empty' => true, // Hanya term yang punya tradisi terbit.
+                'parent'     => $conf['hanya_induk'] ? 0 : '',
+            ) );
+            ?>
+          <select name="<?php echo esc_attr( $kunci ); ?>" aria-label="<?php echo esc_attr( $conf['label'] ); ?>">
+            <option value=""><?php echo esc_html( $conf['label'] ); ?></option>
+            <?php if ( ! is_wp_error( $terms ) ) : ?>
+              <?php foreach ( $terms as $term ) : ?>
+                <option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $filter[ $kunci ], $term->slug ); ?>>
+                  <?php echo esc_html( $term->name ); ?>
+                </option>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </select>
+        <?php endforeach; ?>
 
         <button type="submit">Cari</button>
 
@@ -227,7 +281,7 @@ function tk_koleksi_render_kartu( $id ) {
 }
 
 /**
- * HTML nomor halaman. Filter aktif (cari, provinsi) ikut terbawa.
+ * HTML nomor halaman. Semua filter aktif (cari, provinsi, kategori) ikut terbawa.
  *
  * @param array $filter Filter aktif.
  * @param int   $total  Jumlah halaman.
@@ -243,10 +297,7 @@ function tk_koleksi_render_paging( $filter, $total ) {
         'format'    => '',
         'current'   => $filter['hal'],
         'total'     => $total,
-        'add_args'  => array_filter( array(
-            'cari'     => $filter['cari'],
-            'provinsi' => $filter['provinsi'],
-        ) ),
+        'add_args'  => tk_koleksi_filter_aktif( $filter ),
         'prev_text' => '‹ Sebelumnya',
         'next_text' => 'Berikutnya ›',
     ) );

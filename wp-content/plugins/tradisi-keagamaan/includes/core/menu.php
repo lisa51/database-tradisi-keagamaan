@@ -9,7 +9,7 @@
  * 2. Item khusus lewat CSS Class (Appearance → Menus → Screen Options →
  *    centang "CSS Classes", lalu isi kolom CSS Classes pada item menu):
  *
- *    tk-menu-cta      Tampil sebagai tombol oranye (gaya ada di warisi.css).
+ *    tk-menu-cta      Tampil sebagai tombol oranye (gaya ada di assets/css/base.css).
  *    tk-menu-kurator  Hanya tampil untuk Kurator & Administrator.
  *                     Pakai untuk item "Dashboard Kurasi".
  *    tk-menu-akun     Otomatis berganti teks & link:
@@ -68,7 +68,7 @@ function tk_menu_item_khusus( $items ) {
                 $item->url   = wp_logout_url( home_url( '/' ) );
             } else {
                 $item->title = 'Masuk';
-                // Tujuan setelah login diatur tk_login_redirect() (includes/roles.php).
+                // Tujuan setelah login diatur tk_login_redirect() (includes/akun/akses.php).
                 $item->url   = wp_login_url();
             }
         }

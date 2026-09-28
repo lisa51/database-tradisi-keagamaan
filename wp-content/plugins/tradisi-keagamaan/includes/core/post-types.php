@@ -1,21 +1,15 @@
 <?php
 /**
- * Struktur data: Custom Post Type, taxonomy, tags, dan template single.
+ * Struktur data: post type "tradisi", taxonomy, tags, dan template single.
  *
- * Post type:
- *   tradisi            URL: /tradisi/nama-tradisi/
+ *   Post type   tradisi            /tradisi/nama-tradisi/  (mendukung revisi & author)
+ *   Taxonomy    agama              hierarkis
+ *               wilayah            hierarkis; level teratas = provinsi
+ *               kategori-tradisi   hierarkis; boleh lebih dari satu per tradisi
+ *               post_tag           tags bawaan WP sebagai "kata kunci"
+ *   Template    templates/single-tradisi.php
  *
- * Taxonomy (semuanya hierarkis, seperti Category):
- *   agama              Contoh: Islam, Hindu, Kristen.
- *   wilayah            Level teratas = provinsi (dipakai stats & filter).
- *   kategori-tradisi   Contoh: Perayaan Adat, Kematian.
- *   post_tag           Tags bawaan WP, dipakai sebagai "kata kunci".
- *
- * Template:
- *   Halaman single tradisi memakai templates/single-tradisi.php di plugin ini.
- *
- * CATATAN: setelah mengubah 'slug' di sini, buka Settings → Permalinks lalu
- * klik Save supaya URL baru dikenali.
+ * Setelah mengubah slug di sini, buka Settings → Permalinks lalu klik Save.
  *
  * @package TradisiKeagamaan
  */

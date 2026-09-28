@@ -1,0 +1,232 @@
+/* =============================================================================
+   WARISI — kurasi.css
+   [tk_kurasi] Dashboard Kurasi dan Panel Kurator di halaman tradisi.
+   Tombol kecil, status, dan pesan ada di base.css.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. Antrean kurasi
+   Baris: [thumb] [isi] [aksi] + panel lipat di baris penuh
+   ============================================================================= */
+.tk-kurasi-daftar { margin: 0; padding: 0; list-style: none; }
+.tk-kurasi-item {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+}
+.tk-kurasi-thumb {
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem-tua);
+}
+.tk-kurasi-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.tk-kurasi-judul            { margin: 0 0 4px; font-size: 19px; }
+.tk-kurasi-judul a          { color: var(--tk-teks); text-decoration: none; }
+.tk-kurasi-judul a:hover    { color: var(--tk-accent); }
+.tk-kurasi-judul .tk-status { margin-left: 8px; vertical-align: middle; }
+.tk-kurasi-meta             { margin: 0; font-size: 13px; color: var(--tk-abu); }
+
+.tk-kurasi-aksi      { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.tk-kurasi-aksi form { display: inline; margin: 0; }
+
+/* Label "Tamu" & lama menunggu */
+.tk-tamu {
+  margin: 0 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--tk-krem-tua);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tk-accent-gelap);
+}
+.tk-umur--lama { font-weight: 700; color: var(--tk-merah); }
+
+/* Catatan revisi sebelumnya (kiriman ulang) */
+.tk-kurasi-catatan-lama {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--tk-emas);
+  background: var(--tk-krem);
+  font-size: 13px;
+}
+
+
+/* =============================================================================
+   2. Checklist kelengkapan
+   ============================================================================= */
+.tk-cek { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.tk-cek-skor { margin-right: 4px; font-size: 12px; font-weight: 700; color: var(--tk-teks); }
+.tk-cek-item {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tk-cek-item--ok     { background: var(--tk-hijau-bg); color: var(--tk-hijau); }
+.tk-cek-item--kurang { background: var(--tk-merah-bg); color: var(--tk-merah); }
+
+
+/* =============================================================================
+   3. Panel lipat (Minta Revisi / Tolak, Ubah status, Riwayat)
+   ============================================================================= */
+.tk-kurasi-panel {
+  grid-column: 1 / -1;
+  padding-top: 10px;
+  border-top: 1px solid var(--tk-garis);
+}
+.tk-kurasi-panel summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tk-accent-gelap);
+}
+.tk-kurasi-panel form  { margin-top: 10px; }
+.tk-kurasi-panel label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+.tk-kurasi-panel textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem);
+  font-family: inherit;
+  font-size: 14px;
+}
+.tk-kurasi-panel-tombol { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+
+/* =============================================================================
+   4. Riwayat (daftar kejadian)
+   ============================================================================= */
+.tk-log { margin: 10px 0 0; padding: 0; list-style: none; font-size: 13px; }
+.tk-log li { margin: 0 0 8px; padding-left: 14px; border-left: 3px solid var(--tk-garis); }
+.tk-log li.tk-log--terbitkan { border-left-color: var(--tk-hijau); }
+.tk-log li.tk-log--revisi,
+.tk-log li.tk-log--antrean   { border-left-color: var(--tk-emas); }
+.tk-log li.tk-log--tolak     { border-left-color: var(--tk-merah); }
+.tk-log-waktu { margin-left: 6px; font-size: 12px; color: var(--tk-abu); }
+.tk-log blockquote {
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 13px;
+  font-style: normal;
+  color: var(--tk-teks);
+}
+.tk-log-kosong { margin: 8px 0 0; font-size: 13px; color: var(--tk-abu); }
+
+
+/* =============================================================================
+   5. "Riwayat Kurasi Saya"
+   ============================================================================= */
+.tk-riwayat-saya { margin-top: 48px; }
+
+/* Tab saringan */
+.tk-tab { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.tk-tab-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--tk-teks);
+}
+.tk-tab-item span {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--tk-krem-tua);
+  font-size: 11px;
+}
+.tk-tab-item:hover         { border-color: var(--tk-accent); color: var(--tk-accent); }
+.tk-tab-item.is-aktif      { border-color: var(--tk-accent); background: var(--tk-accent); color: #fff; }
+.tk-tab-item.is-aktif span { background: rgba(255, 255, 255, .25); color: #fff; }
+
+/* Baris: [thumb] [judul & keputusan] [status] [tombol] + riwayat lengkap */
+.tk-riwayat-daftar { margin: 0; padding: 0; list-style: none; }
+.tk-riwayat-daftar > li {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+}
+.tk-riwayat-thumb {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem-tua);
+}
+.tk-riwayat-thumb img  { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tk-riwayat-judul      { display: block; font-size: 15px; }
+.tk-riwayat-judul a    { color: var(--tk-teks); text-decoration: none; }
+.tk-riwayat-judul a:hover { color: var(--tk-accent); }
+.tk-riwayat-meta       { display: block; margin-top: 2px; font-size: 12.5px; color: var(--tk-abu); }
+
+
+/* =============================================================================
+   6. Panel Kurator (atas halaman tradisi, khusus kurator)
+   ============================================================================= */
+.tk-panel-kurator {
+  margin: 0 0 28px;
+  padding: 18px 20px;
+  border: 2px dashed var(--tk-accent);
+  border-radius: 14px;
+  background: #fff;
+}
+.tk-panel-head      { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.tk-panel-pratinjau { font-size: 12px; font-weight: 600; color: var(--tk-kuning-teks); }
+
+/* Orang-orang: pengirim, kurator, penyunting, terakhir diubah */
+.tk-panel-orang {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px 20px;
+  margin: 0 0 12px;
+}
+.tk-panel-orang dt {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+.tk-panel-orang dd    { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; overflow-wrap: anywhere; }
+.tk-panel-orang small { color: var(--tk-abu); }
+
+.tk-panel-tautan { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
+.tk-panel-kurator .tk-kurasi-panel { margin-top: 12px; }
+.tk-panel-kurator .tk-notice       { margin-bottom: 14px; }
+
+
+/* =============================================================================
+   Responsif
+   ============================================================================= */
+@media (max-width: 600px) {
+  .tk-kurasi-item  { grid-template-columns: 56px minmax(0, 1fr); }
+  .tk-kurasi-thumb { width: 56px; height: 56px; }
+  .tk-kurasi-aksi  { grid-column: 1 / -1; justify-content: flex-start; }
+
+  .tk-riwayat-daftar > li { grid-template-columns: 40px minmax(0, 1fr) auto; }
+  .tk-riwayat-thumb       { width: 40px; height: 40px; }
+  .tk-riwayat-aksi        { grid-column: 2 / -1; }
+}

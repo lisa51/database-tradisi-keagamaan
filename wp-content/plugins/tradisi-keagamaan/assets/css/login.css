@@ -1,0 +1,46 @@
+/* =============================================================================
+   WARISI — login.css
+   Halaman login & daftar (wp-login.php). Dimuat setelah base.css (token warna)
+   oleh includes/akun/login.php.
+   ============================================================================= */
+
+/* Nama situs menggantikan logo WordPress */
+.login h1 a {
+  width: auto;
+  height: auto;
+  margin: 0 0 16px;
+  background: none;
+  text-indent: 0;
+  overflow: visible;
+  font-family: var(--tk-font-judul);
+  font-size: 32px;
+  color: var(--tk-teks);
+}
+
+.login form {
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  box-shadow: none;
+}
+
+.login .button-primary {
+  border-color: var(--tk-accent);
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-accent);
+  box-shadow: none;
+}
+.login .button-primary:hover,
+.login .button-primary:focus {
+  border-color: var(--tk-accent-gelap);
+  background: var(--tk-accent-gelap);
+}
+
+.login #nav a,
+.login #backtoblog a { color: var(--tk-accent-gelap); }
+
+.login input[type="text"]:focus,
+.login input[type="password"]:focus,
+.login input[type="email"]:focus {
+  border-color: var(--tk-accent);
+  box-shadow: 0 0 0 1px var(--tk-accent);
+}

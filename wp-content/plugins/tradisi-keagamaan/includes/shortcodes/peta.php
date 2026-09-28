@@ -15,7 +15,7 @@
  *           lokasi, deskripsi, dan tombol "Lihat Detail".
  *
  * Tradisi hanya muncul di peta kalau field "latitude" dan "longitude"
- * sudah diisi (lihat includes/acf-fields.php).
+ * sudah diisi (lihat includes/core/acf-fields.php).
  *
  * Cara kerja teknis:
  *   PHP mengumpulkan data titik → dikirim sebagai JSON di atribut

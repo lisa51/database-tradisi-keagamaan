@@ -2,12 +2,12 @@
 /**
  * Template halaman detail tradisi (/tradisi/nama-tradisi/).
  *
- * Dipasang otomatis oleh includes/post-types.php.
- * Logika data ada di includes/single.php → file ini hanya HTML.
- * Gaya ada di assets/css/warisi.css, bagian "10. Halaman single tradisi".
+ * Dipasang otomatis oleh includes/core/post-types.php.
+ * Logika data ada di includes/core/single-data.php → file ini hanya HTML.
+ * Gaya ada di assets/css/single.css.
  *
  * Urutan bagian:
- *   0. Panel Kurator (khusus kurator/admin, lihat includes/panel-kurator.php)
+ *   0. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *   1. Link kembali
  *   2. Badge kategori + status, judul, tanggal terbit
  *   3. Baris meta: penulis, asal daerah, wilayah, pembaca

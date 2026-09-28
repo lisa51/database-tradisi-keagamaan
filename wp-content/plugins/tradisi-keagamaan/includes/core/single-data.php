@@ -1,18 +1,15 @@
 <?php
 /**
- * Fungsi bantu untuk halaman single tradisi (templates/single-tradisi.php).
+ * Data untuk halaman single tradisi (templates/single-tradisi.php).
  *
- * Template hanya berisi HTML. Semua logika pengambilan dan pengolahan data
- * ada di sini, supaya template mudah dibaca dan diubah tampilannya.
+ * Template hanya berisi HTML; semua pengambilan & pengolahan data ada di sini.
+ * Data dibaca dengan get_post_meta() (bukan get_field()), sehingga halaman
+ * tetap tampil walaupun ACF nonaktif.
  *
- * Isi:
- *   tk_single_get_data()       Kumpulkan semua data satu tradisi.
- *   tk_get_galeri_ids()        Ubah isi field galeri menjadi daftar ID gambar.
- *   tk_format_tanggal_acf()    Format tanggal ACF menjadi "17 Agustus 2026".
- *   tk_single_get_terkait()    Cari tradisi terkait (kategori/wilayah sama).
- *
- * Catatan: data dibaca dengan get_post_meta(), bukan get_field(), sehingga
- * halaman tetap tampil walaupun plugin ACF sedang nonaktif.
+ *   tk_single_get_data()     Kumpulkan semua data satu tradisi.
+ *   tk_get_galeri_ids()      Isi field galeri → daftar ID gambar (Image maupun Gallery ACF Pro).
+ *   tk_format_tanggal_acf()  Tanggal ACF (Ymd) → "17 Agustus 2026".
+ *   tk_single_get_terkait()  Tradisi terkait (kategori ATAU wilayah sama).
  *
  * @package TradisiKeagamaan
  */

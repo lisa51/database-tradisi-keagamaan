@@ -19,7 +19,7 @@
  *
  * Untuk mengubah label, keterangan, ikon, atau warna ikon, cukup ubah
  * array $items di tk_stats_shortcode(). Warna ikon yang tersedia:
- * 'oranye', 'abu', 'emas' (lihat .tk-stat-ikon--* di warisi.css).
+ * 'oranye', 'abu', 'emas' (lihat .tk-stat-ikon--* di assets/css/beranda.css).
  *
  * CATATAN: kalau struktur "wilayah" diubah menjadi 2 level
  * (pulau → provinsi), fungsi tk_stats_count_provinsi() perlu disesuaikan.

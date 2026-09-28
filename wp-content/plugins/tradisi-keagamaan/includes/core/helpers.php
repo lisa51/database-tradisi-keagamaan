@@ -1,13 +1,13 @@
 <?php
 /**
- * Fungsi bantu (helper) yang dipakai bersama oleh beberapa modul.
+ * Fungsi bantu umum yang dipakai banyak modul.
  *
- * Isi:
- *   - tk_term_names()   : ambil nama term sebuah post sebagai teks.
- *   - tk_icon()         : ikon SVG kecil (pin, gedung).
- *   - tk_url_tambah()   : URL halaman "Tambah Tradisi".
- *   - tk_url_jelajahi() : URL ke panel pencarian di Beranda.
- *   - tk_url_kurasi()   : URL halaman "Dashboard Kurasi".
+ *   tk_term_names()    Nama term sebuah post sebagai teks ("Bali, Jawa Timur").
+ *   tk_icon()          Ikon SVG garis (pin, gedung, buku, user, mata, link).
+ *   tk_url_tambah()    URL halaman Tambah Tradisi.
+ *   tk_url_kurasi()    URL halaman Dashboard Kurasi.
+ *   tk_url_jelajahi()  URL panel pencarian di Beranda (#jelajahi).
+ *   tk_url_tinjau()    URL tradisi untuk kurator (publik bila terbit, pratinjau bila belum).
  *
  * @package TradisiKeagamaan
  */
@@ -69,13 +69,23 @@ function tk_icon( $name, $size = 14 ) {
 }
 
 /**
- * URL halaman "Tambah Tradisi" (slug: tambah-tradisi).
+ * URL halaman "Tambah Tradisi" (slug diatur TK_SLUG_TAMBAH di config.php).
  *
  * @return string
  */
 function tk_url_tambah() {
-    $page = get_page_by_path( 'tambah-tradisi' );
-    return $page ? get_permalink( $page ) : home_url( '/tambah-tradisi/' );
+    $page = get_page_by_path( TK_SLUG_TAMBAH );
+    return $page ? get_permalink( $page ) : home_url( '/' . TK_SLUG_TAMBAH . '/' );
+}
+
+/**
+ * URL halaman "Dashboard Kurasi" (slug diatur TK_SLUG_KURASI di config.php).
+ *
+ * @return string
+ */
+function tk_url_kurasi() {
+    $page = get_page_by_path( TK_SLUG_KURASI );
+    return $page ? get_permalink( $page ) : home_url( '/' . TK_SLUG_KURASI . '/' );
 }
 
 /**
@@ -88,11 +98,14 @@ function tk_url_jelajahi() {
 }
 
 /**
- * URL halaman "Dashboard Kurasi" (slug: dashboard-kurasi).
+ * URL halaman tradisi untuk kurator: halaman publik bila terbit,
+ * pratinjau bila belum.
  *
+ * @param int $post_id
  * @return string
  */
-function tk_url_kurasi() {
-    $page = get_page_by_path( 'dashboard-kurasi' );
-    return $page ? get_permalink( $page ) : home_url( '/dashboard-kurasi/' );
+function tk_url_tinjau( $post_id ) {
+    return 'publish' === get_post_status( $post_id )
+        ? get_permalink( $post_id )
+        : get_preview_post_link( $post_id );
 }

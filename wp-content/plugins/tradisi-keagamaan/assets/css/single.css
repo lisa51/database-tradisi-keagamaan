@@ -1,0 +1,170 @@
+/* =============================================================================
+   WARISI — single.css
+   Halaman detail tradisi (templates/single-tradisi.php), blok BEM .tk-single.
+   Panel Kurator di atas halaman ini ada di kurasi.css.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. Kerangka & kepala artikel
+   ============================================================================= */
+.tk-single {
+  max-width: 800px;
+  margin: 32px auto 0;
+  padding: 0 20px;
+}
+
+.tk-single__kembali {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Badge kategori & status (komponen .tk-pill ada di base.css) */
+.tk-single__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.tk-single__tgl { margin-left: 4px; font-size: 13px; color: var(--tk-abu); }
+
+.tk-single__title {
+  margin: 14px 0 16px;
+  font-size: clamp(30px, 4vw, 42px);
+  line-height: 1.15;
+}
+
+/* Baris meta berikon: penulis, asal daerah, wilayah, pembaca */
+.tk-single__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0 0 24px;
+  padding: 0 0 20px;
+  border-bottom: 1px solid var(--tk-garis);
+  list-style: none;
+  font-size: 14px;
+  color: var(--tk-abu);
+}
+.tk-single__meta li  { display: flex; align-items: center; gap: 6px; margin: 0; }
+.tk-single__meta svg { color: var(--tk-accent); }
+
+
+/* =============================================================================
+   2. Isi artikel
+   ============================================================================= */
+.tk-single__featured-img { margin: 0 0 24px; }
+.tk-single__featured-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--tk-radius);
+}
+
+/* Kotak abstrak */
+.tk-single__abstract {
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border-left: 4px solid var(--tk-emas);
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem-tua);
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--tk-coklat);
+}
+.tk-single__abstract-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* Kotak info: tanggal perayaan, agama, wilayah */
+.tk-single__info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px 24px;
+  margin: 0 0 28px;
+  padding: 16px 20px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+}
+.tk-single__info dt {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+.tk-single__info dd { margin: 2px 0 0; font-size: 15px; font-weight: 600; }
+
+.tk-single__content     { font-size: 16px; line-height: 1.75; }
+.tk-single__content h2  { margin-top: 28px; font-size: 24px; }
+.tk-single__content img { height: auto; border-radius: var(--tk-radius-kecil); }
+
+/* Sub-bagian (galeri, lokasi) */
+.tk-single__section       { margin-top: 32px; }
+.tk-single__section-title { margin: 0 0 12px; font-size: 22px; }
+
+/* Galeri foto */
+.tk-galeri {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.tk-galeri a   { display: block; line-height: 0; }
+.tk-galeri img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+
+/* =============================================================================
+   3. Kaki artikel & tradisi terkait
+   ============================================================================= */
+.tk-single__kaki {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--tk-garis);
+}
+.tk-single__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.tk-single__tags .tk-label { margin-right: 4px; color: var(--tk-abu); }
+.tk-single__tags .tag-pill {
+  background: var(--tk-krem-tua);
+  color: var(--tk-accent-gelap);
+  text-decoration: none;
+}
+.tk-single__tags .tag-pill:hover { background: var(--tk-accent); color: #fff; }
+
+.tk-single__sumber {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--tk-abu);
+  overflow-wrap: anywhere;
+}
+.tk-single__sumber svg { flex-shrink: 0; margin-top: 2px; color: var(--tk-accent); }
+
+/* Tradisi terkait (card dari koleksi.css) */
+.tk-single__terkait {
+  max-width: var(--tk-lebar);
+  margin: 56px auto 48px;
+  padding: 0 20px;
+}

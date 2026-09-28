@@ -1,0 +1,186 @@
+/* =============================================================================
+   WARISI — koleksi.css
+   [tk_koleksi]: panel Jelajahi, grid & card tradisi.
+   Card yang sama dipakai "Tradisi Terkait" di halaman single.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. Panel Jelajahi (cari + dropdown filter)
+   ============================================================================= */
+.tk-jelajah {
+  min-width: 0;
+  margin: 32px 0 40px;
+  padding: 24px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.tk-jelajah-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.tk-jelajah-judul { margin: 4px 0 0; font-size: 28px; }
+.tk-jumlah {
+  padding: 4px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 999px;
+  background: var(--tk-krem);
+  font-size: 12px;
+  color: var(--tk-abu);
+}
+
+/* [kolom cari] [dropdown × --tk-jumlah-filter] [tombol]
+   Jumlah dropdown diisi dari PHP (tk_koleksi_filter_taksonomi()). */
+.tk-cari {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(var(--tk-jumlah-filter, 1), minmax(0, 1fr)) auto;
+  gap: 12px;
+}
+.tk-cari input,
+.tk-cari select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 10px;
+  background: var(--tk-krem);
+  font-family: inherit;
+  font-size: 14px;
+}
+.tk-cari button {
+  height: 44px;
+  padding: 0 32px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--tk-accent);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tk-cari button:hover,
+.tk-cari button:focus { background: var(--tk-accent-gelap); color: #fff; }
+.tk-reset { grid-column: 1 / -1; font-size: 13px; }
+
+
+/* =============================================================================
+   2. Grid & card
+   ============================================================================= */
+.tk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.tk-kartu {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--tk-garis);
+  border-radius: 14px;
+  background: #fff;
+  transition: box-shadow .2s, transform .2s;
+}
+.tk-kartu:hover {
+  box-shadow: var(--tk-bayangan);
+  transform: translateY(-2px);
+}
+
+/* Gambar + badge di atasnya */
+.tk-kartu-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--tk-krem-tua);
+  line-height: 0;
+}
+.tk-kartu-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tk-badge-kat,
+.tk-badge-status {
+  position: absolute;
+  top: 12px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #fff;
+}
+.tk-badge-kat    { left: 12px; max-width: 60%; background: var(--tk-coklat); }
+.tk-badge-status {
+  right: 12px;
+  background: var(--tk-hijau);
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+/* Isi card */
+.tk-kartu-isi {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 18px 18px 16px;
+}
+.tk-kartu-judul         { margin: 0 0 10px; font-size: 21px; line-height: 1.25; }
+.tk-kartu-judul a       { color: var(--tk-teks); text-decoration: none; }
+.tk-kartu-judul a:hover { color: var(--tk-accent); }
+
+/* Lokasi 2 baris: asal_daerah (abu) + wilayah (tebal) */
+.tk-lok {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--tk-abu);
+}
+.tk-lok svg { flex-shrink: 0; margin-top: 2px; color: var(--tk-accent); }
+.tk-lok-2   { font-weight: 600; color: var(--tk-teks); }
+
+.tk-kartu-desk {
+  margin: 10px 0 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--tk-abu);
+}
+
+/* Kaki card: kata kunci + "Lihat Detail" (selalu di bawah) */
+.tk-kartu-kaki {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--tk-garis);
+}
+.tk-tag { font-size: 11.5px; color: var(--tk-abu); }
+.tk-detail {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--tk-accent);
+}
+
+
+/* =============================================================================
+   Responsif
+   ============================================================================= */
+@media (max-width: 900px) {
+  .tk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tk-cari { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tk-cari input[type="search"] { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .tk-grid,
+  .tk-cari { grid-template-columns: 1fr; }
+}

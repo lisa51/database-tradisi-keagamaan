@@ -1,0 +1,130 @@
+/* =============================================================================
+   WARISI — kontribusi.css
+   [tk_form_tradisi]: form ACF, tombol, "Kiriman Saya",
+   dan catatan kurator untuk pengirim.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. Form ACF
+   ============================================================================= */
+.tk-form {
+  padding: 28px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.tk-form .acf-field .acf-label label { font-size: 14px; font-weight: 700; color: var(--tk-teks); }
+.tk-form .acf-field .acf-label .description,
+.tk-form .acf-field p.description    { font-size: 12.5px; color: var(--tk-abu); }
+.tk-form .acf-required               { color: var(--tk-accent); }
+
+.tk-form input[type="text"],
+.tk-form input[type="email"],
+.tk-form input[type="url"],
+.tk-form input[type="number"],
+.tk-form textarea,
+.tk-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem);
+  font-family: inherit;
+  font-size: 14px;
+}
+.tk-form input:focus,
+.tk-form textarea:focus,
+.tk-form select:focus {
+  border-color: var(--tk-accent);
+  outline: 0;
+  box-shadow: 0 0 0 2px rgba(196, 85, 45, .15);
+}
+
+/* Kolom berdampingan (mis. Latitude & Longitude) sejajar.
+   ACF memakai float; diganti flex supaya tinggi kolom sama, lalu input
+   didorong ke bawah sehingga sejajar walau keterangannya beda panjang. */
+.tk-form .acf-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.tk-form .acf-fields > .acf-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 14px 0;
+  border-top: 0;
+}
+.tk-form .acf-fields > .acf-field[data-width] {
+  float: none;
+  padding-right: 16px;
+  border-left: 0;
+}
+.tk-form .acf-fields > .acf-field[data-width] + .acf-field[data-width] {
+  padding-right: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+.tk-form .acf-fields > .acf-field > .acf-input { margin-top: auto; }
+.tk-form .acf-fields > .acf-field.acf-hidden  { display: none; }
+
+/* Tombol: [Simpan Draf] [Kirim untuk Dikurasi] (gaya dasar .tk-btn di base.css) */
+.tk-form .acf-form-submit { margin-top: 24px; }
+.tk-form-tombol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+
+/* =============================================================================
+   2. Catatan kurator (saat merevisi) & "Kiriman Saya"
+   ============================================================================= */
+.tk-catatan-kurator {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  border-left: 4px solid var(--tk-emas);
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem-tua);
+}
+.tk-catatan-kurator p { margin: 6px 0 0; }
+
+.tk-kiriman { margin-top: 40px; }
+.tk-kiriman-daftar { margin: 0; padding: 0; list-style: none; }
+/* Baris: [judul] [tanggal] [status] [tombol] + catatan di baris penuh */
+.tk-kiriman-daftar li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tk-garis);
+}
+.tk-kiriman-judul { font-weight: 600; }
+.tk-kiriman-tgl   { font-size: 13px; color: var(--tk-abu); }
+.tk-kiriman-catatan {
+  grid-column: 1 / -1;
+  padding: 8px 12px;
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem);
+  font-size: 13px;
+}
+
+
+/* =============================================================================
+   Responsif
+   ============================================================================= */
+@media (max-width: 600px) {
+  .tk-form { padding: 20px; }
+
+  /* Kolom berdampingan menjadi bertumpuk */
+  .tk-form .acf-fields > .acf-field[data-width] { width: 100% !important; padding-right: 0; }
+
+  .tk-form-tombol      { justify-content: stretch; }
+  .tk-form-tombol .tk-btn { flex: 1; justify-content: center; }
+
+  .tk-kiriman-daftar li { grid-template-columns: 1fr auto auto; }
+  .tk-kiriman-tgl       { display: none; }
+}

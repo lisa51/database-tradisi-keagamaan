@@ -17,7 +17,7 @@
  *      ke halaman ini.
  *   6. Riwayat kurasi (tk_log_render()) & riwayat suntingan (revisi).
  *
- * Revisi WordPress aktif untuk post type "tradisi" (lihat includes/post-types.php),
+ * Revisi WordPress aktif untuk post type "tradisi" (lihat includes/core/post-types.php),
  * sehingga setiap penyimpanan di editor tercatat beserta penyuntingnya.
  *
  * @package TradisiKeagamaan
@@ -62,7 +62,7 @@ function tk_panel_get_revisi( $post_id ) {
  */
 function tk_panel_nama_kurator( $post_id ) {
     $nama = array();
-    foreach ( array_unique( array_map( 'intval', get_post_meta( $post_id, '_tk_dikurasi_oleh', false ) ) ) as $uid ) {
+    foreach ( array_unique( array_map( 'intval', (array) get_post_meta( $post_id, '_tk_dikurasi_oleh', false ) ) ) as $uid ) {
         $user = get_userdata( $uid );
         if ( $user ) {
             $nama[] = $user->display_name;

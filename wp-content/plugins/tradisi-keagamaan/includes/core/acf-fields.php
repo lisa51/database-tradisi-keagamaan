@@ -5,7 +5,7 @@
  * Field yang tersedia (nama → tipe):
  *   asal_daerah        text         Kabupaten/kota. Dipakai di card & stats.
  *   deskripsi_singkat  textarea     Abstrak. Dipakai di card, hero, single.
- *   tanggal_perayaan   date_picker  Format simpan: d/m/Y.
+ *   tanggal_perayaan   date_picker  Disimpan sebagai Ymd; ditampilkan lewat tk_format_tanggal_acf().
  *   sumber_referensi   url          Link sumber (wajib untuk konten kutipan).
  *   galeri_foto        image        SATU foto (ACF gratis). Ganti ke 'gallery'
  *                                   setelah memakai ACF Pro.
@@ -18,8 +18,9 @@
  *   1. Ubah field lewat menu ACF → Field Groups.
  *   2. ACF → Tools → Generate PHP, salin hasilnya.
  *   3. Ganti isi acf_add_local_field_group() di bawah.
- *   PENTING: jangan ubah nilai 'key' (field_xxx), karena data tersimpan
- *   bergantung pada key tersebut.
+ *   4. Kembalikan 'key' grup menjadi TK_DETAIL_GROUP.
+ *   PENTING: jangan ubah nilai 'key' (group_xxx / field_xxx), karena data
+ *   tersimpan bergantung pada key tersebut.
  *
  * Pengaturan yang nilainya default (kosong/0) sengaja dihapus agar ringkas;
  * ACF otomatis mengisi nilai default tersebut.
@@ -42,7 +43,7 @@ function tk_register_acf_fields() {
     }
 
     acf_add_local_field_group( array(
-        'key'         => 'group_6aa0f20d00bc9',
+        'key'         => TK_DETAIL_GROUP, // group_6aa0f20d00bc9 (config.php)
         'title'       => 'Detail Tradisi',
         'description' => 'Berisi atribut terkait tradisi',
         'fields'      => array(

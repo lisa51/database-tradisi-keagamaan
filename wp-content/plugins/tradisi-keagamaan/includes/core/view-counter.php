@@ -3,7 +3,7 @@
  * Penghitung pembaca (view counter) untuk halaman single tradisi.
  *
  * Cara kerja:
- *   Setiap kali halaman /tradisi/... dibuka, nilai post meta 'tk_view_count'
+ *   Setiap kali halaman /tradisi/... dibuka, nilai post meta TK_VIEW_META ('tk_view_count', lihat config.php)
  *   bertambah 1. Nilai ini ditampilkan sebagai "Pembaca" dan dipakai [tk_hero]
  *   untuk memilih tradisi unggulan (pembaca terbanyak).
  *
@@ -19,9 +19,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-
-/** Nama post meta tempat jumlah pembaca disimpan. */
-define( 'TK_VIEW_META', 'tk_view_count' );
 
 add_action( 'wp_head', 'tk_track_view_count' );
 

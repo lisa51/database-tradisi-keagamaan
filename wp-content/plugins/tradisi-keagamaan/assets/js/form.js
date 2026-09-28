@@ -1,7 +1,7 @@
 /**
  * WARISI — Form Tambah Tradisi
  * -----------------------------------------------------------------------------
- * Dimuat oleh includes/shortcodes/form-tradisi.php.
+ * Dimuat oleh includes/shortcodes/form-tradisi.php. Gaya tombol ada di assets/css/kontribusi.css.
  *
  * Tombol "Simpan Draf" (name="tk_status" value="draft") tidak perlu
  * semua field wajib terisi. Script ini mematikan validasi ACF di browser
