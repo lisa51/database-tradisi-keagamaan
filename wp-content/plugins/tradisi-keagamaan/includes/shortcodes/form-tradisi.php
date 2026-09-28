@@ -5,40 +5,40 @@
  * Pemakaian:
  *   Taruh [tk_form_tradisi] di halaman "Tambah Tradisi" (slug: tambah-tradisi).
  *
- * Alur:
- *   1. Pengunjung belum login  → tombol Masuk / Daftar.
- *   2. Pengguna login (punya hak tk_kirim) → form tampil.
- *   3. Form dikirim → tradisi baru dibuat dengan status "pending"
- *      (Menunggu Kurasi), pengirim = pengguna yang login.
- *   4. Foto utama dijadikan featured image, kata kunci dijadikan Tags,
- *      lalu kurator menerima email pemberitahuan.
- *   5. Di bawah form, pengguna melihat daftar "Kiriman Saya" beserta statusnya.
+ * DUA JENIS PENGIRIM
  *
- * Dua tombol di akhir form:
- *   Simpan Draf           → status "draft". Field wajib boleh kosong (kecuali
- *                           Nama Tradisi). Kurator belum diberi tahu.
- *   Kirim untuk Dikurasi  → status "pending", semua field wajib dicek.
+ *   Kontributor Tamu (tanpa login)
+ *     - Wajib mengisi Nama, Email, dan pernyataan persetujuan.
+ *     - Hanya tombol "Kirim untuk Dikurasi" (tidak ada draf).
+ *     - Penulis di database = akun sistem "Kontributor Tamu"; nama & email
+ *       asli disimpan di meta tk_tamu_nama / tk_tamu_email.
+ *     - Kalau kurator meminta revisi, tamu mendapat email berisi link
+ *       rahasia (?edit=ID&token=...) untuk memperbaiki tanpa login.
+ *     - Dibatasi TK_TAMU_BATAS_PER_JAM kiriman per jam per alamat IP.
  *
- * Melanjutkan draf:
- *   Di "Kiriman Saya", draf punya link "Lanjutkan" → ?edit=ID. Form terisi
- *   data draf tersebut. Hanya pemilik draf yang bisa membukanya, dan hanya
- *   selama statusnya masih draf.
+ *   Kontributor (punya akun, hak tk_kirim)
+ *     - Tombol "Simpan Draf" dan "Kirim untuk Dikurasi".
+ *     - Melihat daftar "Kiriman Saya" + status + catatan kurator, dan bisa
+ *       melanjutkan draf / merevisi lewat link "Lanjutkan" (?edit=ID).
  *
- * Isi form:
- *   - Nama Tradisi & Isi Artikel (bawaan ACF form).
- *   - Grup "Formulir Kontributor" (didefinisikan di file ini): foto utama,
- *     agama, wilayah, kategori, kata kunci.
- *   - Grup "Detail Tradisi" (includes/acf-fields.php): asal daerah, abstrak,
- *     tanggal, sumber, galeri, koordinat.
+ * SETELAH DIKIRIM ("Kirim untuk Dikurasi")
+ *   Status → pending, riwayat dicatat, kurator menerima email, dan untuk
+ *   kiriman baru pengirim menerima email konfirmasi.
+ *   Foto utama → featured image, kata kunci → Tags.
  *
- * Keamanan:
- *   - Hanya pengguna dengan hak tk_kirim yang bisa mengirim (dicek dua kali:
- *     saat menampilkan form dan saat menyimpan).
- *   - Status selalu "pending"; tidak ada kiriman yang langsung terbit.
- *   - ACF menambahkan nonce dan honeypot anti-spam secara otomatis.
- *   - Upload memakai uploader "basic", sehingga kontributor tidak bisa
- *     melihat Media Library milik orang lain.
+ * ISI FORM (grup ACF)
+ *   - Identitas Pengirim   (khusus tamu, didefinisikan di file ini)
+ *   - Formulir Kontributor (foto utama, agama, wilayah, kategori, kata kunci)
+ *   - Detail Tradisi       (includes/acf-fields.php)
+ *   Grup yang didefinisikan di file ini tidak tampil di editor wp-admin.
  *
+ * KEAMANAN
+ *   - Kiriman dicek ulang saat disimpan (tk_form_guard), bukan hanya saat form tampil.
+ *   - Status tidak pernah langsung "publish".
+ *   - ACF menambahkan nonce & honeypot anti-spam.
+ *   - Upload memakai uploader "basic" (tanpa akses Media Library).
+ *
+ * Fungsi pendukung (riwayat, email, token, status) ada di includes/kurasi-alur.php.
  * Butuh plugin ACF aktif.
  *
  * @package TradisiKeagamaan
@@ -48,34 +48,85 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-/** Key field group khusus form (dipakai beberapa fungsi di bawah). */
+/** Key field group (dipakai beberapa fungsi di bawah). */
 define( 'TK_FORM_GROUP', 'group_tk_form_kontributor' );
+define( 'TK_TAMU_GROUP', 'group_tk_form_tamu' );
+define( 'TK_DETAIL_GROUP', 'group_6aa0f20d00bc9' ); // Lihat includes/acf-fields.php.
 
-/** Key field group detail tradisi (lihat includes/acf-fields.php). */
-define( 'TK_DETAIL_GROUP', 'group_6aa0f20d00bc9' );
+/** Batas kiriman tamu per jam per alamat IP (anti-spam). */
+define( 'TK_TAMU_BATAS_PER_JAM', 5 );
 
 /* =============================================================================
- * 1. Field group "Formulir Kontributor"
+ * 1. Field group khusus form
  * ========================================================================== */
 
 add_action( 'acf/include_fields', 'tk_form_register_fields' );
 
 /**
- * Field tambahan yang hanya muncul di form depan.
+ * Grup "Identitas Pengirim" (tamu) dan "Formulir Kontributor".
  *
  * Lokasinya sengaja diarahkan ke post type yang tidak ada ("tk_form_only"),
- * sehingga grup ini TIDAK muncul di editor wp-admin. acf_form() tetap bisa
- * menampilkannya karena grup dipanggil langsung lewat 'field_groups'.
- *
- * Field taxonomy memakai save_terms/load_terms, jadi pilihan pengguna
- * langsung tersimpan sebagai term (agama, wilayah, kategori).
+ * sehingga tidak muncul di editor wp-admin. acf_form() tetap menampilkannya
+ * karena grup dipanggil langsung lewat 'field_groups'.
  */
 function tk_form_register_fields() {
     if ( ! function_exists( 'acf_add_local_field_group' ) ) {
         return;
     }
 
-    // Pengaturan bersama untuk field taxonomy.
+    $lokasi_form = array(
+        array(
+            array(
+                'param'    => 'post_type',
+                'operator' => '==',
+                'value'    => 'tk_form_only', // Sengaja tidak ada: khusus form depan.
+            ),
+        ),
+    );
+
+    // --- Identitas Pengirim (hanya untuk tamu) -----------------------------
+    acf_add_local_field_group( array(
+        'key'      => TK_TAMU_GROUP,
+        'title'    => 'Identitas Pengirim',
+        'fields'   => array(
+            array(
+                'key'      => 'field_tk_tamu_nama',
+                'label'    => 'Nama Lengkap',
+                'name'     => 'tk_tamu_nama',
+                'type'     => 'text',
+                'required' => 1,
+                'wrapper'  => array( 'width' => '50' ),
+            ),
+            array(
+                'key'          => 'field_tk_tamu_email',
+                'label'        => 'Email',
+                'name'         => 'tk_tamu_email',
+                'type'         => 'email',
+                'required'     => 1,
+                'instructions' => 'Untuk kabar hasil kurasi. Tidak ditampilkan ke publik.',
+                'wrapper'      => array( 'width' => '50' ),
+            ),
+            array(
+                'key'          => 'field_tk_tamu_instansi',
+                'label'        => 'Instansi / Komunitas',
+                'name'         => 'tk_tamu_instansi',
+                'type'         => 'text',
+                'instructions' => 'Opsional. Contoh: Sanggar Budaya Situraja, Universitas Padjadjaran.',
+            ),
+            array(
+                'key'      => 'field_tk_tamu_setuju',
+                'label'    => 'Pernyataan',
+                'name'     => 'tk_tamu_setuju',
+                'type'     => 'true_false',
+                'required' => 1,
+                'message'  => 'Saya menyatakan informasi yang saya kirim benar, dan bersedia kiriman ini ditinjau serta diterbitkan oleh kurator WARISI.',
+            ),
+        ),
+        'location' => $lokasi_form,
+        'active'   => true,
+    ) );
+
+    // --- Formulir Kontributor ---------------------------------------------
     $taxonomy_field = array(
         'type'          => 'taxonomy',
         'add_term'      => 0,
@@ -119,12 +170,12 @@ function tk_form_register_fields() {
                 'wrapper'    => array( 'width' => '50' ),
             ),
             $taxonomy_field + array(
-                'key'        => 'field_tk_form_kategori',
-                'label'      => 'Kategori Tradisi',
-                'name'       => 'tk_form_kategori',
-                'taxonomy'   => 'kategori-tradisi',
-                'field_type' => 'checkbox',
-                'required'   => 1,
+                'key'          => 'field_tk_form_kategori',
+                'label'        => 'Kategori Tradisi',
+                'name'         => 'tk_form_kategori',
+                'taxonomy'     => 'kategori-tradisi',
+                'field_type'   => 'checkbox',
+                'required'     => 1,
                 'instructions' => 'Boleh memilih lebih dari satu.',
             ),
             array(
@@ -135,28 +186,101 @@ function tk_form_register_fields() {
                 'instructions' => 'Pisahkan dengan koma. Contoh: kremasi, Hindu Bali, upacara kematian',
             ),
         ),
-        'location' => array(
-            array(
-                array(
-                    'param'    => 'post_type',
-                    'operator' => '==',
-                    'value'    => 'tk_form_only', // Sengaja tidak ada: grup ini khusus form depan.
-                ),
-            ),
-        ),
+        'location' => $lokasi_form,
         'active'   => true,
     ) );
 }
 
+add_filter( 'acf/prepare_field/name=_post_title', 'tk_form_label_judul' );
+add_filter( 'acf/prepare_field/name=_post_content', 'tk_form_label_isi' );
+
+/** Label field bawaan ACF "Title" dalam Bahasa Indonesia. */
+function tk_form_label_judul( $field ) {
+    $field['label']        = 'Nama Tradisi';
+    $field['instructions'] = 'Contoh: Ngaben, Tabuik, Pasola.';
+    return $field;
+}
+
+/** Label field bawaan ACF "Content" dalam Bahasa Indonesia. */
+function tk_form_label_isi( $field ) {
+    $field['label']        = 'Isi Artikel';
+    $field['instructions'] = 'Uraikan sejarah, makna, dan tata cara tradisi (minimal ' . TK_MIN_KATA_ISI . ' kata). Sebutkan sumber di field Sumber Referensi.';
+    return $field;
+}
+
 /* =============================================================================
- * 2. Persiapan & pengaman sebelum form diproses
+ * 2. Konteks: siapa yang mengisi, dan kiriman mana yang sedang diedit
+ * ========================================================================== */
+
+/**
+ * Tentukan mode form dari pengguna & parameter URL.
+ *
+ * @return array {
+ *     @type string $mode    'akun' | 'tamu' | 'tanpa_izin'
+ *     @type int    $edit_id ID kiriman yang dilanjutkan/direvisi, 0 = kiriman baru.
+ * }
+ */
+function tk_form_konteks() {
+    // phpcs:disable WordPress.Security.NonceVerification -- hanya memilih data; izin dicek di bawah & di tk_form_guard().
+    $edit_id = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
+    $token   = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
+    // phpcs:enable
+
+    if ( is_user_logged_in() ) {
+        if ( ! current_user_can( 'tk_kirim' ) ) {
+            return array( 'mode' => 'tanpa_izin', 'edit_id' => 0 );
+        }
+        return array(
+            'mode'    => 'akun',
+            'edit_id' => ( $edit_id && tk_form_boleh_edit( $edit_id ) ) ? $edit_id : 0,
+        );
+    }
+
+    return array(
+        'mode'    => 'tamu',
+        'edit_id' => ( $edit_id && tk_token_cocok( $edit_id, $token ) ) ? $edit_id : 0,
+    );
+}
+
+/**
+ * Pengguna login boleh membuka kiriman di form bila: tradisi, berstatus
+ * draf (draf biasa atau perlu revisi), dan miliknya sendiri.
+ *
+ * @param int $post_id
+ * @return bool
+ */
+function tk_form_boleh_edit( $post_id ) {
+    $post = get_post( $post_id );
+
+    return $post
+        && 'tradisi' === $post->post_type
+        && 'draft' === $post->post_status
+        && (int) $post->post_author === get_current_user_id();
+}
+
+/**
+ * Status yang diminta tombol yang diklik: 'draft' atau 'pending'.
+ * Tamu selalu 'pending' (tidak punya draf).
+ *
+ * @return string
+ */
+function tk_form_status_diminta() {
+    if ( ! is_user_logged_in() ) {
+        return 'pending';
+    }
+    $status = isset( $_POST['tk_status'] ) ? sanitize_key( $_POST['tk_status'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- nonce dicek ACF.
+    return 'draft' === $status ? 'draft' : 'pending';
+}
+
+/* =============================================================================
+ * 3. Sebelum & saat disimpan
  * ========================================================================== */
 
 add_action( 'template_redirect', 'tk_form_head' );
 
 /**
  * acf_form_head() wajib dipanggil sebelum header halaman dicetak.
- * Hanya dijalankan di halaman yang berisi shortcode [tk_form_tradisi].
+ * Hanya di halaman yang berisi [tk_form_tradisi].
  */
 function tk_form_head() {
     if ( ! function_exists( 'acf_form_head' ) || ! is_singular() ) {
@@ -171,62 +295,62 @@ function tk_form_head() {
 add_filter( 'acf/pre_save_post', 'tk_form_guard', 1 );
 
 /**
- * Tolak kiriman dari pengguna tanpa hak tk_kirim, dan cegah form depan
- * dipakai untuk mengubah tradisi milik orang lain.
+ * Pengaman terakhir sebelum ACF menyimpan kiriman dari form depan.
  *
- * @param int|string $post_id 'new_post' atau ID post.
+ * @param int|string $post_id 'new_post' atau ID kiriman yang diedit.
  * @return int|string
  */
 function tk_form_guard( $post_id ) {
     if ( is_admin() ) {
         return $post_id; // Penyimpanan dari wp-admin tidak diubah.
     }
-    if ( ! current_user_can( 'tk_kirim' ) ) {
-        wp_die( 'Anda perlu masuk sebagai kontributor untuk mengirim tradisi.', 403 );
+
+    $baru = ( 'new_post' === $post_id );
+
+    if ( is_user_logged_in() ) {
+        if ( ! current_user_can( 'tk_kirim' ) ) {
+            wp_die( 'Akun Anda tidak memiliki izin untuk mengirim tradisi.', 403 );
+        }
+        if ( ! $baru && ! tk_form_boleh_edit( $post_id ) ) {
+            wp_die( 'Anda tidak berhak mengubah tradisi ini.', 403 );
+        }
+    } else {
+        $token = isset( $_REQUEST['token'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+        if ( ! $baru && ! tk_token_cocok( $post_id, $token ) ) {
+            wp_die( 'Link revisi tidak valid atau sudah kedaluwarsa.', 403 );
+        }
+        if ( $baru ) {
+            tk_form_batasi_tamu();
+        }
     }
-    if ( 'new_post' !== $post_id && ! tk_form_boleh_edit( $post_id ) ) {
-        wp_die( 'Anda tidak berhak mengubah tradisi ini.', 403 );
-    }
+
+    $GLOBALS['tk_form_baru'] = $baru; // Dipakai tk_form_after_save().
     return $post_id;
 }
 
 /**
- * Apakah pengguna yang login boleh membuka tradisi ini di form depan?
- * Syarat: tradisi berstatus draf dan milik pengguna itu sendiri.
- *
- * @param int $post_id ID tradisi.
- * @return bool
+ * Batasi jumlah kiriman tamu per jam per alamat IP.
  */
-function tk_form_boleh_edit( $post_id ) {
-    $post = get_post( $post_id );
+function tk_form_batasi_tamu() {
+    $ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+    $kunci = 'tk_tamu_' . md5( $ip );
+    $hitung = (int) get_transient( $kunci );
 
-    return $post
-        && 'tradisi' === $post->post_type
-        && 'draft' === $post->post_status
-        && (int) $post->post_author === get_current_user_id();
-}
-
-/**
- * Status yang diminta tombol yang diklik: 'draft' atau 'pending'.
- * Nilainya dari tombol yang diklik (name="tk_status").
- *
- * @return string
- */
-function tk_form_status_diminta() {
-    $status = isset( $_POST['tk_status'] ) ? sanitize_key( $_POST['tk_status'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- nonce dicek oleh ACF.
-    return 'draft' === $status ? 'draft' : 'pending';
+    if ( $hitung >= TK_TAMU_BATAS_PER_JAM ) {
+        wp_die( 'Terlalu banyak kiriman dari jaringan Anda. Silakan coba lagi dalam satu jam.', 429 );
+    }
+    set_transient( $kunci, $hitung + 1, HOUR_IN_SECONDS );
 }
 
 add_filter( 'acf/validate_value', 'tk_form_validasi_draf', 20, 3 );
 
 /**
- * Saat "Simpan Draf", field wajib boleh kosong kecuali Nama Tradisi.
- * Validasi AJAX ACF sendiri dimatikan oleh assets/js/form.js saat tombol
- * draf diklik; filter ini menangani validasi di server.
+ * "Simpan Draf" (khusus akun): field wajib boleh kosong kecuali Nama Tradisi.
+ * Validasi ACF di browser dimatikan oleh assets/js/form.js.
  *
- * @param bool|string $valid Hasil validasi sebelumnya.
- * @param mixed       $value Nilai field.
- * @param array       $field Pengaturan field.
+ * @param bool|string $valid
+ * @param mixed       $value
+ * @param array       $field
  * @return bool|string
  */
 function tk_form_validasi_draf( $valid, $value, $field ) {
@@ -236,26 +360,25 @@ function tk_form_validasi_draf( $valid, $value, $field ) {
     return $valid;
 }
 
-/* =============================================================================
- * 3. Setelah tersimpan: status, foto utama, kata kunci, notifikasi
- * ========================================================================== */
-
 add_action( 'acf/save_post', 'tk_form_after_save', 20 );
 
 /**
- * @param int|string $post_id ID tradisi yang baru disimpan.
+ * Setelah ACF menyimpan: atur status, foto, tags, riwayat, dan email.
+ *
+ * @param int|string $post_id
  */
 function tk_form_after_save( $post_id ) {
     if ( is_admin() || ! is_numeric( $post_id ) || 'tradisi' !== get_post_type( $post_id ) ) {
         return;
     }
 
-    // Status sesuai tombol: Simpan Draf → draft, Kirim → pending.
-    // Tradisi yang sudah terbit tidak pernah diubah statusnya dari sini.
-    $status_sekarang = get_post_status( $post_id );
-    $status_diminta  = tk_form_status_diminta();
-    if ( in_array( $status_sekarang, array( 'draft', 'pending' ), true ) && $status_sekarang !== $status_diminta ) {
-        wp_update_post( array( 'ID' => $post_id, 'post_status' => $status_diminta ) );
+    $baru    = ! empty( $GLOBALS['tk_form_baru'] );
+    $sebelum = get_post_status( $post_id );
+    $diminta = tk_form_status_diminta();
+
+    // Status sesuai tombol. Tradisi yang sudah terbit tidak disentuh.
+    if ( in_array( $sebelum, array( 'draft', 'pending' ), true ) && $sebelum !== $diminta ) {
+        wp_update_post( array( 'ID' => $post_id, 'post_status' => $diminta ) );
     }
 
     // Foto utama → featured image.
@@ -265,70 +388,29 @@ function tk_form_after_save( $post_id ) {
     }
 
     // Kata kunci "a, b, c" → Tags.
-    $kata_kunci = (string) get_post_meta( $post_id, 'kata_kunci', true );
-    $tags       = array_filter( array_map( 'trim', explode( ',', $kata_kunci ) ) );
+    $tags = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $post_id, 'kata_kunci', true ) ) ) );
     if ( $tags ) {
         wp_set_post_terms( $post_id, $tags, 'post_tag', false );
     }
 
-    // Beri tahu kurator (sekali saja per tradisi).
-    if ( 'pending' === get_post_status( $post_id ) && ! get_post_meta( $post_id, '_tk_kurator_diberitahu', true ) ) {
-        tk_form_notify_kurator( $post_id );
-        update_post_meta( $post_id, '_tk_kurator_diberitahu', 1 );
+    // Baru dikirim (atau dikirim ulang setelah draf/revisi) → catat & beri tahu.
+    if ( 'pending' === $diminta && ( $baru || 'draft' === $sebelum ) ) {
+        $ulang = (bool) get_post_meta( $post_id, '_tk_perlu_revisi', true );
+
+        delete_post_meta( $post_id, '_tk_perlu_revisi' );
+        delete_post_meta( $post_id, '_tk_token' ); // Link revisi lama tidak berlaku lagi.
+
+        tk_log_tambah( $post_id, $ulang ? 'kirim_ulang' : 'kirim', '', tk_nama_pengirim( $post_id ) );
+        tk_email_ke_kurator( $post_id, $ulang );
+
+        if ( $baru ) {
+            tk_email_ke_pengirim( $post_id, 'diterima' );
+        }
     }
 }
 
-/**
- * Kirim email ke semua Kurator (atau email admin kalau belum ada kurator).
- *
- * Di LocalWP, email tidak benar-benar terkirim; lihat di tab "Mailpit".
- *
- * @param int $post_id ID tradisi.
- */
-function tk_form_notify_kurator( $post_id ) {
-    $emails = get_users( array( 'role__in' => array( 'kurator' ), 'fields' => 'user_email' ) );
-    if ( ! $emails ) {
-        $emails = array( get_option( 'admin_email' ) );
-    }
-
-    $pengirim = get_the_author_meta( 'display_name', get_post_field( 'post_author', $post_id ) );
-    $judul    = get_the_title( $post_id );
-
-    wp_mail(
-        $emails,
-        sprintf( '[%s] Kiriman baru menunggu kurasi: %s', get_bloginfo( 'name' ), $judul ),
-        sprintf(
-            "Ada tradisi baru yang menunggu kurasi.\n\nJudul    : %s\nPengirim : %s\n\nTinjau di Dashboard Kurasi:\n%s\n",
-            $judul,
-            $pengirim,
-            tk_url_kurasi()
-        )
-    );
-}
-
 /* =============================================================================
- * 4. Label field bawaan ACF form (Title/Content) dalam Bahasa Indonesia
- * ========================================================================== */
-
-add_filter( 'acf/prepare_field/name=_post_title', 'tk_form_label_judul' );
-add_filter( 'acf/prepare_field/name=_post_content', 'tk_form_label_isi' );
-
-/** @param array $field */
-function tk_form_label_judul( $field ) {
-    $field['label']        = 'Nama Tradisi';
-    $field['instructions'] = 'Contoh: Ngaben, Tabuik, Pasola.';
-    return $field;
-}
-
-/** @param array $field */
-function tk_form_label_isi( $field ) {
-    $field['label']        = 'Isi Artikel';
-    $field['instructions'] = 'Uraikan sejarah, makna, dan tata cara tradisi. Sebutkan sumber di field Sumber Referensi.';
-    return $field;
-}
-
-/* =============================================================================
- * 5. Shortcode
+ * 4. Shortcode
  * ========================================================================== */
 
 add_shortcode( 'tk_form_tradisi', 'tk_form_shortcode' );
@@ -343,96 +425,110 @@ function tk_form_shortcode() {
         return '<p class="tk-kosong">Form belum tersedia: plugin ACF belum aktif.</p>';
     }
 
-    if ( ! is_user_logged_in() ) {
-        return tk_form_render_ajakan_masuk();
-    }
+    $k = tk_form_konteks();
 
-    if ( ! current_user_can( 'tk_kirim' ) ) {
+    if ( 'tanpa_izin' === $k['mode'] ) {
         return '<p class="tk-kosong">Akun Anda belum memiliki izin untuk mengirim tradisi. Hubungi admin WARISI.</p>';
     }
 
-    // Mode lanjutkan draf (?edit=ID), hanya untuk draf milik sendiri.
-    $edit_id = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification -- hanya memilih data yang ditampilkan.
-    if ( $edit_id && ! tk_form_boleh_edit( $edit_id ) ) {
-        $edit_id = 0;
+    $tamu    = ( 'tamu' === $k['mode'] );
+    $edit_id = $k['edit_id'];
+
+    // Grup field: identitas hanya untuk kiriman tamu yang baru.
+    $grup = array( TK_FORM_GROUP, TK_DETAIL_GROUP );
+    if ( $tamu && ! $edit_id ) {
+        array_unshift( $grup, TK_TAMU_GROUP );
     }
+
+    // Kiriman baru dari tamu dicatat atas nama akun sistem "Kontributor Tamu".
+    $new_post = array(
+        'post_type'   => 'tradisi',
+        'post_status' => 'pending', // Diubah ke draft oleh tk_form_after_save() bila perlu.
+    );
+    if ( $tamu ) {
+        $new_post['post_author'] = tk_get_user_tamu();
+    }
+
+    // Tujuan setelah simpan. Untuk tamu yang merevisi, token tidak dibawa lagi.
+    $kembali = $tamu
+        ? add_query_arg( 'terkirim', 'tamu', get_permalink() )
+        : add_query_arg( 'tersimpan', '%post_id%', get_permalink() );
+
+    wp_enqueue_script( 'tk-form', TK_URL . 'assets/js/form.js', array( 'acf-input' ), filemtime( TK_PATH . 'assets/js/form.js' ), true );
 
     ob_start();
 
     echo tk_form_render_pesan();
 
     if ( $edit_id ) {
-        printf(
-            '<div class="tk-notice tk-notice--info">Melanjutkan draf <strong>%s</strong>. <a href="%s">Buat kiriman baru</a></div>',
-            esc_html( get_the_title( $edit_id ) ),
-            esc_url( get_permalink() )
-        );
+        echo tk_form_render_info_edit( $edit_id, $tamu );
+    } elseif ( $tamu ) {
+        echo tk_form_render_info_tamu();
     }
-
-    wp_enqueue_script(
-        'tk-form',
-        TK_URL . 'assets/js/form.js',
-        array( 'acf-input' ),
-        filemtime( TK_PATH . 'assets/js/form.js' ),
-        true
-    );
 
     echo '<div class="tk-form">';
     acf_form( array(
         'id'                 => 'tk-form-tradisi',
         'post_id'            => $edit_id ? $edit_id : 'new_post',
-        'new_post'           => array(
-            'post_type'   => 'tradisi',
-            'post_status' => 'pending', // Diubah ke draft oleh tk_form_after_save() bila perlu.
-        ),
-        'field_groups'       => array( TK_FORM_GROUP, TK_DETAIL_GROUP ),
+        'new_post'           => $new_post,
+        'field_groups'       => $grup,
         'post_title'         => true,
         'post_content'       => true,
         'uploader'           => 'basic',
         'honeypot'           => true,
-        'return'             => add_query_arg( 'tersimpan', '%post_id%', get_permalink() ),
+        'return'             => $kembali,
         'submit_value'       => 'Kirim untuk Dikurasi',
-        'html_submit_button' => tk_form_render_tombol(),
+        'html_submit_button' => tk_form_render_tombol( ! $tamu ),
         'updated_message'    => false, // Pesan ditangani tk_form_render_pesan().
     ) );
     echo '</div>';
 
-    echo tk_form_render_kiriman_saya();
+    if ( ! $tamu ) {
+        echo tk_form_render_kiriman_saya();
+    }
 
     return ob_get_clean();
 }
 
+/* =============================================================================
+ * 5. Bagian-bagian HTML
+ * ========================================================================== */
+
 /**
- * Dua tombol di akhir form.
+ * Tombol di akhir form.
  *
- * Kedua tombol memakai name="tk_status", sehingga nilai tombol yang diklik
- * ikut terkirim ('draft' atau 'pending'). assets/js/form.js mematikan
- * validasi ACF saat "Simpan Draf" diklik.
+ * Tombol memakai name="tk_status" sehingga nilainya ikut terkirim.
+ * ACF memasukkan 'submit_value' ke %s lewat sprintf(), dan ACF 6.2+
+ * menyaring HTML ini, jadi tidak memakai onclick atau <input> tersembunyi.
  *
- * Catatan:
- *   - ACF memasukkan teks tombol lewat sprintf(), jadi %s = 'submit_value'.
- *   - ACF 6.2+ menyaring HTML ini (hanya tag & atribut aman), karena itu
- *     tidak memakai onclick atau <input> tersembunyi.
- *
- * @return string HTML.
+ * @param bool $dengan_draf Tampilkan tombol "Simpan Draf" (khusus akun).
+ * @return string
  */
-function tk_form_render_tombol() {
+function tk_form_render_tombol( $dengan_draf ) {
     return '<div class="tk-form-tombol">'
-        . '<button type="submit" name="tk_status" value="draft" class="tk-btn tk-btn-garis">Simpan Draf</button>'
+        . ( $dengan_draf ? '<button type="submit" name="tk_status" value="draft" class="tk-btn tk-btn-garis">Simpan Draf</button>' : '' )
         . '<button type="submit" name="tk_status" value="pending" class="tk-btn tk-btn-utama">%s</button>'
         . '</div>';
 }
 
 /**
- * Pesan setelah form disimpan (?tersimpan=ID), sesuai status tradisinya.
+ * Pesan setelah form disimpan.
+ *   ?terkirim=tamu   → terima kasih untuk tamu.
+ *   ?tersimpan=ID    → draf tersimpan / terkirim (akun, hanya untuk pemiliknya).
  *
- * @return string HTML, atau '' kalau tidak ada pesan.
+ * @return string
  */
 function tk_form_render_pesan() {
-    $id   = isset( $_GET['tersimpan'] ) ? absint( $_GET['tersimpan'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification -- hanya menampilkan pesan.
+    // phpcs:disable WordPress.Security.NonceVerification -- hanya menampilkan pesan.
+    if ( isset( $_GET['terkirim'] ) && 'tamu' === $_GET['terkirim'] ) {
+        return '<div class="tk-notice tk-notice--sukses"><strong>Terima kasih!</strong> Kiriman Anda sudah kami terima dan akan ditinjau kurator. Kabar selanjutnya kami kirim ke email Anda.</div>';
+    }
+
+    $id = isset( $_GET['tersimpan'] ) ? absint( $_GET['tersimpan'] ) : 0;
+    // phpcs:enable
     $post = $id ? get_post( $id ) : null;
 
-    if ( ! $post || (int) $post->post_author !== get_current_user_id() ) {
+    if ( ! $post || ! is_user_logged_in() || (int) $post->post_author !== get_current_user_id() ) {
         return '';
     }
 
@@ -447,48 +543,52 @@ function tk_form_render_pesan() {
 }
 
 /**
- * Kotak ajakan masuk/daftar untuk pengunjung yang belum login.
+ * Penjelasan di atas form untuk tamu.
  *
- * @return string HTML.
+ * @return string
  */
-function tk_form_render_ajakan_masuk() {
-    ob_start();
-    ?>
-    <div class="tk-ajakan">
-      <span class="tk-label">Kontribusi</span>
-      <h2>Bagikan tradisi dari daerah Anda</h2>
-      <p>Masuk atau buat akun gratis untuk mengirim tradisi. Setiap kiriman akan ditinjau kurator sebelum diterbitkan.</p>
-      <div class="tk-hero-tombol">
-        <a class="tk-btn tk-btn-utama" href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>">Masuk</a>
-        <?php if ( get_option( 'users_can_register' ) ) : ?>
-          <a class="tk-btn tk-btn-garis" href="<?php echo esc_url( wp_registration_url() ); ?>">Daftar Akun</a>
-        <?php endif; ?>
-      </div>
-    </div>
-    <?php
-    return ob_get_clean();
-}
+function tk_form_render_info_tamu() {
+    $daftar = get_option( 'users_can_register' )
+        ? sprintf( ' atau <a href="%s">daftar akun</a>', esc_url( wp_registration_url() ) )
+        : '';
 
-/**
- * Label & warna untuk setiap status tradisi.
- *
- * @param string $status Status post.
- * @return string[] array( label, modifier class )
- */
-function tk_status_label( $status ) {
-    $daftar = array(
-        'pending' => array( 'Menunggu Kurasi', 'pending' ),
-        'publish' => array( 'Terpublikasi', 'publish' ),
-        'draft'   => array( 'Draf', 'draft' ),
-        'trash'   => array( 'Ditolak', 'trash' ),
+    return sprintf(
+        '<div class="tk-notice tk-notice--info">Anda mengirim sebagai <strong>tamu</strong>: cukup isi nama dan email. Ingin menyimpan draf dan memantau status kiriman? <a href="%s">Masuk</a>%s.</div>',
+        esc_url( wp_login_url( get_permalink() ) ),
+        $daftar
     );
-    return isset( $daftar[ $status ] ) ? $daftar[ $status ] : array( $status, 'draft' );
 }
 
 /**
- * Daftar tradisi yang pernah dikirim pengguna yang sedang login.
+ * Info saat melanjutkan draf / merevisi, termasuk catatan kurator.
  *
- * @return string HTML, atau '' kalau belum ada kiriman.
+ * @param int  $edit_id
+ * @param bool $tamu
+ * @return string
+ */
+function tk_form_render_info_edit( $edit_id, $tamu ) {
+    $revisi  = (bool) get_post_meta( $edit_id, '_tk_perlu_revisi', true );
+    $catatan = (string) get_post_meta( $edit_id, '_tk_catatan', true );
+
+    $html = sprintf(
+        '<div class="tk-notice tk-notice--info">%s <strong>%s</strong>.%s</div>',
+        $revisi ? 'Merevisi kiriman' : 'Melanjutkan draf',
+        esc_html( get_the_title( $edit_id ) ),
+        $tamu ? '' : sprintf( ' <a href="%s">Buat kiriman baru</a>', esc_url( get_permalink() ) )
+    );
+
+    if ( $revisi && $catatan ) {
+        $html .= '<div class="tk-catatan-kurator"><span class="tk-label">Catatan kurator</span><p>'
+            . nl2br( esc_html( $catatan ) ) . '</p></div>';
+    }
+
+    return $html;
+}
+
+/**
+ * Daftar "Kiriman Saya" (khusus pengguna login).
+ *
+ * @return string
  */
 function tk_form_render_kiriman_saya() {
     $kiriman = get_posts( array(
@@ -508,7 +608,8 @@ function tk_form_render_kiriman_saya() {
       <div class="tk-koleksi-head"><h2>Kiriman Saya</h2></div>
       <ul class="tk-kiriman-daftar">
         <?php foreach ( $kiriman as $p ) :
-            list( $label, $mod ) = tk_status_label( $p->post_status );
+            list( $label, $mod ) = tk_status_kiriman( $p );
+            $catatan = in_array( $mod, array( 'revisi', 'trash' ), true ) ? (string) get_post_meta( $p->ID, '_tk_catatan', true ) : '';
             ?>
           <li>
             <span class="tk-kiriman-judul">
@@ -521,9 +622,16 @@ function tk_form_render_kiriman_saya() {
             <span class="tk-kiriman-tgl"><?php echo esc_html( get_the_date( '', $p ) ); ?></span>
             <span class="tk-status tk-status--<?php echo esc_attr( $mod ); ?>"><?php echo esc_html( $label ); ?></span>
             <?php if ( 'draft' === $p->post_status ) : ?>
-              <a class="tk-btn-kecil" href="<?php echo esc_url( add_query_arg( 'edit', $p->ID, get_permalink() ) ); ?>">Lanjutkan</a>
+              <a class="tk-btn-kecil" href="<?php echo esc_url( add_query_arg( 'edit', $p->ID, get_permalink() ) ); ?>"><?php echo 'revisi' === $mod ? 'Revisi' : 'Lanjutkan'; ?></a>
             <?php else : ?>
               <span></span>
+            <?php endif; ?>
+
+            <?php if ( $catatan ) : ?>
+              <div class="tk-kiriman-catatan">
+                <strong><?php echo 'trash' === $mod ? 'Alasan kurator:' : 'Catatan kurator:'; ?></strong>
+                <?php echo nl2br( esc_html( $catatan ) ); ?>
+              </div>
             <?php endif; ?>
           </li>
         <?php endforeach; ?>

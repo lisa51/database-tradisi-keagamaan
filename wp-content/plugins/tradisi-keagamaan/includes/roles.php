@@ -8,6 +8,13 @@
  *     - Tidak bisa masuk wp-admin (kecuali halaman Profil) dan tidak melihat admin bar.
  *     - Kiriman masuk dengan status "pending" (menunggu kurasi).
  *
+ *   Kontributor Tamu (kontributor_tamu)
+ *     - Peran untuk SATU akun sistem bernama "Kontributor Tamu" yang dibuat
+ *       otomatis. Akun ini tidak dipakai login oleh siapa pun; ia hanya menjadi
+ *       "penulis" di database untuk semua kiriman dari pengunjung tanpa akun.
+ *     - Nama & email asli pengirim tamu disimpan di post meta (lihat
+ *       includes/kurasi-alur.php) dan ditampilkan sebagai penulis.
+ *
  *   Kurator (kurator)
  *     - Bisa membuka halaman "Dashboard Kurasi", menerbitkan atau menolak kiriman.
  *     - Bisa mengedit tradisi dan mengelola term (wilayah, kategori, dsb.) di wp-admin.
@@ -35,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Naikkan angka ini setiap kali daftar hak akses di bawah diubah. */
-define( 'TK_ROLES_VERSION', 1 );
+define( 'TK_ROLES_VERSION', 2 );
 
 add_action( 'init', 'tk_setup_roles' );
 
@@ -51,6 +58,10 @@ function tk_setup_roles() {
         'kontributor' => array(
             'nama' => 'Kontributor',
             'caps' => array( 'read', 'tk_kirim' ),
+        ),
+        'kontributor_tamu' => array(
+            'nama' => 'Kontributor Tamu',
+            'caps' => array(), // Tanpa hak apa pun; hanya penanda penulis.
         ),
         'kurator'     => array(
             'nama' => 'Kurator',
@@ -73,7 +84,37 @@ function tk_setup_roles() {
         $admin->add_cap( 'tk_kurasi' );
     }
 
+    tk_get_user_tamu(); // Pastikan akun sistem "Kontributor Tamu" ada.
+
     update_option( 'tk_roles_version', TK_ROLES_VERSION );
+}
+
+/**
+ * ID akun sistem "Kontributor Tamu" (dibuat otomatis bila belum ada).
+ * Akun ini diberi password acak dan tidak dimaksudkan untuk login.
+ *
+ * @return int ID pengguna, atau 0 bila gagal dibuat.
+ */
+function tk_get_user_tamu() {
+    $id = (int) get_option( 'tk_user_tamu' );
+    if ( $id && get_userdata( $id ) ) {
+        return $id;
+    }
+
+    $id = wp_insert_user( array(
+        'user_login'   => 'kontributor-tamu',
+        'user_pass'    => wp_generate_password( 32, true, true ),
+        'display_name' => 'Kontributor Tamu',
+        'role'         => 'kontributor_tamu',
+    ) );
+
+    if ( is_wp_error( $id ) ) {
+        $user = get_user_by( 'login', 'kontributor-tamu' ); // Mungkin sudah ada dari sebelumnya.
+        $id   = $user ? $user->ID : 0;
+    }
+
+    update_option( 'tk_user_tamu', (int) $id );
+    return (int) $id;
 }
 
 /**

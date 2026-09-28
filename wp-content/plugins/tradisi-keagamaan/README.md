@@ -24,6 +24,7 @@ tradisi-keagamaan/
 │   ├── roles.php                Peran Kontributor & Kurator, akses wp-admin, halaman login.
 │   ├── menu.php                 Menu: anchor, item khusus kurator, tombol Masuk/Keluar.
 │   ├── single.php               Data & logika untuk halaman single tradisi.
+│   ├── kurasi-alur.php          Riwayat, checklist, pengirim (akun/tamu), token revisi, email.
 │   └── shortcodes/
 │       ├── hero.php             [tk_hero]
 │       ├── stats.php            [tk_stats]
@@ -109,45 +110,71 @@ Susunan Beranda saat ini:
 
 ## Kontribusi & kurasi
 
-### Peran
+### Jenis pengirim & peran
 
-| Peran | Bisa apa |
+| Siapa | Bisa apa |
 |---|---|
-| **Kontributor** | Login, kirim tradisi lewat form, lihat status kirimannya. Tidak bisa masuk wp-admin (kecuali Profil). |
-| **Kurator** | Semua hak kontributor, plus Dashboard Kurasi (terbitkan/tolak), edit tradisi dan term di wp-admin. Tidak bisa mengubah pengaturan, plugin, atau pengguna. |
+| **Kontributor Tamu** (tanpa login) | Kirim tradisi dengan mengisi Nama, Email, dan pernyataan persetujuan. Tidak ada draf. Revisi lewat link rahasia di email. Dibatasi 5 kiriman/jam/IP. |
+| **Kontributor** (akun) | Kirim atau Simpan Draf, pantau status & catatan kurator di "Kiriman Saya", lanjutkan draf/revisi. Tidak bisa masuk wp-admin (kecuali Profil). |
+| **Kurator** | Dashboard Kurasi (terbitkan, minta revisi, tolak), edit tradisi & term di wp-admin. Tidak bisa mengubah pengaturan, plugin, atau pengguna. |
 | **Administrator** | Semua hak, termasuk kurasi. |
 
-Peran dibuat otomatis oleh `includes/roles.php`. Kalau daftar hak akses diubah, naikkan `TK_ROLES_VERSION`.
+Peran **Kontributor Tamu** dipakai oleh satu akun sistem bernama "Kontributor Tamu" (dibuat otomatis, tidak untuk login). Akun ini menjadi "penulis" semua kiriman tamu di database, sedangkan nama & email asli pengirim disimpan di meta `tk_tamu_nama` dan `tk_tamu_email`. Di situs, yang tampil sebagai penulis adalah nama asli pengirim; emailnya hanya terlihat oleh kurator.
+
+Peran dibuat oleh `includes/roles.php`. Kalau daftar hak akses diubah, naikkan `TK_ROLES_VERSION`.
 
 ### Alur
 
-1. Pengunjung daftar akun di halaman login (otomatis menjadi Kontributor dan langsung aktif).
-2. Kontributor mengisi form di halaman **Tambah Tradisi** `[tk_form_tradisi]`.
-3. Tradisi tersimpan dengan status **Menunggu Kurasi** (`pending`), kurator mendapat email.
-4. Kurator membuka **Dashboard Kurasi** `[tk_kurasi]`: Pratinjau, Edit, **Terbitkan**, atau **Tolak**.
-5. Terbitkan → tradisi tampil di situs, pengirim mendapat email. Tolak → pindah ke Trash (bisa dipulihkan 30 hari).
+```
+Tamu / Kontributor ── Kirim ──▶ Menunggu Kurasi ──┬── Terbitkan ──▶ Terpublikasi   (email ke pengirim)
+        ▲                                         ├── Minta Revisi ─▶ Perlu Revisi  (email + catatan + link revisi)
+        └─────────── Kirim ulang ◀────────────────┘                     │
+                                                  └── Tolak ─────▶ Trash (email + alasan, bisa dipulihkan 30 hari)
+```
 
-Form punya dua tombol: **Simpan Draf** (status `draft`, field wajib boleh kosong kecuali Nama Tradisi, kurator belum diberi tahu) dan **Kirim untuk Dikurasi** (status `pending`, semua field wajib dicek). Draf bisa dilanjutkan lewat link **Lanjutkan** di "Kiriman Saya" (`?edit=ID`), hanya oleh pemiliknya dan selama masih berstatus draf. Logika tombol draf di browser ada di `assets/js/form.js`.
+- Setiap kiriman & kiriman ulang → kurator mendapat email.
+- Kiriman baru → pengirim mendapat email konfirmasi.
+- Minta Revisi dan Tolak **wajib** disertai catatan.
+- Link revisi tamu berisi token rahasia (`?edit=ID&token=...`), dibuat ulang setiap kali revisi diminta, dan tidak berlaku lagi setelah kiriman dikirim ulang.
+
+### Dashboard Kurasi
+
+Setiap kiriman di antrean menampilkan:
+- Pengirim (dengan label **Tamu** dan email bila tamu), lama menunggu (merah bila lebih dari 7 hari), wilayah & kategori.
+- **Checklist kelengkapan**: foto utama, abstrak, isi ≥150 kata, sumber, asal daerah, wilayah, kategori, koordinat. Kriteria diatur di `tk_kelengkapan()` (`includes/kurasi-alur.php`).
+- Tombol **Pratinjau**, **Edit**, **Terbitkan**, serta panel **Minta Revisi / Tolak** dan **Riwayat**.
+
+Riwayat (siapa melakukan apa, kapan, dan catatannya) juga tampil di kotak **Pengirim & Riwayat Kurasi** di sidebar editor tradisi wp-admin. Kalau kurator menerbitkan langsung dari editor, tetap tercatat dan pengirim tetap diberi tahu.
 
 ### Pengaturan awal (sekali saja)
 
-1. **Settings → General**: centang **Anyone can register**, dan pilih **New User Default Role: Kontributor**.
-2. Halaman **Tambah Tradisi** (slug `tambah-tradisi`) berisi block Shortcode `[tk_form_tradisi]`.
-3. Halaman **Dashboard Kurasi** (slug `dashboard-kurasi`) berisi block Shortcode `[tk_kurasi]`.
-4. **Appearance → Menus** (aktifkan kolom lewat Screen Options → CSS Classes):
-   - Item "Dashboard Kurasi" diberi CSS class `tk-menu-kurator` → hanya tampil untuk kurator/admin.
-   - Tambah Custom Link (URL `#`, teks bebas) dengan CSS class `tk-menu-akun` → otomatis menjadi **Masuk** atau **Keluar**.
+1. **Settings → General**: centang **Anyone can register**, pilih **New User Default Role: Kontributor**.
+2. Halaman **Tambah Tradisi** (slug `tambah-tradisi`) berisi `[tk_form_tradisi]`.
+3. Halaman **Dashboard Kurasi** (slug `dashboard-kurasi`) berisi `[tk_kurasi]`.
+4. **Appearance → Menus** (Screen Options → CSS Classes):
+   - "Dashboard Kurasi" diberi class `tk-menu-kurator` → hanya untuk kurator/admin.
+   - Custom Link (URL `#`) dengan class `tk-menu-akun` → otomatis **Masuk**/**Keluar**.
 5. Jadikan akun tim kurasi sebagai Kurator lewat **Users → Edit → Role: Kurator**.
 
 ### Isi form
 
-Nama tradisi, isi artikel, foto utama (wajib, jadi featured image), agama, provinsi/wilayah (wajib), kategori (wajib, boleh lebih dari satu), kata kunci (dipisah koma, jadi Tags), lalu semua field Detail Tradisi (asal daerah, abstrak, tanggal, sumber, galeri, koordinat).
+Tamu: Nama, Email, Instansi (opsional), Pernyataan. Semua pengirim: nama tradisi, isi artikel, foto utama (wajib), agama, provinsi/wilayah (wajib), kategori (wajib), kata kunci (jadi Tags), lalu semua field Detail Tradisi.
 
-Field khusus form ada di grup **Formulir Kontributor** (didefinisikan di `form-tradisi.php`). Grup ini sengaja tidak muncul di editor wp-admin, karena di sana taxonomy dan featured image sudah punya panel sendiri.
+Akun punya dua tombol: **Simpan Draf** (field wajib boleh kosong kecuali Nama Tradisi) dan **Kirim untuk Dikurasi**. Logika tombol draf ada di `assets/js/form.js`.
 
 ### Email
 
-Email dikirim lewat `wp_mail()`. Di LocalWP, email tidak benar-benar terkirim, tapi bisa dilihat di tab **Mailpit**. Di server internal, pastikan server bisa mengirim email (SMTP), misalnya dengan plugin WP Mail SMTP.
+Dikirim lewat `wp_mail()`. Di LocalWP tidak terkirim sungguhan; lihat tab **Mailpit**. Di server internal pastikan SMTP berfungsi (misalnya plugin WP Mail SMTP).
+
+### Post meta alur kurasi
+
+| Meta | Isi |
+|---|---|
+| `tk_tamu_nama`, `tk_tamu_email`, `tk_tamu_instansi` | Identitas pengirim tamu |
+| `_tk_log` | Riwayat kurasi (array) |
+| `_tk_perlu_revisi` | 1 = dikembalikan untuk revisi |
+| `_tk_catatan` | Catatan revisi / alasan tolak terakhir |
+| `_tk_token` | Token link revisi tamu |
 
 ## Halaman single tradisi
 

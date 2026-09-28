@@ -1007,6 +1007,7 @@ a:hover { color: var(--tk-accent-gelap); }
 .tk-status--publish { background: #e8f4ee; color: var(--tk-hijau); }
 .tk-status--draft   { background: #f1efec; color: var(--tk-abu); }
 .tk-status--trash   { background: #fbe9e6; color: #9a2f1b; }
+.tk-status--revisi  { background: #fde6d8; color: var(--tk-accent-gelap); }
 
 /* Dashboard: 2 kotak ringkasan */
 .tk-stats--dua { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1036,6 +1037,100 @@ a:hover { color: var(--tk-accent-gelap); }
 .tk-kurasi-meta  { margin: 0; font-size: 13px; color: var(--tk-abu); }
 .tk-kurasi-aksi  { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 
+/* Panel & isi tambahan di setiap kiriman (baris penuh di bawah) */
+.tk-kurasi-aksi form { display: inline; margin: 0; }
+.tk-kurasi-judul .tk-status { margin-left: 8px; vertical-align: middle; }
+.tk-tamu {
+  margin: 0 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--tk-krem-tua);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tk-accent-gelap);
+}
+.tk-umur--lama { font-weight: 700; color: #9a2f1b; }
+
+/* Checklist kelengkapan */
+.tk-cek { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.tk-cek-skor { margin-right: 4px; font-size: 12px; font-weight: 700; color: var(--tk-teks); }
+.tk-cek-item {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tk-cek-item--ok     { background: #e8f4ee; color: var(--tk-hijau); }
+.tk-cek-item--kurang { background: #fbe9e6; color: #9a2f1b; }
+
+.tk-kurasi-catatan-lama {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--tk-emas);
+  background: var(--tk-krem);
+  font-size: 13px;
+}
+
+/* Panel lipat: Minta Revisi / Tolak, Riwayat */
+.tk-kurasi-panel {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--tk-garis);
+  padding-top: 10px;
+}
+.tk-kurasi-panel summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tk-accent-gelap);
+}
+.tk-kurasi-panel form { margin-top: 10px; }
+.tk-kurasi-panel label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+.tk-kurasi-panel textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 8px;
+  background: var(--tk-krem);
+  font-family: inherit;
+  font-size: 14px;
+}
+.tk-kurasi-panel-tombol { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* Riwayat kurasi */
+.tk-log { margin: 10px 0 0; padding: 0; list-style: none; font-size: 13px; }
+.tk-log li { margin: 0 0 8px; padding-left: 14px; border-left: 3px solid var(--tk-garis); }
+.tk-log--terbitkan { border-left-color: var(--tk-hijau) !important; }
+.tk-log--revisi    { border-left-color: var(--tk-emas) !important; }
+.tk-log--tolak     { border-left-color: #9a2f1b !important; }
+.tk-log-waktu { margin-left: 6px; font-size: 12px; color: var(--tk-abu); }
+.tk-log blockquote {
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 13px;
+  font-style: normal;
+  color: var(--tk-teks);
+}
+.tk-log-kosong { margin: 8px 0 0; font-size: 13px; color: var(--tk-abu); }
+
+/* Catatan kurator untuk pengirim */
+.tk-catatan-kurator {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  border-left: 4px solid var(--tk-emas);
+  border-radius: 8px;
+  background: var(--tk-krem-tua);
+}
+.tk-catatan-kurator p { margin: 6px 0 0; }
+.tk-kiriman-catatan {
+  grid-column: 1 / -1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--tk-krem);
+  font-size: 13px;
+}
+
 /* Tombol kecil */
 .tk-btn-kecil {
   display: inline-flex;
@@ -1051,10 +1146,24 @@ a:hover { color: var(--tk-accent-gelap); }
   color: var(--tk-teks);
 }
 .tk-btn-kecil:hover { border-color: var(--tk-accent); color: var(--tk-accent); }
-.tk-btn-kecil--terbit { border-color: var(--tk-hijau); background: var(--tk-hijau); color: #fff; }
+.tk-btn-kecil--terbit { border-color: var(--tk-hijau); background: var(--tk-hijau); color: #fff; cursor: pointer; font-family: inherit; }
 .tk-btn-kecil--terbit:hover { background: #17603c; color: #fff; }
-.tk-btn-kecil--tolak  { border-color: #e2a497; color: #9a2f1b; }
+.tk-btn-kecil--revisi { border-color: var(--tk-emas); background: #fcf1dd; color: #8a5a0c; cursor: pointer; font-family: inherit; }
+.tk-btn-kecil--revisi:hover { border-color: #8a5a0c; color: #8a5a0c; }
+.tk-btn-kecil--tolak  { border-color: #e2a497; color: #9a2f1b; cursor: pointer; font-family: inherit; }
 .tk-btn-kecil--tolak:hover { background: #fbe9e6; border-color: #9a2f1b; color: #9a2f1b; }
+/* Tombol <button> di dashboard: dipertegas agar tidak tertimpa gaya tombol GeneratePress */
+button.tk-btn-kecil { line-height: 1; }
+button.tk-btn-kecil--terbit,
+button.tk-btn-kecil--terbit:hover,
+button.tk-btn-kecil--terbit:focus { background: var(--tk-hijau); border-color: var(--tk-hijau); color: #fff; }
+button.tk-btn-kecil--terbit:hover { background: #17603c; }
+button.tk-btn-kecil--revisi,
+button.tk-btn-kecil--revisi:hover,
+button.tk-btn-kecil--revisi:focus { background: #fcf1dd; border-color: var(--tk-emas); color: #8a5a0c; }
+button.tk-btn-kecil--tolak,
+button.tk-btn-kecil--tolak:focus { background: #fff; border-color: #e2a497; color: #9a2f1b; }
+button.tk-btn-kecil--tolak:hover { background: #fbe9e6; border-color: #9a2f1b; color: #9a2f1b; }
 
 
 /* =============================================================================
