@@ -1180,6 +1180,35 @@ a:hover { color: var(--tk-accent-gelap); }
 .tk-riwayat-judul { display: block; font-size: 15px; }
 .tk-riwayat-meta  { display: block; margin-top: 2px; font-size: 12.5px; color: var(--tk-abu); }
 
+/* Panel Kurator (di halaman tradisi, khusus kurator) */
+.tk-panel-kurator {
+  margin: 0 0 28px;
+  padding: 18px 20px;
+  border: 2px dashed var(--tk-accent);
+  border-radius: 14px;
+  background: #fff;
+}
+.tk-panel-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.tk-panel-pratinjau { font-size: 12px; font-weight: 600; color: #8a5a0c; }
+.tk-panel-orang {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px 20px;
+  margin: 0 0 12px;
+}
+.tk-panel-orang dt {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+.tk-panel-orang dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; overflow-wrap: anywhere; }
+.tk-panel-orang small { color: var(--tk-abu); }
+.tk-panel-tautan { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
+.tk-panel-kurator .tk-kurasi-panel { margin-top: 12px; }
+.tk-panel-kurator .tk-notice { margin-bottom: 14px; }
+
 /* Tombol kecil */
 .tk-btn-kecil {
   display: inline-flex;

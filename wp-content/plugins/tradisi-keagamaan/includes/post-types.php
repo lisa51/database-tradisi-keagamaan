@@ -44,7 +44,7 @@ function tk_register_data_types() {
         'has_archive'  => true,
         'show_in_rest' => true, // Wajib untuk editor blok.
         'menu_icon'    => 'dashicons-book-alt',
-        'supports'     => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'supports'     => array( 'title', 'editor', 'thumbnail', 'excerpt', 'revisions', 'author' ), // revisions: riwayat suntingan di Panel Kurator.
         'rewrite'      => array( 'slug' => 'tradisi' ),
     ) );
 

@@ -24,7 +24,8 @@ tradisi-keagamaan/
 │   ├── roles.php                Peran Kontributor & Kurator, akses wp-admin, halaman login.
 │   ├── menu.php                 Menu: anchor, item khusus kurator, tombol Masuk/Keluar.
 │   ├── single.php               Data & logika untuk halaman single tradisi.
-│   ├── kurasi-alur.php          Riwayat, checklist, pengirim (akun/tamu), token revisi, email.
+│   ├── kurasi-alur.php          Riwayat, checklist, pengirim (akun/tamu), token revisi, email, aturan aksi.
+│   ├── panel-kurator.php        Panel Kurator di halaman tradisi (khusus kurator).
 │   └── shortcodes/
 │       ├── hero.php             [tk_hero]
 │       ├── stats.php            [tk_stats]
@@ -147,6 +148,27 @@ Setiap kiriman di antrean menampilkan:
 Di bawah antrean ada **Riwayat Kurasi Saya**: semua tradisi yang pernah Anda terbitkan, minta revisi, atau tolak, dengan tab saringan (Semua, Diterbitkan, Diminta Revisi, Ditolak), status terkini, dan tombol **Lihat** (terbit), **Pratinjau** (menunggu/perlu revisi), atau **Pulihkan** (ditolak, kembali menjadi Draf). Daftar ini memakai meta `_tk_dikurasi_oleh`; riwayat lama diisi otomatis sekali jalan dengan mencocokkan nama kurator.
 
 Riwayat (siapa melakukan apa, kapan, dan catatannya) juga tampil di kotak **Pengirim & Riwayat Kurasi** di sidebar editor tradisi wp-admin. Kalau kurator menerbitkan langsung dari editor, tetap tercatat dan pengirim tetap diberi tahu.
+
+### Panel Kurator
+
+Saat kurator/admin membuka halaman tradisi (termasuk pratinjau kiriman yang belum terbit), di bagian atas muncul **Panel Kurator** (`includes/panel-kurator.php`). Pengunjung biasa tidak melihatnya. Isinya:
+
+- **Status** saat ini (dan penanda mode pratinjau).
+- **Pengirim** (akun/tamu, email, instansi, tanggal dibuat), **Kurator** yang pernah memutuskan, **Penyunting** (dari revisi WordPress, beserta jumlah suntingan), dan **Terakhir diubah** oleh siapa.
+- **Checklist kelengkapan**.
+- Tautan **Edit di wp-admin**, **Bandingkan revisi**, **Dashboard Kurasi**.
+- **Ubah status publikasi** dengan catatan. Tombol menyesuaikan status:
+
+| Status sekarang | Aksi tersedia |
+|---|---|
+| Menunggu Kurasi | Terbitkan · Minta Revisi · Tolak |
+| Terpublikasi | Kembalikan ke Antrean · Minta Revisi · Tolak |
+| Draf / Perlu Revisi | Terbitkan · Kembalikan ke Antrean · Tolak |
+
+  Catatan wajib untuk Minta Revisi, Kembalikan ke Antrean, dan Tolak. Setelah aksi, kurator kembali ke halaman tradisi yang sama (kecuali Tolak, yang kembali ke dashboard).
+- **Riwayat kurasi** dan **Riwayat suntingan** (link "lihat perubahan" ke layar pembanding revisi wp-admin).
+
+Judul tradisi di antrean dan di "Riwayat Kurasi Saya" langsung membuka halaman ini. Revisi WordPress aktif untuk post type tradisi, dan kunjungan kurator/admin serta pratinjau tidak dihitung sebagai pembaca.
 
 ### Pengaturan awal (sekali saja)
 

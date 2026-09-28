@@ -155,6 +155,7 @@ function tk_log_label() {
         'tolak'      => 'Ditolak',
         'terbitkan'  => 'Diterbitkan',
         'pulihkan'   => 'Dipulihkan dari Trash',
+        'antrean'    => 'Dikembalikan ke antrean kurasi',
     );
 }
 
@@ -196,7 +197,36 @@ function tk_log_tambah( $post_id, $aksi, $catatan = '', $oleh = '' ) {
  * @return string[]
  */
 function tk_log_aksi_kurator() {
-    return array( 'terbitkan', 'revisi', 'tolak' );
+    return array( 'terbitkan', 'revisi', 'tolak', 'antrean' );
+}
+
+/**
+ * Aksi kurasi yang boleh dilakukan dari setiap status.
+ *
+ *   terbitkan  Terbitkan                    (dari: menunggu, draf/perlu revisi)
+ *   revisi     Minta revisi ke pengirim     (dari: menunggu, terbit)
+ *   antrean    Kembalikan ke antrean kurasi (dari: terbit, draf/perlu revisi)
+ *   tolak      Tolak & pindah ke Trash      (dari: menunggu, terbit, draf)
+ *
+ * @param string $status Status post saat ini.
+ * @return string[]
+ */
+function tk_aksi_diizinkan( $status ) {
+    $peta = array(
+        'pending' => array( 'terbitkan', 'revisi', 'tolak' ),
+        'publish' => array( 'antrean', 'revisi', 'tolak' ),
+        'draft'   => array( 'terbitkan', 'antrean', 'tolak' ),
+    );
+    return isset( $peta[ $status ] ) ? $peta[ $status ] : array();
+}
+
+/**
+ * Aksi yang wajib disertai catatan.
+ *
+ * @return string[]
+ */
+function tk_aksi_wajib_catatan() {
+    return array( 'revisi', 'tolak', 'antrean' );
 }
 
 /**

@@ -7,6 +7,7 @@
  * Gaya ada di assets/css/warisi.css, bagian "10. Halaman single tradisi".
  *
  * Urutan bagian:
+ *   0. Panel Kurator (khusus kurator/admin, lihat includes/panel-kurator.php)
  *   1. Link kembali
  *   2. Badge kategori + status, judul, tanggal terbit
  *   3. Baris meta: penulis, asal daerah, wilayah, pembaca
@@ -46,6 +47,9 @@ while ( have_posts() ) :
 
 <div class="container">
   <article class="tk-single">
+
+    <?php /* 0. Panel Kurator (hanya terlihat oleh kurator/admin) */ ?>
+    <?php echo tk_panel_kurator( $id ); // phpcs:ignore WordPress.Security.EscapeOutput -- di-escape di dalam fungsi. ?>
 
     <?php /* 1. Link kembali */ ?>
     <a class="tk-single__kembali" href="<?php echo esc_url( tk_url_jelajahi() ); ?>">← Kembali ke koleksi</a>

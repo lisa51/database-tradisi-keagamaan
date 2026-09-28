@@ -9,6 +9,7 @@
  *
  * Catatan:
  *   - Setiap refresh ikut terhitung (tidak dibedakan per pengunjung).
+ *   - Pratinjau dan kunjungan kurator/admin tidak dihitung.
  *   - Kalau nanti dipasang plugin cache halaman, hitungan bisa tidak
  *     bertambah karena PHP tidak dijalankan untuk halaman yang di-cache.
  *
@@ -28,8 +29,11 @@ add_action( 'wp_head', 'tk_track_view_count' );
  * Tambah 1 hitungan pembaca saat halaman single tradisi dibuka.
  */
 function tk_track_view_count() {
-    if ( ! is_singular( 'tradisi' ) || is_admin() ) {
+    if ( ! is_singular( 'tradisi' ) || is_admin() || is_preview() ) {
         return;
+    }
+    if ( current_user_can( 'edit_posts' ) ) {
+        return; // Kunjungan kurator/admin saat meninjau tidak dihitung sebagai pembaca.
     }
     $post_id = get_the_ID();
     update_post_meta( $post_id, TK_VIEW_META, tk_get_view_count( $post_id ) + 1 );

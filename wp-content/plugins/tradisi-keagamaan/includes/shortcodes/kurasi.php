@@ -211,7 +211,13 @@ function tk_kurasi_render_riwayat_saya() {
             <li>
               <div class="tk-riwayat-thumb"><?php echo get_the_post_thumbnail( $post, 'thumbnail' ); ?></div>
               <div class="tk-riwayat-isi">
-                <strong class="tk-riwayat-judul"><?php echo esc_html( get_the_title( $post ) ); ?></strong>
+                <strong class="tk-riwayat-judul">
+                  <?php if ( 'trash' === $post->post_status ) : ?>
+                    <?php echo esc_html( get_the_title( $post ) ); ?>
+                  <?php else : ?>
+                    <a href="<?php echo esc_url( tk_url_tinjau( $post->ID ) ); ?>#panel-kurator"><?php echo esc_html( get_the_title( $post ) ); ?></a>
+                  <?php endif; ?>
+                </strong>
                 <span class="tk-riwayat-meta">
                   Anda: <?php echo esc_html( isset( $label_log[ $r['log']['aksi'] ] ) ? $label_log[ $r['log']['aksi'] ] : $r['log']['aksi'] ); ?>
                   · <?php echo esc_html( mysql2date( 'j M Y', $r['log']['waktu'] ) ); ?>
@@ -286,8 +292,9 @@ function tk_kurasi_render_pesan() {
         'terbitkan'     => array( 'sukses', 'Tradisi diterbitkan dan pengirim sudah diberi tahu.' ),
         'revisi'        => array( 'info', 'Kiriman dikembalikan untuk revisi. Pengirim sudah menerima catatan Anda.' ),
         'tolak'         => array( 'info', 'Kiriman ditolak dan dipindah ke Trash (bisa dipulihkan dalam 30 hari). Pengirim sudah menerima alasannya.' ),
-        'catatan_kosong'=> array( 'gagal', 'Catatan wajib diisi untuk Minta Revisi atau Tolak.' ),
-        'gagal'         => array( 'gagal', 'Aksi gagal. Muat ulang halaman lalu coba lagi.' ),
+        'antrean'       => array( 'info', 'Tradisi dikembalikan ke antrean kurasi (status Menunggu Kurasi).' ),
+        'catatan_kosong'=> array( 'gagal', 'Catatan wajib diisi untuk Minta Revisi, Tolak, atau Kembalikan ke Antrean.' ),
+        'gagal'         => array( 'gagal', 'Aksi gagal atau tidak berlaku untuk status tradisi saat ini. Muat ulang halaman lalu coba lagi.' ),
     );
 
     if ( ! isset( $pesan[ $hasil ] ) ) {
@@ -304,13 +311,15 @@ function tk_kurasi_render_pesan() {
 /**
  * Awal form POST aksi kurasi (nonce + field tersembunyi).
  *
- * @param int $post_id
+ * @param int  $post_id
+ * @param bool $dari_panel true = setelah aksi kembali ke halaman tradisi.
  * @return string
  */
-function tk_kurasi_form_buka( $post_id ) {
+function tk_kurasi_form_buka( $post_id, $dari_panel = false ) {
     return '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">'
         . '<input type="hidden" name="action" value="tk_kurasi">'
         . '<input type="hidden" name="post_id" value="' . absint( $post_id ) . '">'
+        . ( $dari_panel ? '<input type="hidden" name="kembali" value="panel">' : '' )
         . wp_nonce_field( 'tk_kurasi_' . $post_id, '_tk_nonce', true, false );
 }
 
@@ -363,7 +372,7 @@ function tk_kurasi_render_item( $p ) {
 
       <div class="tk-kurasi-isi">
         <h3 class="tk-kurasi-judul">
-          <?php echo esc_html( get_the_title( $id ) ); ?>
+          <a href="<?php echo esc_url( tk_url_tinjau( $id ) ); ?>#panel-kurator"><?php echo esc_html( get_the_title( $id ) ); ?></a>
           <?php if ( $ulang ) : ?><span class="tk-status tk-status--revisi">Kiriman ulang</span><?php endif; ?>
         </h3>
         <p class="tk-kurasi-meta">
@@ -419,23 +428,32 @@ function tk_kurasi_render_item( $p ) {
 add_action( 'admin_post_tk_kurasi', 'tk_kurasi_handle' );
 
 /**
- * Jalankan aksi Terbitkan / Minta Revisi / Tolak.
+ * Jalankan aksi kurasi dari Dashboard atau Panel Kurator.
+ *
+ * Aksi yang boleh dilakukan bergantung pada status saat ini
+ * (lihat tk_aksi_diizinkan() di includes/kurasi-alur.php).
+ *
+ * Field POST:
+ *   post_id, aksi, catatan, _tk_nonce
+ *   kembali = 'panel' → setelah aksi, kembali ke halaman tradisi itu
+ *             (kosong → kembali ke Dashboard Kurasi).
  */
 function tk_kurasi_handle() {
     $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
     $aksi    = isset( $_POST['aksi'] ) ? sanitize_key( $_POST['aksi'] ) : '';
     $catatan = isset( $_POST['catatan'] ) ? sanitize_textarea_field( wp_unslash( $_POST['catatan'] ) ) : '';
+    $panel   = isset( $_POST['kembali'] ) && 'panel' === $_POST['kembali'];
 
     check_admin_referer( 'tk_kurasi_' . $post_id, '_tk_nonce' );
 
     if ( ! current_user_can( 'tk_kurasi' ) || ! current_user_can( 'edit_post', $post_id ) ) {
         wp_die( 'Anda tidak berhak melakukan kurasi.', 403 );
     }
-    if ( 'tradisi' !== get_post_type( $post_id ) || 'pending' !== get_post_status( $post_id ) ) {
-        tk_kurasi_redirect( 'gagal' );
+    if ( 'tradisi' !== get_post_type( $post_id ) || ! in_array( $aksi, tk_aksi_diizinkan( get_post_status( $post_id ) ), true ) ) {
+        tk_kurasi_redirect( 'gagal', $panel ? $post_id : 0 );
     }
-    if ( in_array( $aksi, array( 'revisi', 'tolak' ), true ) && '' === trim( $catatan ) ) {
-        tk_kurasi_redirect( 'catatan_kosong' );
+    if ( in_array( $aksi, tk_aksi_wajib_catatan(), true ) && '' === trim( $catatan ) ) {
+        tk_kurasi_redirect( 'catatan_kosong', $panel ? $post_id : 0 );
     }
 
     $GLOBALS['tk_aksi_dashboard'] = true; // Agar tidak dicatat dua kali oleh hook transisi status.
@@ -444,6 +462,7 @@ function tk_kurasi_handle() {
         case 'terbitkan':
             wp_publish_post( $post_id );
             delete_post_meta( $post_id, '_tk_catatan' );
+            delete_post_meta( $post_id, '_tk_perlu_revisi' );
             tk_log_tambah( $post_id, 'terbitkan', $catatan );
             tk_email_ke_pengirim( $post_id, 'terbitkan' );
             break;
@@ -456,26 +475,46 @@ function tk_kurasi_handle() {
             tk_email_ke_pengirim( $post_id, 'revisi', $catatan ); // Berisi link revisi (token untuk tamu).
             break;
 
+        case 'antrean':
+            // Tarik dari publikasi / keluarkan dari draf → kembali menunggu kurasi.
+            wp_update_post( array( 'ID' => $post_id, 'post_status' => 'pending' ) );
+            delete_post_meta( $post_id, '_tk_perlu_revisi' );
+            tk_log_tambah( $post_id, 'antrean', $catatan );
+            break;
+
         case 'tolak':
             update_post_meta( $post_id, '_tk_catatan', $catatan );
             tk_log_tambah( $post_id, 'tolak', $catatan );
             tk_email_ke_pengirim( $post_id, 'tolak', $catatan );
             wp_trash_post( $post_id );
+            $panel = false; // Tradisi di Trash tidak bisa dibuka; kembali ke dashboard.
             break;
-
-        default:
-            tk_kurasi_redirect( 'gagal' );
     }
 
-    tk_kurasi_redirect( $aksi );
+    tk_kurasi_redirect( $aksi, $panel ? $post_id : 0 );
 }
 
 /**
- * Kembali ke Dashboard Kurasi dengan kode pesan, lalu berhenti.
+ * URL halaman tradisi untuk kurator: halaman publik bila terbit,
+ * pratinjau bila belum.
+ *
+ * @param int $post_id
+ * @return string
+ */
+function tk_url_tinjau( $post_id ) {
+    return 'publish' === get_post_status( $post_id )
+        ? get_permalink( $post_id )
+        : get_preview_post_link( $post_id );
+}
+
+/**
+ * Kembali ke Dashboard Kurasi (atau ke halaman tradisi) dengan kode pesan.
  *
  * @param string $hasil
+ * @param int    $post_id Kalau diisi, kembali ke halaman tradisi ini.
  */
-function tk_kurasi_redirect( $hasil ) {
-    wp_safe_redirect( add_query_arg( 'kurasi', $hasil, tk_url_kurasi() ) );
+function tk_kurasi_redirect( $hasil, $post_id = 0 ) {
+    $tujuan = $post_id ? tk_url_tinjau( $post_id ) : tk_url_kurasi();
+    wp_safe_redirect( add_query_arg( 'kurasi', $hasil, $tujuan ) . ( $post_id ? '#panel-kurator' : '' ) );
     exit;
 }
