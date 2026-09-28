@@ -12,7 +12,8 @@ tradisi-keagamaan/
 │   └── css/
 │       └── warisi.css           Semua CSS situs (warna, header, Beranda, single, peta).
 │   ├── js/
-│   │   └── peta.js              Script peta interaktif (Leaflet).
+│   │   ├── peta.js              Script peta interaktif (Leaflet).
+│   │   └── form.js              Tombol "Simpan Draf" di form kontributor.
 │   └── vendor/leaflet/          (opsional) salinan lokal Leaflet untuk server internal.
 ├── includes/
 │   ├── helpers.php              Fungsi bantu: nama term, ikon SVG, URL.
@@ -20,13 +21,16 @@ tradisi-keagamaan/
 │   ├── acf-fields.php           Field ACF "Detail Tradisi".
 │   ├── view-counter.php         Penghitung pembaca (meta tk_view_count).
 │   ├── assets.php               Memuat font Google + warisi.css.
-│   ├── menu.php                 Perbaikan menu anchor (#jelajahi).
+│   ├── roles.php                Peran Kontributor & Kurator, akses wp-admin, halaman login.
+│   ├── menu.php                 Menu: anchor, item khusus kurator, tombol Masuk/Keluar.
 │   ├── single.php               Data & logika untuk halaman single tradisi.
 │   └── shortcodes/
 │       ├── hero.php             [tk_hero]
 │       ├── stats.php            [tk_stats]
 │       ├── koleksi.php          [tk_koleksi]
-│       └── peta.php             [tk_peta] + peta kecil di halaman single
+│       ├── peta.php             [tk_peta] + peta kecil di halaman single
+│       ├── form-tradisi.php     [tk_form_tradisi] form kirim tradisi
+│       └── kurasi.php           [tk_kurasi] Dashboard Kurasi
 └── templates/
     └── single-tradisi.php       Tampilan halaman detail tradisi (HTML saja).
 ```
@@ -102,6 +106,48 @@ Susunan Beranda saat ini:
 [tk_stats]
 [tk_koleksi]
 ```
+
+## Kontribusi & kurasi
+
+### Peran
+
+| Peran | Bisa apa |
+|---|---|
+| **Kontributor** | Login, kirim tradisi lewat form, lihat status kirimannya. Tidak bisa masuk wp-admin (kecuali Profil). |
+| **Kurator** | Semua hak kontributor, plus Dashboard Kurasi (terbitkan/tolak), edit tradisi dan term di wp-admin. Tidak bisa mengubah pengaturan, plugin, atau pengguna. |
+| **Administrator** | Semua hak, termasuk kurasi. |
+
+Peran dibuat otomatis oleh `includes/roles.php`. Kalau daftar hak akses diubah, naikkan `TK_ROLES_VERSION`.
+
+### Alur
+
+1. Pengunjung daftar akun di halaman login (otomatis menjadi Kontributor dan langsung aktif).
+2. Kontributor mengisi form di halaman **Tambah Tradisi** `[tk_form_tradisi]`.
+3. Tradisi tersimpan dengan status **Menunggu Kurasi** (`pending`), kurator mendapat email.
+4. Kurator membuka **Dashboard Kurasi** `[tk_kurasi]`: Pratinjau, Edit, **Terbitkan**, atau **Tolak**.
+5. Terbitkan → tradisi tampil di situs, pengirim mendapat email. Tolak → pindah ke Trash (bisa dipulihkan 30 hari).
+
+Form punya dua tombol: **Simpan Draf** (status `draft`, field wajib boleh kosong kecuali Nama Tradisi, kurator belum diberi tahu) dan **Kirim untuk Dikurasi** (status `pending`, semua field wajib dicek). Draf bisa dilanjutkan lewat link **Lanjutkan** di "Kiriman Saya" (`?edit=ID`), hanya oleh pemiliknya dan selama masih berstatus draf. Logika tombol draf di browser ada di `assets/js/form.js`.
+
+### Pengaturan awal (sekali saja)
+
+1. **Settings → General**: centang **Anyone can register**, dan pilih **New User Default Role: Kontributor**.
+2. Halaman **Tambah Tradisi** (slug `tambah-tradisi`) berisi block Shortcode `[tk_form_tradisi]`.
+3. Halaman **Dashboard Kurasi** (slug `dashboard-kurasi`) berisi block Shortcode `[tk_kurasi]`.
+4. **Appearance → Menus** (aktifkan kolom lewat Screen Options → CSS Classes):
+   - Item "Dashboard Kurasi" diberi CSS class `tk-menu-kurator` → hanya tampil untuk kurator/admin.
+   - Tambah Custom Link (URL `#`, teks bebas) dengan CSS class `tk-menu-akun` → otomatis menjadi **Masuk** atau **Keluar**.
+5. Jadikan akun tim kurasi sebagai Kurator lewat **Users → Edit → Role: Kurator**.
+
+### Isi form
+
+Nama tradisi, isi artikel, foto utama (wajib, jadi featured image), agama, provinsi/wilayah (wajib), kategori (wajib, boleh lebih dari satu), kata kunci (dipisah koma, jadi Tags), lalu semua field Detail Tradisi (asal daerah, abstrak, tanggal, sumber, galeri, koordinat).
+
+Field khusus form ada di grup **Formulir Kontributor** (didefinisikan di `form-tradisi.php`). Grup ini sengaja tidak muncul di editor wp-admin, karena di sana taxonomy dan featured image sudah punya panel sendiri.
+
+### Email
+
+Email dikirim lewat `wp_mail()`. Di LocalWP, email tidak benar-benar terkirim, tapi bisa dilihat di tab **Mailpit**. Di server internal, pastikan server bisa mengirim email (SMTP), misalnya dengan plugin WP Mail SMTP.
 
 ## Halaman single tradisi
 

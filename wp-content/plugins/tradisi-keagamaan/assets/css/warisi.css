@@ -16,7 +16,8 @@
      9. [tk_koleksi] grid & card
     10. Halaman single tradisi
     11. [tk_peta]               (peta interaktif)
-    12. Responsif               (semua @media dikumpulkan di akhir)
+    12. Form & Dashboard Kurasi ([tk_form_tradisi], [tk_kurasi])
+    13. Responsif               (semua @media dikumpulkan di akhir)
 
    Konvensi nama class:
      .tk-*               komponen buatan plugin (shortcode)
@@ -881,7 +882,183 @@ a:hover { color: var(--tk-accent-gelap); }
 
 
 /* =============================================================================
-   12. Responsif
+   12. Form & Dashboard Kurasi
+   ============================================================================= */
+/* Pesan (notice) */
+.tk-notice {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.tk-notice--sukses { background: #e8f4ee; border-color: #b9dcc8; color: #17603c; }
+.tk-notice--info   { background: var(--tk-krem-tua); border-color: var(--tk-garis); color: var(--tk-coklat); }
+.tk-notice--gagal  { background: #fbe9e6; border-color: #f0c2b9; color: #9a2f1b; }
+
+/* Ajakan masuk/daftar */
+.tk-ajakan {
+  padding: 32px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.tk-ajakan h2 { margin: 6px 0 8px; font-size: 28px; }
+.tk-ajakan p  { max-width: 560px; margin: 0 0 20px; color: var(--tk-abu); }
+
+/* Form ACF */
+.tk-form {
+  padding: 28px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 16px;
+  background: #fff;
+}
+.tk-form .acf-fields > .acf-field { padding: 14px 0; border-top: 0; }
+.tk-form .acf-field .acf-label label { font-size: 14px; font-weight: 700; color: var(--tk-teks); }
+.tk-form .acf-field .acf-label .description,
+.tk-form .acf-field p.description { font-size: 12.5px; color: var(--tk-abu); }
+.tk-form .acf-required { color: var(--tk-accent); }
+.tk-form input[type="text"],
+.tk-form input[type="url"],
+.tk-form input[type="number"],
+.tk-form textarea,
+.tk-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 8px;
+  background: var(--tk-krem);
+  font-family: inherit;
+  font-size: 14px;
+}
+.tk-form input:focus,
+.tk-form textarea:focus,
+.tk-form select:focus {
+  border-color: var(--tk-accent);
+  outline: 0;
+  box-shadow: 0 0 0 2px rgba(196, 85, 45, .15);
+}
+
+/* Kolom berdampingan (mis. Latitude & Longitude) sejajar.
+   ACF memakai float; diganti flex supaya tinggi kolom sama, lalu input
+   didorong ke bawah sehingga sejajar walau keterangannya beda panjang. */
+.tk-form .acf-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.tk-form .acf-fields > .acf-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.tk-form .acf-fields > .acf-field[data-width] {
+  float: none;
+  padding-right: 16px;
+  border-left: 0;
+}
+.tk-form .acf-fields > .acf-field[data-width] + .acf-field[data-width] {
+  padding-right: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+.tk-form .acf-fields > .acf-field > .acf-input { margin-top: auto; }
+.tk-form .acf-fields > .acf-field.acf-hidden { display: none; }
+
+/* Tombol: Simpan Draf + Kirim untuk Dikurasi */
+.tk-form .acf-form-submit { margin-top: 24px; }
+.tk-form-tombol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+/* Selector dipertegas agar tidak kalah oleh gaya tombol bawaan GeneratePress */
+.tk-form .tk-form-tombol button.tk-btn { border: 1px solid transparent; cursor: pointer; font-family: inherit; }
+.tk-form .tk-form-tombol button.tk-btn-utama { background: var(--tk-accent); color: #fff; }
+.tk-form .tk-form-tombol button.tk-btn-utama:hover { background: var(--tk-accent-gelap); color: #fff; }
+.tk-form .tk-form-tombol button.tk-btn-garis { background: #fff; border-color: var(--tk-garis); color: var(--tk-teks); }
+.tk-form .tk-form-tombol button.tk-btn-garis:hover { border-color: var(--tk-accent); color: var(--tk-accent); }
+
+/* Daftar "Kiriman Saya" */
+.tk-kiriman { margin-top: 40px; }
+.tk-kiriman-daftar { margin: 0; padding: 0; list-style: none; }
+.tk-kiriman-daftar li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tk-garis);
+}
+.tk-kiriman-judul { font-weight: 600; }
+.tk-kiriman-tgl   { font-size: 13px; color: var(--tk-abu); }
+
+/* Label status */
+.tk-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tk-status--pending { background: #fcf1dd; color: #8a5a0c; }
+.tk-status--publish { background: #e8f4ee; color: var(--tk-hijau); }
+.tk-status--draft   { background: #f1efec; color: var(--tk-abu); }
+.tk-status--trash   { background: #fbe9e6; color: #9a2f1b; }
+
+/* Dashboard: 2 kotak ringkasan */
+.tk-stats--dua { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Antrean kurasi */
+.tk-kurasi-daftar { margin: 0; padding: 0; list-style: none; }
+.tk-kurasi-item {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+}
+.tk-kurasi-thumb {
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--tk-krem-tua);
+}
+.tk-kurasi-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tk-kurasi-judul { margin: 0 0 4px; font-size: 19px; }
+.tk-kurasi-meta  { margin: 0; font-size: 13px; color: var(--tk-abu); }
+.tk-kurasi-aksi  { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+
+/* Tombol kecil */
+.tk-btn-kecil {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--tk-teks);
+}
+.tk-btn-kecil:hover { border-color: var(--tk-accent); color: var(--tk-accent); }
+.tk-btn-kecil--terbit { border-color: var(--tk-hijau); background: var(--tk-hijau); color: #fff; }
+.tk-btn-kecil--terbit:hover { background: #17603c; color: #fff; }
+.tk-btn-kecil--tolak  { border-color: #e2a497; color: #9a2f1b; }
+.tk-btn-kecil--tolak:hover { background: #fbe9e6; border-color: #9a2f1b; color: #9a2f1b; }
+
+
+/* =============================================================================
+   13. Responsif
    ============================================================================= */
 /* Tablet */
 @media (max-width: 900px) {
@@ -896,4 +1073,15 @@ a:hover { color: var(--tk-accent-gelap); }
   .tk-stats,
   .tk-grid,
   .tk-cari { grid-template-columns: 1fr; }
+
+  .tk-form,
+  .tk-ajakan { padding: 20px; }
+  .tk-kiriman-daftar li { grid-template-columns: 1fr auto auto; }
+  .tk-form .acf-fields > .acf-field[data-width] { width: 100% !important; padding-right: 0; } /* kolom bertumpuk di HP */
+  .tk-form-tombol { justify-content: stretch; }
+  .tk-form-tombol .tk-btn { flex: 1; justify-content: center; }
+  .tk-kiriman-tgl { display: none; }
+  .tk-kurasi-item { grid-template-columns: 56px minmax(0, 1fr); }
+  .tk-kurasi-thumb { width: 56px; height: 56px; }
+  .tk-kurasi-aksi { grid-column: 1 / -1; justify-content: flex-start; }
 }

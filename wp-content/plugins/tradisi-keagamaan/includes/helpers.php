@@ -7,6 +7,7 @@
  *   - tk_icon()         : ikon SVG kecil (pin, gedung).
  *   - tk_url_tambah()   : URL halaman "Tambah Tradisi".
  *   - tk_url_jelajahi() : URL ke panel pencarian di Beranda.
+ *   - tk_url_kurasi()   : URL halaman "Dashboard Kurasi".
  *
  * @package TradisiKeagamaan
  */
@@ -84,4 +85,14 @@ function tk_url_tambah() {
  */
 function tk_url_jelajahi() {
     return home_url( '/#jelajahi' );
+}
+
+/**
+ * URL halaman "Dashboard Kurasi" (slug: dashboard-kurasi).
+ *
+ * @return string
+ */
+function tk_url_kurasi() {
+    $page = get_page_by_path( 'dashboard-kurasi' );
+    return $page ? get_permalink( $page ) : home_url( '/dashboard-kurasi/' );
 }
