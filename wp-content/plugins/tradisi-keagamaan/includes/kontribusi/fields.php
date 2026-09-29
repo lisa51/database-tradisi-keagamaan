@@ -107,7 +107,35 @@ function tk_form_register_fields() {
                 'return_format' => 'id',
                 'library'       => 'uploadedTo',
                 'mime_types'    => 'jpg,jpeg,png,webp',
-                'max_size'      => 5, // MB
+                'max_size'      => TK_FOTO_MAKS_MB,
+            ),
+            // Galeri untuk form depan. Field Gallery (galeri_foto) butuh Media
+            // Library yang tidak bisa dipakai tamu/kontributor, jadi di sini
+            // tiap foto diunggah lewat input file biasa (Repeater ACF Pro).
+            // Setelah simpan, foto dipindah ke galeri_foto oleh
+            // tk_form_pindahkan_galeri() (includes/kontribusi/proses.php).
+            array(
+                'key'          => 'field_tk_form_galeri',
+                'label'        => 'Foto Tambahan',
+                'name'         => 'galeri_unggah',
+                'type'         => 'repeater',
+                'instructions' => 'Opsional, untuk Galeri Foto (maks. ' . TK_GALERI_MAKS . ' foto, masing-masing ' . TK_FOTO_MAKS_MB . ' MB). Klik "Tambah Foto" untuk setiap foto.',
+                'layout'       => 'table',
+                'max'          => TK_GALERI_MAKS,
+                'button_label' => 'Tambah Foto',
+                'sub_fields'   => array(
+                    array(
+                        'key'           => 'field_tk_form_galeri_foto',
+                        'label'         => 'Foto',
+                        'name'          => 'foto',
+                        'type'          => 'image',
+                        'return_format' => 'id',
+                        'library'       => 'uploadedTo',
+                        'mime_types'    => 'jpg,jpeg,png,webp',
+                        'max_size'      => TK_FOTO_MAKS_MB,
+                        'preview_size'  => 'thumbnail',
+                    ),
+                ),
             ),
             $taxonomy_field + array(
                 'key'        => 'field_tk_form_agama',
@@ -147,6 +175,44 @@ function tk_form_register_fields() {
         'location' => $lokasi_form,
         'active'   => true,
     ) );
+}
+
+add_filter( 'acf/prepare_field/key=field_6aa0f2fa51a58', 'tk_form_sembunyikan_galeri' );
+
+/**
+ * Field Gallery (galeri_foto) hanya untuk wp-admin. Di form depan
+ * digantikan "Foto Tambahan" (galeri_unggah).
+ *
+ * @param array $field
+ * @return array|false
+ */
+function tk_form_sembunyikan_galeri( $field ) {
+    return is_admin() ? $field : false;
+}
+
+add_filter( 'acf/prepare_field/key=field_tk_form_galeri', 'tk_form_info_galeri' );
+
+/**
+ * Saat melanjutkan draf/revisi: sebutkan jumlah foto yang sudah ada di galeri,
+ * dan kurangi batas baris agar total tidak melebihi TK_GALERI_MAKS.
+ *
+ * @param array $field
+ * @return array|false
+ */
+function tk_form_info_galeri( $field ) {
+    $post_id = is_numeric( acf_get_form_data( 'post_id' ) ) ? (int) acf_get_form_data( 'post_id' ) : 0;
+    $ada     = $post_id ? count( tk_get_galeri_ids( get_post_meta( $post_id, 'galeri_foto', true ) ) ) : 0;
+    if ( ! $ada ) {
+        return $field;
+    }
+
+    $sisa = TK_GALERI_MAKS - $ada;
+    if ( $sisa <= 0 ) {
+        return false; // Galeri sudah penuh.
+    }
+    $field['max']           = $sisa;
+    $field['instructions'] .= sprintf( ' Galeri sudah berisi %d foto; foto baru akan ditambahkan (sisa %d).', $ada, $sisa );
+    return $field;
 }
 
 add_filter( 'acf/prepare_field/name=_post_title', 'tk_form_label_judul' );

@@ -38,6 +38,10 @@ wp-content/plugins/wordfence/
 wp-content/plugins/seo-by-rank-math/
 wp-content/plugins/simple-cloudflare-turnstile/
 
+# ACF Pro (berlisensi): pasang dari zip di akun advancedcustomfields.com,
+# lalu isi license key di ACF → Updates. License key tersimpan di database.
+wp-content/plugins/advanced-custom-fields-pro/
+
 # Data runtime Wordfence (firewall, IP, hasil scan). JANGAN di-commit.
 wp-content/wflogs/
 wordfence-waf.php

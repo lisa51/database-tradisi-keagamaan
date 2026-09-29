@@ -26,7 +26,7 @@ Plugin custom untuk situs **WARISI (Warisan Religi Indonesia)**, database tradis
 
 ## 1. Pemasangan & pengaturan awal
 
-**Kebutuhan:** WordPress 6.x, PHP 7.4+ (disarankan 8.2), tema GeneratePress, plugin ACF (gratis atau Pro).
+**Kebutuhan:** WordPress 6.x, PHP 7.4+ (disarankan 8.2), tema GeneratePress, plugin **ACF Pro** (untuk Galeri Foto & "Foto Tambahan"; dengan ACF gratis, kedua field itu tidak tampil tetapi fitur lain tetap berjalan).
 
 **Plugin pendukung** (disarankan, tidak wajib):
 
@@ -72,7 +72,7 @@ Peran **Kontributor**, **Kontributor Tamu**, dan **Kurator**, serta akun sistem 
 | ACF | `deskripsi_singkat` | Textarea: abstrak |
 | ACF | `tanggal_perayaan` | Date picker |
 | ACF | `sumber_referensi` | URL |
-| ACF | `galeri_foto` | Image (1 foto). Ganti ke Gallery setelah ACF Pro; kode sudah siap |
+| ACF | `galeri_foto` | Gallery (ACF Pro), maks. 12 foto. Diatur kurator di wp-admin; dari form depan lewat "Foto Tambahan" |
 | ACF | `latitude`, `longitude` | Number: titik peta. Kosong = tidak tampil di peta |
 | Meta | `tk_view_count` | Jumlah pembaca (otomatis; kurator/admin & pratinjau tidak dihitung) |
 
@@ -159,7 +159,9 @@ Kiriman tamu tercatat atas nama akun sistem "Kontributor Tamu", tetapi di situs 
 
 ### Isi form
 
-Nama tradisi, isi artikel (≥150 kata disarankan), foto utama (wajib → featured image), agama, provinsi/wilayah (wajib), kategori (wajib), kata kunci (→ Tags), lalu semua field Detail Tradisi.
+Nama tradisi, isi artikel (≥150 kata disarankan), foto utama (wajib → featured image), **Foto Tambahan** (opsional → Galeri Foto), agama, provinsi/wilayah (wajib), kategori (wajib), kata kunci (→ Tags), lalu field Detail Tradisi lainnya.
+
+**Foto Tambahan:** klik **Tambah Foto** untuk setiap foto (JPG/PNG/WebP, maks. 5 MB per foto, total galeri maks. 12). Setelah form disimpan, foto dipindah ke Galeri Foto. Saat melanjutkan draf/revisi, foto baru ditambahkan di belakang foto yang sudah ada. Menghapus atau mengurutkan foto galeri dilakukan kurator di wp-admin.
 
 "Simpan Draf" hanya mewajibkan Nama Tradisi. "Kirim untuk Dikurasi" mewajibkan semua field wajib.
 
@@ -211,6 +213,8 @@ Riwayat juga tampil di kotak **Pengirim & Riwayat Kurasi** di sidebar editor wp-
 
 Urutan: Panel Kurator (khusus kurator) → link kembali → badge kategori & status → judul → meta (penulis, asal daerah, wilayah, pembaca) → gambar utama → abstrak → info (tanggal perayaan, agama, wilayah) → isi → galeri → peta lokasi → kata kunci & sumber → tradisi terkait.
 
+**Galeri Foto:** klik foto untuk membuka lightbox. Navigasi dengan tombol ‹ ›, panah keyboard, atau geser di HP; tutup dengan ×, Esc, atau klik latar. Keterangan foto diambil dari **Caption** di Media Library.
+
 Bagian yang datanya kosong tidak ditampilkan. Halaman tetap tampil walaupun ACF nonaktif.
 
 ---
@@ -253,6 +257,8 @@ Semua ada di **`includes/config.php`**:
 | `TK_SLUG_KURASI` | `dashboard-kurasi` | Slug halaman dashboard |
 | `TK_TAMU_BATAS_PER_JAM` | `5` | Batas kiriman tamu per jam per IP |
 | `TK_MIN_KATA_ISI` | `150` | Minimum kata untuk checklist "Isi" |
+| `TK_GALERI_MAKS` | `12` | Jumlah foto maksimum di Galeri Foto |
+| `TK_FOTO_MAKS_MB` | `5` | Ukuran maksimum per foto (foto utama & galeri) |
 | `TK_KURASI_HARI_PERINGATAN` | `7` | Batas hari sebelum antrean ditandai merah |
 | `TK_RIWAYAT_PER_HALAMAN` | `15` | Baris per halaman "Riwayat Kurasi Saya" |
 | `TK_KONTAK_EMAIL` | kosong (= email admin) | Penerima pesan Hubungi Kami |

@@ -207,6 +207,9 @@ function tk_form_after_save( $post_id ) {
         set_post_thumbnail( $post_id, $foto );
     }
 
+    // Foto Tambahan → Galeri Foto.
+    tk_form_pindahkan_galeri( $post_id );
+
     // Kata kunci "a, b, c" → Tags.
     $tags = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $post_id, 'kata_kunci', true ) ) ) );
     if ( $tags ) {
@@ -227,4 +230,38 @@ function tk_form_after_save( $post_id ) {
             tk_email_ke_pengirim( $post_id, 'diterima' );
         }
     }
+}
+
+/**
+ * Pindahkan foto dari "Foto Tambahan" (galeri_unggah, form depan) ke
+ * "Galeri Foto" (galeri_foto), lalu kosongkan galeri_unggah.
+ * Foto ditambahkan di belakang foto yang sudah ada, maks. TK_GALERI_MAKS.
+ *
+ * Hanya foto yang terhubung ke tradisi ini (post_parent) yang diterima. ACF
+ * menghubungkan foto yang baru diunggah secara otomatis, sehingga ID lampiran
+ * lain yang disisipkan ke form diabaikan.
+ *
+ * @param int $post_id
+ */
+function tk_form_pindahkan_galeri( $post_id ) {
+    $baris = get_field( 'galeri_unggah', $post_id, false ); // Nilai mentah: array baris [ field_key => ID ].
+    delete_field( 'galeri_unggah', $post_id );
+    if ( ! is_array( $baris ) || ! $baris ) {
+        return;
+    }
+
+    $baru = array();
+    foreach ( $baris as $row ) {
+        $id = is_array( $row ) ? absint( reset( $row ) ) : 0;
+        if ( $id && wp_attachment_is_image( $id ) && (int) get_post_field( 'post_parent', $id ) === (int) $post_id ) {
+            $baru[] = $id;
+        }
+    }
+    if ( ! $baru ) {
+        return;
+    }
+
+    $ada    = tk_get_galeri_ids( get_post_meta( $post_id, 'galeri_foto', true ) );
+    $galeri = array_slice( array_values( array_unique( array_merge( $ada, $baru ) ) ), 0, TK_GALERI_MAKS );
+    update_field( 'galeri_foto', array_map( 'strval', $galeri ), $post_id );
 }

@@ -51,6 +51,12 @@ define( 'TK_TAMU_BATAS_PER_JAM', 5 );
 /** Jumlah kata minimum isi artikel agar lolos checklist "Isi". */
 define( 'TK_MIN_KATA_ISI', 150 );
 
+/** Jumlah foto maksimum di Galeri Foto satu tradisi (wp-admin & form depan). */
+define( 'TK_GALERI_MAKS', 12 );
+
+/** Ukuran maksimum per foto yang diunggah (MB): foto utama & galeri. */
+define( 'TK_FOTO_MAKS_MB', 5 );
+
 /** Kiriman yang menunggu lebih dari sekian hari ditandai merah di dashboard. */
 define( 'TK_KURASI_HARI_PERINGATAN', 7 );
 

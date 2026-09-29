@@ -119,13 +119,89 @@
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
 }
-.tk-galeri a   { display: block; line-height: 0; }
+.tk-galeri a   { display: block; overflow: hidden; border-radius: 10px; line-height: 0; cursor: zoom-in; }
 .tk-galeri img {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 10px;
+  transition: transform .25s ease;
+}
+.tk-galeri a:hover img,
+.tk-galeri a:focus-visible img { transform: scale(1.04); }
+.tk-galeri a:focus-visible     { outline: 2px solid var(--tk-accent); outline-offset: 2px; }
+.tk-galeri__jumlah {
+  margin-left: 6px;
+  font-family: var(--tk-font-teks);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--tk-abu);
+}
+
+/* Lightbox (assets/js/galeri.js). Latar gelap tetap gelap di tema apa pun. */
+.tk-lightbox-terbuka { overflow: hidden; }
+.tk-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 72px;
+  background: rgba(20, 14, 10, .92);
+}
+.tk-lightbox[hidden] { display: none; }
+.tk-lightbox__isi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+}
+.tk-lightbox__isi img {
+  max-width: 100%;
+  max-height: calc(100vh - 150px);
+  object-fit: contain;
+  border-radius: 6px;
+}
+.tk-lightbox__isi figcaption {
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+  color: rgba(255, 255, 255, .85);
+}
+.tk-lightbox button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .12);
+  font-family: inherit;
+  font-size: 30px;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+}
+.tk-lightbox button:hover,
+.tk-lightbox button:focus-visible { background: rgba(255, 255, 255, .25); color: #fff; }
+.tk-lightbox button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.tk-lightbox button[hidden]       { display: none; }
+.tk-lightbox__tutup        { top: 14px; right: 14px; }
+.tk-lightbox__nav          { top: 50%; transform: translateY(-50%); }
+.tk-lightbox__nav--kiri    { left: 14px; }
+.tk-lightbox__nav--kanan   { right: 14px; }
+.tk-lightbox__hitung {
+  position: absolute;
+  top: 24px;
+  left: 20px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, .7);
 }
 
 
@@ -167,4 +243,13 @@
   max-width: var(--tk-lebar);
   margin: 56px auto 48px;
   padding: 0 20px;
+}
+
+
+/* =============================================================================
+   Responsif: lightbox di layar kecil (navigasi utama lewat geser)
+   ============================================================================= */
+@media (max-width: 600px) {
+  .tk-lightbox        { padding: 56px 12px; }
+  .tk-lightbox__nav   { top: auto; bottom: 16px; transform: none; }
 }

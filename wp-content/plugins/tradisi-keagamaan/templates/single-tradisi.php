@@ -110,10 +110,12 @@ while ( have_posts() ) :
     <?php /* 8. Galeri foto */ ?>
     <?php if ( $d['galeri'] ) : ?>
       <section class="tk-single__section">
-        <h2 class="tk-single__section-title">Galeri Foto</h2>
-        <div class="tk-galeri">
+        <h2 class="tk-single__section-title">Galeri Foto <span class="tk-galeri__jumlah"><?php echo count( $d['galeri'] ); ?> foto</span></h2>
+        <?php /* Klik foto → lightbox (assets/js/galeri.js). Tanpa JS, link membuka foto besar. */ ?>
+        <div class="tk-galeri" data-tk-galeri>
           <?php foreach ( $d['galeri'] as $foto_id ) : ?>
-            <a href="<?php echo esc_url( wp_get_attachment_image_url( $foto_id, 'large' ) ); ?>" target="_blank" rel="noopener">
+            <a href="<?php echo esc_url( wp_get_attachment_image_url( $foto_id, 'large' ) ); ?>"
+               data-keterangan="<?php echo esc_attr( wp_get_attachment_caption( $foto_id ) ); ?>">
               <?php echo wp_get_attachment_image( $foto_id, 'medium', false, array( 'loading' => 'lazy' ) ); ?>
             </a>
           <?php endforeach; ?>

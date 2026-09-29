@@ -2,6 +2,18 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.4.0 (29 September 2026): Galeri Foto (ACF Pro)
+
+**Baru**
+- `galeri_foto` menjadi field **Gallery** ACF Pro (maks. 12 foto, JPG/PNG/WebP, 5 MB per foto).
+- Form depan: **Foto Tambahan** (Repeater, uploader basic) untuk tamu & kontributor; foto dipindah ke Galeri Foto setelah simpan. Saat revisi, sisa kuota ditampilkan.
+- Lightbox Galeri Foto di halaman detail (`assets/js/galeri.js`): tombol, keyboard, geser di HP, keterangan dari Caption, jumlah foto di judul.
+- Konstanta `TK_GALERI_MAKS` dan `TK_FOTO_MAKS_MB`.
+
+**Diubah**
+- Foto galeri tidak lagi membuka tab baru; tanpa JavaScript, link tetap membuka foto besar.
+- Data lama `galeri_foto` (satu ID) dimigrasi ke format Gallery.
+
 ## 2.3.0 (29 September 2026): Anti-bot Turnstile
 
 **Baru**

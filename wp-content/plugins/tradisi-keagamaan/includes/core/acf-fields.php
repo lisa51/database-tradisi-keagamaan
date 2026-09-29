@@ -7,8 +7,9 @@
  *   deskripsi_singkat  textarea     Abstrak. Dipakai di card, hero, single.
  *   tanggal_perayaan   date_picker  Disimpan sebagai Ymd; ditampilkan lewat tk_format_tanggal_acf().
  *   sumber_referensi   url          Link sumber (wajib untuk konten kutipan).
- *   galeri_foto        image        SATU foto (ACF gratis). Ganti ke 'gallery'
- *                                   setelah memakai ACF Pro.
+ *   galeri_foto        gallery      Banyak foto (ACF Pro), maks. TK_GALERI_MAKS.
+ *                                   Di form depan diganti field "Foto Tambahan"
+ *                                   (includes/kontribusi/fields.php).
  *   latitude           number       Garis lintang titik peta (Indonesia: ±-11 s.d. 6).
  *   longitude          number       Garis bujur titik peta (Indonesia: ±95 s.d. 141).
  *                                   Keduanya dipakai [tk_peta] dan peta di
@@ -78,10 +79,15 @@ function tk_register_acf_fields() {
                 'key'           => 'field_6aa0f2fa51a58',
                 'label'         => 'Galeri Foto',
                 'name'          => 'galeri_foto',
-                'type'          => 'image',
-                'return_format' => 'array',
+                'type'          => 'gallery', // ACF Pro. Tanpa Pro, ACF gratis menampilkannya sebagai field tak dikenal.
+                'instructions'  => 'Foto pendukung (maks. ' . TK_GALERI_MAKS . '). Seret untuk mengubah urutan. Foto utama tidak perlu dimasukkan lagi di sini.',
+                'return_format' => 'id',
                 'library'       => 'all',
                 'preview_size'  => 'medium',
+                'insert'        => 'append',
+                'max'           => TK_GALERI_MAKS,
+                'mime_types'    => 'jpg,jpeg,png,webp',
+                'max_size'      => TK_FOTO_MAKS_MB,
             ),
             array(
                 'key'          => 'field_tk_latitude',

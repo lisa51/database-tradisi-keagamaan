@@ -75,6 +75,12 @@ function tk_enqueue_assets() {
     }
 
     tk_register_peta_assets();
+
+    // Lightbox Galeri Foto, hanya di halaman detail tradisi.
+    if ( is_singular( 'tradisi' ) ) {
+        $js = 'assets/js/galeri.js';
+        wp_enqueue_script( 'tk-galeri', TK_URL . $js, array(), filemtime( TK_PATH . $js ), true );
+    }
 }
 
 /**

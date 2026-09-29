@@ -77,6 +77,7 @@ tradisi-keagamaan/
     ├── js/
     │   ├── peta.js                Peta Leaflet, pin gabungan, panel detail
     │   ├── form.js                Tombol "Simpan Draf" (matikan validasi ACF)
+    │   ├── galeri.js              Lightbox Galeri Foto di halaman detail
     │   └── kontak.js              Cek ukuran lampiran Hubungi Kami di browser
     └── vendor/leaflet/            (opsional) salinan lokal Leaflet
 ```
@@ -226,8 +227,12 @@ Dropdown, query, pagination, tombol hapus pencarian, dan lebar kolom menyesuaika
 4. Bila field perlu tampil di halaman detail, tambahkan ke `tk_single_get_data()` lalu ke template.
 5. Bila perlu masuk checklist kurator, tambahkan ke `tk_kelengkapan()`.
 
-### Mengganti galeri ke Gallery (setelah ACF Pro)
-Ubah tipe field `galeri_foto` menjadi **Gallery** di ACF, lalu perbarui export di `core/acf-fields.php`. Template **tidak perlu diubah**, karena `tk_get_galeri_ids()` sudah menangani kedua format.
+### Galeri Foto (ACF Pro)
+- `galeri_foto` bertipe **Gallery** (`core/acf-fields.php`), hanya tampil di wp-admin. Di form depan disembunyikan oleh `tk_form_sembunyikan_galeri()`, karena field Gallery butuh Media Library yang tidak bisa dipakai tamu/kontributor.
+- Form depan memakai Repeater **`galeri_unggah`** ("Foto Tambahan", `kontribusi/fields.php`) berisi field Image dengan uploader basic. Setelah simpan, `tk_form_pindahkan_galeri()` (`kontribusi/proses.php`) memindahkan fotonya ke `galeri_foto`, lalu mengosongkan `galeri_unggah`. Hanya foto dengan `post_parent` = tradisi itu yang diterima (mencegah ID lampiran lain disisipkan).
+- Tampilan: `templates/single-tradisi.php` + lightbox `assets/js/galeri.js` (dimuat hanya di halaman tradisi) + gaya `.tk-galeri` / `.tk-lightbox` di `single.css`.
+- `tk_get_galeri_ids()` menerima semua format (ID tunggal, "1,2", array ID, array ACF), jadi data lama tetap terbaca.
+- Batas jumlah & ukuran: `TK_GALERI_MAKS`, `TK_FOTO_MAKS_MB` di `config.php`.
 
 ### Menambah kriteria checklist kurator
 Tambahkan satu baris `'Label' => kondisi_boolean` di `tk_kelengkapan()` (`kurasi/data.php`).
