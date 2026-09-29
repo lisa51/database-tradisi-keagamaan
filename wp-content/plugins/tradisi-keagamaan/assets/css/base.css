@@ -146,6 +146,18 @@ a:hover { color: var(--tk-accent-gelap); }
   color: #fff;
 }
 
+/* Ikon di depan teks menu (CSS class tk-ikon-<nama>, lihat includes/core/menu.php) */
+.tk-menu-ikon {
+  display: inline-block;
+  margin-right: 7px;
+  line-height: 0;
+  vertical-align: -3px;
+  opacity: .8;
+}
+.main-navigation .main-nav ul li:hover > a .tk-menu-ikon,
+.main-navigation .main-nav ul li[class*="current-menu-"] > a .tk-menu-ikon,
+.main-navigation .main-nav ul li.tk-menu-cta > a .tk-menu-ikon { opacity: 1; }
+
 /* Sub-menu dropdown (mis. "Hubungi Kami" di bawah "Tentang"), khusus desktop.
    Di HP, GeneratePress menampilkan sub-menu bertumpuk di menu mobile. */
 @media (min-width: 769px) {

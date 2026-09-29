@@ -47,7 +47,9 @@ function tk_term_names( $post_id, $taxonomy, $sep = ', ', $limit = 0 ) {
  *   tk_icon( 'pin' )         // 14px, untuk lokasi di card
  *   tk_icon( 'buku', 22 )    // 22px, untuk kotak stats
  *
- * @param string $name Nama ikon: 'pin', 'gedung', 'buku', 'user', 'mata', 'link'.
+ * @param string $name Nama ikon: 'pin', 'gedung', 'buku', 'user', 'mata', 'link';
+ *                     untuk menu: 'rumah', 'cari', 'peta', 'kurasi', 'info',
+ *                     'surat', 'tambah', 'masuk', 'keluar'.
  * @param int    $size Ukuran dalam piksel. Default 14.
  * @return string Markup SVG, atau string kosong kalau nama tidak dikenal.
  */
@@ -59,6 +61,17 @@ function tk_icon( $name, $size = 14 ) {
         'mata'   => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
         'link'   => '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
         'buku'   => '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+
+        // Menu (lihat includes/core/menu.php).
+        'rumah'  => '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
+        'cari'   => '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+        'peta'   => '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
+        'kurasi' => '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="m9 13 2 2 4-4"/>',
+        'info'   => '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+        'surat'  => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+        'tambah' => '<path d="M12 5v14M5 12h14"/>',
+        'masuk'  => '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
+        'keluar' => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
     );
     if ( ! isset( $paths[ $name ] ) ) {
         return '';

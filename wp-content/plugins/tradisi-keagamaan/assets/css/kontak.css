@@ -25,7 +25,40 @@
   color: var(--tk-teks);
 }
 .tk-kontak-form textarea { resize: vertical; }
-.tk-wajib { color: var(--tk-accent); }
+.tk-wajib    { color: var(--tk-accent); }
+.tk-opsional { font-weight: 400; color: var(--tk-abu); }
+
+/* Lampiran */
+.tk-kontak-form input[type="file"] {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px dashed var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: var(--tk-krem);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--tk-abu);
+}
+.tk-kontak-form input[type="file"]:focus { border-color: var(--tk-accent); outline: 0; }
+.tk-kontak-form input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  padding: 6px 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: #fff;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--tk-teks);
+  cursor: pointer;
+}
+.tk-kontak-form input[type="file"]::file-selector-button:hover { border-color: var(--tk-accent); color: var(--tk-accent); }
+.tk-kontak-ket {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--tk-abu);
+}
 
 /* Honeypot: di luar layar, bukan display:none (sebagian bot melewatinya) */
 .tk-kontak-hp {

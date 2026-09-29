@@ -67,6 +67,20 @@ define( 'TK_KONTAK_EMAIL', '' );
 /** Batas pesan per jam per alamat IP (anti-spam). */
 define( 'TK_KONTAK_BATAS_PER_JAM', 3 );
 
+/** Ukuran maksimum lampiran (MB). Jangan melebihi upload_max_filesize & batas server email. */
+define( 'TK_KONTAK_LAMPIRAN_MAKS_MB', 5 );
+
+/**
+ * Format lampiran yang diizinkan (ekstensi => MIME).
+ * Hindari format yang bisa berisi makro/skrip (doc, xls, docm, zip, svg, html).
+ */
+define( 'TK_KONTAK_LAMPIRAN_TIPE', array(
+    'jpg|jpeg' => 'image/jpeg',
+    'png'      => 'image/png',
+    'pdf'      => 'application/pdf',
+    'docx'     => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+) );
+
 /**
  * Versi daftar peran & hak akses (includes/akun/peran.php).
  * Naikkan angka ini setiap kali hak akses peran diubah agar peran dibuat ulang.

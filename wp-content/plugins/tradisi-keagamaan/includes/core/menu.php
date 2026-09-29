@@ -16,6 +16,12 @@
  *                     belum login → "Masuk" (ke halaman login),
  *                     sudah login → "Keluar" (logout, kembali ke Beranda).
  *                     Buat sebagai Custom Link dengan URL "#" dan teks bebas.
+ *                     Ikon masuk/keluar dipasang otomatis.
+ *
+ * 3. Ikon menu lewat CSS Class tk-ikon-<nama>, mis. "tk-ikon-rumah".
+ *    Nama ikon: rumah, cari, peta, kurasi, info, surat, tambah, masuk,
+ *    keluar (juga pin, gedung, buku, user, mata, link). Daftar SVG ada di
+ *    tk_icon() (includes/core/helpers.php). Gaya: .tk-menu-ikon di base.css.
  *
  * @package TradisiKeagamaan
  */
@@ -66,13 +72,36 @@ function tk_menu_item_khusus( $items ) {
             if ( is_user_logged_in() ) {
                 $item->title = 'Keluar';
                 $item->url   = wp_logout_url( home_url( '/' ) );
+                $item->classes[] = 'tk-ikon-keluar';
             } else {
                 $item->title = 'Masuk';
                 // Tujuan setelah login diatur tk_login_redirect() (includes/akun/akses.php).
                 $item->url   = wp_login_url();
+                $item->classes[] = 'tk-ikon-masuk';
             }
         }
     }
 
     return $items;
+}
+
+add_filter( 'nav_menu_item_title', 'tk_menu_ikon', 10, 2 );
+
+/**
+ * Tambahkan ikon SVG di depan judul item menu dengan class tk-ikon-<nama>.
+ *
+ * @param string  $title Judul item menu.
+ * @param WP_Post $item  Item menu.
+ * @return string
+ */
+function tk_menu_ikon( $title, $item ) {
+    foreach ( (array) $item->classes as $class ) {
+        if ( 0 === strpos( $class, 'tk-ikon-' ) ) {
+            $svg = tk_icon( substr( $class, strlen( 'tk-ikon-' ) ), 16 );
+            if ( $svg ) {
+                return '<span class="tk-menu-ikon">' . $svg . '</span>' . $title;
+            }
+        }
+    }
+    return $title;
 }

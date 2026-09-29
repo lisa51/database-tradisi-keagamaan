@@ -57,7 +57,7 @@ tradisi-keagamaan/
 │   │   └── panel-kurator.php      Panel Kurator di halaman tradisi
 │   │
 │   ├── kontak/                    Form Hubungi Kami
-│   │   └── proses.php             Validasi, honeypot, batas per IP, email ke admin
+│   │   └── proses.php             Validasi, lampiran, honeypot, batas per IP, email ke admin
 │   │
 │   └── shortcodes/                TAMPILAN halaman depan (satu file per shortcode)
 │       ├── hero.php               [tk_hero]
@@ -75,7 +75,8 @@ tradisi-keagamaan/
     ├── css/                       Satu file per fitur (lihat bagian 5)
     ├── js/
     │   ├── peta.js                Peta Leaflet, pin gabungan, panel detail
-    │   └── form.js                Tombol "Simpan Draf" (matikan validasi ACF)
+    │   ├── form.js                Tombol "Simpan Draf" (matikan validasi ACF)
+    │   └── kontak.js              Cek ukuran lampiran Hubungi Kami di browser
     └── vendor/leaflet/            (opsional) salinan lokal Leaflet
 ```
 

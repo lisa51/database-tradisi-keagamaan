@@ -2,6 +2,16 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.2.0 (29 September 2026): Lampiran & ikon menu
+
+**Baru**
+- Lampiran opsional di `[tk_kontak]` (JPG, PNG, PDF, DOCX; maks. 5 MB). Isi file dicek, dikirim sebagai lampiran email, lalu dihapus. Ukuran juga dicek di browser (`assets/js/kontak.js`).
+- Konstanta `TK_KONTAK_LAMPIRAN_MAKS_MB` dan `TK_KONTAK_LAMPIRAN_TIPE`.
+- Ikon di menu lewat CSS Class `tk-ikon-<nama>`; Masuk/Keluar otomatis berikon. Ikon baru di `tk_icon()`: rumah, cari, peta, kurasi, info, surat, tambah, masuk, keluar.
+
+**Diubah**
+- `tk_kirim_email()` menerima daftar lampiran.
+
 ## 2.1.0 (29 September 2026): Hubungi Kami
 
 **Baru**

@@ -21,14 +21,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string|string[] $ke
  * @param string          $judul
  * @param string          $isi
- * @param string[]        $headers Header tambahan (mis. Reply-To).
+ * @param string[]        $headers  Header tambahan (mis. Reply-To).
+ * @param string[]        $lampiran Path file lampiran.
  * @return bool true bila wp_mail() berhasil.
  */
-function tk_kirim_email( $ke, $judul, $isi, $headers = array() ) {
+function tk_kirim_email( $ke, $judul, $isi, $headers = array(), $lampiran = array() ) {
     if ( ! $ke ) {
         return false;
     }
-    return wp_mail( $ke, sprintf( '[%s] %s', get_bloginfo( 'name' ), $judul ), $isi, $headers );
+    return wp_mail( $ke, sprintf( '[%s] %s', get_bloginfo( 'name' ), $judul ), $isi, $headers, $lampiran );
 }
 
 /**

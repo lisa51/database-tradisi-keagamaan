@@ -35,6 +35,8 @@ function tk_kontak_shortcode( $atts ) {
     $state = isset( $GLOBALS['tk_kontak'] ) ? $GLOBALS['tk_kontak'] : array( 'data' => array(), 'galat' => array() );
     $data  = wp_parse_args( $state['data'], tk_kontak_isian_awal() );
 
+    wp_enqueue_script( 'tk-kontak', TK_URL . 'assets/js/kontak.js', array(), filemtime( TK_PATH . 'assets/js/kontak.js' ), true );
+
     ob_start();
     ?>
     <div class="tk-kontak" id="tk-kontak">
@@ -55,7 +57,7 @@ function tk_kontak_shortcode( $atts ) {
             </div>
         <?php endif; ?>
 
-        <form class="tk-form tk-kontak-form" method="post" action="<?php echo esc_url( get_permalink() . '#tk-kontak' ); ?>">
+        <form class="tk-form tk-kontak-form" method="post" enctype="multipart/form-data" action="<?php echo esc_url( get_permalink() . '#tk-kontak' ); ?>">
             <?php if ( $atts['judul'] ) : ?>
                 <h2 class="tk-kontak-judul"><?php echo esc_html( $atts['judul'] ); ?></h2>
             <?php endif; ?>
@@ -91,6 +93,16 @@ function tk_kontak_shortcode( $atts ) {
             <p class="tk-kontak-field">
                 <label for="tk_pesan">Pesan <span class="tk-wajib">*</span></label>
                 <textarea id="tk_pesan" name="tk_pesan" rows="7" required minlength="10" maxlength="5000"><?php echo esc_textarea( $data['pesan'] ); ?></textarea>
+            </p>
+
+            <p class="tk-kontak-field">
+                <label for="tk_lampiran">Lampiran <span class="tk-opsional">(opsional)</span></label>
+                <input type="file" id="tk_lampiran" name="tk_lampiran" accept="<?php echo esc_attr( tk_kontak_lampiran_accept() ); ?>"
+                    data-maks="<?php echo esc_attr( TK_KONTAK_LAMPIRAN_MAKS_MB * MB_IN_BYTES ); ?>" aria-describedby="tk_lampiran_ket">
+                <span class="tk-kontak-ket" id="tk_lampiran_ket">
+                    Satu file <?php echo esc_html( tk_kontak_lampiran_label() ); ?>, maks. <?php echo esc_html( TK_KONTAK_LAMPIRAN_MAKS_MB ); ?> MB.
+                    Misalnya foto atau dokumen pendukung koreksi data.
+                </span>
             </p>
 
             <?php // Honeypot: disembunyikan dari manusia, diisi oleh bot. ?>

@@ -127,8 +127,9 @@ Tanpa atribut. Menghitung tradisi terbit, provinsi (term `wilayah` level teratas
 
 - Isian: Nama, Email, Perihal (Pertanyaan umum / Koreksi data tradisi / Bantuan kontribusi / Kerja sama / Lainnya), Pesan. Nama & email terisi otomatis bila pengunjung sudah login.
 - Pesan dikirim ke email admin (atau `TK_KONTAK_EMAIL`). Tekan **Balas** di email untuk menjawab langsung ke pengirim.
+- **Lampiran** opsional: satu file JPG, PNG, PDF, atau DOCX, maks. 5 MB. Isi file dicek (bukan hanya nama), lalu file dikirim sebagai lampiran email dan langsung dihapus dari server, tidak masuk Media Library.
 - Anti-spam: honeypot + maks. 3 pesan/jam/IP (`TK_KONTAK_BATAS_PER_JAM`).
-- Pesan tidak disimpan di database, hanya dikirim lewat email. Pastikan SMTP berfungsi di server.
+- Pesan tidak disimpan di database, hanya dikirim lewat email. Pastikan SMTP berfungsi di server dan batas ukuran email penyedia SMTP ≥ ukuran lampiran.
 
 ### `[tk_form_tradisi]` dan `[tk_kurasi]`
 
@@ -217,6 +218,20 @@ Bagian yang datanya kosong tidak ditampilkan. Halaman tetap tampil walaupun ACF 
 | Masuk / Keluar (otomatis) | Custom Link URL `#` | `tk-menu-akun` |
 | Hubungi Kami (sub-menu) | Halaman Hubungi Kami, geser ke kanan di bawah **Tentang** | – |
 
+**Ikon menu:** tambahkan CSS Class `tk-ikon-<nama>` pada item menu (boleh digabung dengan class lain, dipisah spasi). Item Masuk/Keluar mendapat ikon otomatis.
+
+| Item | CSS Class ikon |
+|---|---|
+| Beranda | `tk-ikon-rumah` |
+| Jelajahi Tradisi | `tk-ikon-cari` |
+| Peta Tradisi | `tk-ikon-peta` |
+| Dashboard Kurasi | `tk-menu-kurator tk-ikon-kurasi` |
+| Tentang | `tk-ikon-info` |
+| Hubungi Kami | `tk-ikon-surat` |
+| Tambah Tradisi | `tk-menu-cta tk-ikon-tambah` (tulis teksnya tanpa "+") |
+
+Ikon lain yang tersedia: `pin`, `gedung`, `buku`, `user`, `mata`, `link`, `masuk`, `keluar`.
+
 ---
 
 ## 8. Pengaturan yang bisa diubah
@@ -233,6 +248,8 @@ Semua ada di **`includes/config.php`**:
 | `TK_RIWAYAT_PER_HALAMAN` | `15` | Baris per halaman "Riwayat Kurasi Saya" |
 | `TK_KONTAK_EMAIL` | kosong (= email admin) | Penerima pesan Hubungi Kami |
 | `TK_KONTAK_BATAS_PER_JAM` | `3` | Batas pesan Hubungi Kami per jam per IP |
+| `TK_KONTAK_LAMPIRAN_MAKS_MB` | `5` | Ukuran maksimum lampiran Hubungi Kami |
+| `TK_KONTAK_LAMPIRAN_TIPE` | jpg, png, pdf, docx | Format lampiran yang diizinkan |
 | `TK_ROLES_VERSION` | `2` | Naikkan bila hak akses peran diubah |
 | `TK_FONTS_URL` | Google Fonts | Sumber font |
 | `TK_LEAFLET_VERSI` | `1.9.4` | Versi Leaflet dari CDN |
