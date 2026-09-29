@@ -2,6 +2,14 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.4.1 (29 September 2026): Perbaikan paging koleksi
+
+**Diperbaiki**
+- Nomor halaman `[tk_koleksi]` di Beranda (tombol 2 dan "Berikutnya") mengarah ke halaman detail tradisi terakhir di grid, bukan ke Beranda. URL halaman kini diambil sebelum loop.
+
+**Diubah**
+- Link nomor halaman membawa `#koleksi` (id baru di grid card), sehingga halaman berikutnya langsung tergulir ke grid, bukan ke atas Beranda.
+
 ## 2.4.0 (29 September 2026): Galeri Foto (ACF Pro)
 
 **Baru**

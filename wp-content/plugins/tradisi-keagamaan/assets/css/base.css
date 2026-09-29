@@ -190,8 +190,9 @@ a:hover { color: var(--tk-accent-gelap); }
   background: transparent;
 }
 
-/* Saat menu "/#jelajahi" diklik, beri jarak dari atas layar */
-#jelajahi { scroll-margin-top: 24px; }
+/* Saat menu "/#jelajahi" atau nomor halaman (#koleksi) diklik, beri jarak dari atas layar */
+#jelajahi,
+#koleksi { scroll-margin-top: 24px; }
 
 
 /* =============================================================================

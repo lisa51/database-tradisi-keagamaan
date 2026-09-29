@@ -16,7 +16,8 @@
  *   ?hal=2              Nomor halaman (pagination).
  *
  * Panel pencarian punya id="jelajahi", sehingga menu "/#jelajahi"
- * langsung menggulir ke sini.
+ * langsung menggulir ke sini. Grid card punya id="koleksi"; link nomor
+ * halaman membawa "#koleksi" agar halaman baru langsung tergulir ke grid.
  *
  * Struktur fungsi:
  *   tk_koleksi_shortcode()     Fungsi utama, merangkai semua bagian.
@@ -47,11 +48,14 @@ function tk_koleksi_shortcode( $atts ) {
     $filter = tk_koleksi_get_filter();
     $q      = tk_koleksi_query( $filter, absint( $atts['per_halaman'] ) );
 
+    // Ambil sebelum loop: setelah the_post(), get_permalink() menunjuk ke tradisi terakhir.
+    $url_dasar = get_permalink();
+
     ob_start();
 
-    echo tk_koleksi_render_form( $filter, $q->found_posts );
+    echo tk_koleksi_render_form( $filter, $q->found_posts, $url_dasar );
     ?>
-    <section class="tk-koleksi">
+    <section class="tk-koleksi" id="koleksi">
       <div class="tk-koleksi-head">
         <h2>Koleksi Tradisi Lokal</h2>
         <span class="tk-jumlah-kecil"><?php echo esc_html( $q->post_count ); ?> item tampil</span>
@@ -66,7 +70,7 @@ function tk_koleksi_shortcode( $atts ) {
           }
           ?>
         </div>
-        <?php echo tk_koleksi_render_paging( $filter, $q->max_num_pages ); ?>
+        <?php echo tk_koleksi_render_paging( $filter, $q->max_num_pages, $url_dasar ); ?>
       <?php else : ?>
         <p class="tk-kosong">Tidak ada tradisi yang cocok dengan pencarian Anda.</p>
       <?php endif; ?>
@@ -172,13 +176,13 @@ function tk_koleksi_query( $filter, $per_halaman ) {
 /**
  * HTML panel "Jelajahi Tradisi Lokal": kolom cari + dropdown filter + tombol.
  *
- * @param array $filter Filter aktif (untuk mengisi ulang form).
- * @param int   $total  Total tradisi yang cocok.
+ * @param array  $filter    Filter aktif (untuk mengisi ulang form).
+ * @param int    $total     Total tradisi yang cocok.
+ * @param string $url_dasar URL halaman yang memuat shortcode.
  * @return string HTML.
  */
-function tk_koleksi_render_form( $filter, $total ) {
-    $url_dasar  = get_permalink();
-    $dropdown   = tk_koleksi_filter_taksonomi();
+function tk_koleksi_render_form( $filter, $total, $url_dasar ) {
+    $dropdown  = tk_koleksi_filter_taksonomi();
     $ada_filter = (bool) tk_koleksi_filter_aktif( $filter );
 
     ob_start();
@@ -283,23 +287,25 @@ function tk_koleksi_render_kartu( $id ) {
 /**
  * HTML nomor halaman. Semua filter aktif (cari, provinsi, kategori) ikut terbawa.
  *
- * @param array $filter Filter aktif.
- * @param int   $total  Jumlah halaman.
+ * @param array  $filter    Filter aktif.
+ * @param int    $total     Jumlah halaman.
+ * @param string $url_dasar URL halaman yang memuat shortcode.
  * @return string HTML, atau string kosong kalau hanya 1 halaman.
  */
-function tk_koleksi_render_paging( $filter, $total ) {
+function tk_koleksi_render_paging( $filter, $total, $url_dasar ) {
     if ( $total < 2 ) {
         return '';
     }
 
     $links = paginate_links( array(
-        'base'      => add_query_arg( 'hal', '%#%', get_permalink() ),
-        'format'    => '',
-        'current'   => $filter['hal'],
-        'total'     => $total,
-        'add_args'  => tk_koleksi_filter_aktif( $filter ),
-        'prev_text' => '‹ Sebelumnya',
-        'next_text' => 'Berikutnya ›',
+        'base'         => add_query_arg( 'hal', '%#%', $url_dasar ),
+        'format'       => '',
+        'current'      => $filter['hal'],
+        'total'        => $total,
+        'add_args'     => tk_koleksi_filter_aktif( $filter ),
+        'add_fragment' => '#koleksi', // Setelah pindah halaman, langsung gulir ke grid.
+        'prev_text'    => '‹ Sebelumnya',
+        'next_text'    => 'Berikutnya ›',
     ) );
 
     return '<nav class="tk-halaman" aria-label="Halaman koleksi">' . $links . '</nav>';
