@@ -89,6 +89,7 @@ function tk_form_shortcode() {
         'return'             => $kembali,
         'submit_value'       => 'Kirim untuk Dikurasi',
         'html_submit_button' => tk_form_render_tombol( ! $tamu ),
+        'html_after_fields'  => ( $tamu && ! $edit_id ) ? tk_turnstile_widget( 'tk-tradisi' ) : '', // Anti-bot, kiriman baru tamu.
         'updated_message'    => false, // Pesan ditangani tk_form_render_pesan().
     ) );
     echo '</div>';

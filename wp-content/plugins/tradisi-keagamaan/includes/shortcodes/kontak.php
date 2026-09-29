@@ -111,6 +111,8 @@ function tk_kontak_shortcode( $atts ) {
                 <input type="text" id="tk_situs" name="tk_situs" tabindex="-1" autocomplete="off">
             </p>
 
+            <?php echo tk_turnstile_widget( 'tk-kontak' ); // phpcs:ignore WordPress.Security.EscapeOutput -- HTML dari plugin Turnstile. ?>
+
             <div class="tk-form-tombol">
                 <button type="submit" class="tk-btn tk-btn-utama">Kirim Pesan</button>
             </div>

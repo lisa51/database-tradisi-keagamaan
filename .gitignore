@@ -28,7 +28,20 @@ local-xdebuginfo.php
 wp-content/uploads/
 wp-content/cache/
 wp-content/upgrade/
+wp-content/upgrade-temp-backup/
 wp-content/backup*/
+
+# Plugin pihak ketiga dari wordpress.org: TIDAK di-commit.
+# Pasang ulang di server lewat Plugins → Add New (daftar ada di README plugin WARISI).
+wp-content/plugins/fluent-smtp/
+wp-content/plugins/wordfence/
+wp-content/plugins/seo-by-rank-math/
+wp-content/plugins/simple-cloudflare-turnstile/
+
+# Data runtime Wordfence (firewall, IP, hasil scan). JANGAN di-commit.
+wp-content/wflogs/
+wordfence-waf.php
+.user.ini
 
 # Log & temporary files
 *.log

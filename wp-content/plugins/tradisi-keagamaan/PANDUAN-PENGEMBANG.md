@@ -35,7 +35,8 @@ tradisi-keagamaan/
 │   │   ├── single-data.php        Data untuk templates/single-tradisi.php
 │   │   ├── view-counter.php       Penghitung pembaca
 │   │   ├── assets.php             Font, CSS per fitur, registrasi script peta
-│   │   └── menu.php               Menu: anchor, item kurator, Masuk/Keluar
+│   │   ├── menu.php               Menu: anchor, item kurator, Masuk/Keluar, ikon
+│   │   └── turnstile.php          Anti-bot Turnstile untuk form WARISI (opsional)
 │   │
 │   ├── akun/                      Pengguna
 │   │   ├── peran.php              Peran & akun sistem "Kontributor Tamu"

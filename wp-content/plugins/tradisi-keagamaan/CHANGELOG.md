@@ -2,6 +2,12 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.3.0 (29 September 2026): Anti-bot Turnstile
+
+**Baru**
+- `includes/core/turnstile.php`: Cloudflare Turnstile (lewat plugin Simple Cloudflare Turnstile) di `[tk_kontak]` dan kiriman baru tamu di `[tk_form_tradisi]`. Tanpa plugin atau kunci, form tetap berjalan seperti sebelumnya.
+- README: daftar plugin pendukung (FluentSMTP, Wordfence, Simple Cloudflare Turnstile, Rank Math) dan langkah deployment-nya.
+
 ## 2.2.0 (29 September 2026): Lampiran & ikon menu
 
 **Baru**

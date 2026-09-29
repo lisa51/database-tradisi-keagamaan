@@ -133,6 +133,9 @@ function tk_form_guard( $post_id ) {
             wp_die( 'Link revisi tidak valid atau sudah kedaluwarsa.', 403 );
         }
         if ( $baru ) {
+            if ( ! tk_turnstile_lolos( 'tk-tradisi' ) ) {
+                wp_die( 'Verifikasi anti-bot gagal. Kembali ke form, tunggu tanda centang muncul, lalu kirim lagi.', 'Verifikasi gagal', array( 'response' => 403, 'back_link' => true ) );
+            }
             tk_form_batasi_tamu();
         }
     }

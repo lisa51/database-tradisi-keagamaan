@@ -28,6 +28,15 @@ Plugin custom untuk situs **WARISI (Warisan Religi Indonesia)**, database tradis
 
 **Kebutuhan:** WordPress 6.x, PHP 7.4+ (disarankan 8.2), tema GeneratePress, plugin ACF (gratis atau Pro).
 
+**Plugin pendukung** (disarankan, tidak wajib):
+
+| Plugin | Untuk | Catatan |
+|---|---|---|
+| FluentSMTP | Pengiriman email + log | Wajib di server; tanpa SMTP email kurasi & Hubungi Kami bisa tidak sampai |
+| Wordfence | Firewall, scan, batas login, 2FA | Pakai satu plugin keamanan saja |
+| Simple Cloudflare Turnstile | Anti-bot di login, daftar, lupa password, **dan** form WARISI | Otomatis dipakai oleh `[tk_kontak]` dan kiriman tamu `[tk_form_tradisi]` (lihat `includes/core/turnstile.php`) |
+| Rank Math SEO | Meta, Open Graph, schema, sitemap | Deskripsi tradisi = `%customfield(deskripsi_singkat)%`; Tambah Tradisi & Dashboard Kurasi = noindex |
+
 1. Salin folder `tradisi-keagamaan/` ke `wp-content/plugins/`, lalu aktifkan di **Plugins**.
 2. **Appearance → Customize → Additional CSS** harus **kosong**. Semua CSS ada di plugin.
 3. **Settings → General:** centang **Anyone can register**, pilih **New User Default Role: Kontributor**.
@@ -262,7 +271,10 @@ Warna situs diubah di bagian **Token** pada `assets/css/base.css`.
 
 - **Font:** diambil dari Google Fonts. Bila server/pengunjung tanpa internet, host font secara lokal lalu ubah `TK_FONTS_URL`.
 - **Peta:** Leaflet dari CDN, kecuali `assets/vendor/leaflet/` berisi `leaflet.js` & `leaflet.css` (salin folder `dist` dari https://leafletjs.com/download.html). Gambar peta (tile) tetap dari OpenStreetMap: pengunjung butuh internet, dan OpenStreetMap membatasi pemakaian berat.
-- **Email:** pastikan SMTP berfungsi (mis. plugin WP Mail SMTP). Di LocalWP, email bisa dilihat di tab **Mailpit**.
+- **Email:** atur FluentSMTP (**Settings → FluentSMTP**) dengan layanan pengirim asli (mis. Brevo atau Google Workspace), lalu kirim email uji. Di LocalWP, FluentSMTP diarahkan ke Mailpit (`127.0.0.1:10001`); email bisa dilihat di tab **Mailpit**.
+- **Turnstile:** di lokal memakai **kunci uji** Cloudflare (selalu lolos). Di server, buat kunci asli di dash.cloudflare.com → Turnstile, lalu isi di **Settings → Turnstile**.
+- **Rank Math:** pengaturan tidak ikut git. Di server atur ulang: deskripsi tradisi `%customfield(deskripsi_singkat)%`, schema Article, noindex untuk Tambah Tradisi & Dashboard Kurasi, sitemap Post & Category dimatikan.
+- **Wordfence:** selesaikan onboarding (email notifikasi), aktifkan 2FA untuk admin & kurator, lalu **Optimize Firewall**. Folder `wp-content/wflogs/` tidak di-commit.
 - **Permalink:** setelah pindah server atau mengubah slug, buka **Settings → Permalinks → Save**.
 - **Cache halaman:** plugin cache bisa membuat penghitung pembaca tidak bertambah, dan halaman form/dashboard **harus dikecualikan** dari cache.
 - **Additional CSS** di Customizer harus tetap kosong.

@@ -75,6 +75,11 @@ function tk_kontak_proses() {
         tk_kontak_selesai();
     }
 
+    if ( ! tk_turnstile_lolos( 'tk-kontak' ) ) {
+        $GLOBALS['tk_kontak']['galat'][] = 'Verifikasi anti-bot gagal. Tunggu tanda centang muncul, lalu kirim lagi.';
+        return;
+    }
+
     $lampiran = tk_kontak_cek_lampiran();
     $galat    = tk_kontak_validasi( $data );
     if ( is_string( $lampiran ) ) {
