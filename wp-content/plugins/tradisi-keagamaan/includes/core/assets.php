@@ -11,6 +11,7 @@
  *   peta.css        [tk_peta]
  *   kontribusi.css  [tk_form_tradisi], "Kiriman Saya"
  *   kurasi.css      [tk_kurasi], Panel Kurator
+ *   kontak.css      [tk_kontak] (memakai gaya .tk-form dari kontribusi.css)
  *   (login.css dimuat di halaman login, lihat includes/akun/login.php)
  *
  * Untuk menambah file CSS baru: buat file di assets/css/, lalu tambahkan
@@ -35,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string[] Nama file di assets/css/ (tanpa .css).
  */
 function tk_css_files() {
-    return array( 'base', 'beranda', 'koleksi', 'single', 'peta', 'kontribusi', 'kurasi' );
+    return array( 'base', 'beranda', 'koleksi', 'single', 'peta', 'kontribusi', 'kurasi', 'kontak' );
 }
 
 /**

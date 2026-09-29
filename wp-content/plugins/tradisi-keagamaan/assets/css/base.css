@@ -146,6 +146,25 @@ a:hover { color: var(--tk-accent-gelap); }
   color: #fff;
 }
 
+/* Sub-menu dropdown (mis. "Hubungi Kami" di bawah "Tentang"), khusus desktop.
+   Di HP, GeneratePress menampilkan sub-menu bertumpuk di menu mobile. */
+@media (min-width: 769px) {
+  .main-navigation .main-nav ul ul {
+    min-width: 200px;
+    padding: 6px;
+    border: 1px solid var(--tk-garis);
+    border-radius: var(--tk-radius);
+    background: #fff;
+    box-shadow: var(--tk-bayangan);
+  }
+  .main-navigation .main-nav ul ul li a {
+    margin: 0;
+    padding: 0 12px;
+    background: transparent;
+    white-space: nowrap;
+  }
+}
+
 
 /* =============================================================================
    4. Tata letak halaman

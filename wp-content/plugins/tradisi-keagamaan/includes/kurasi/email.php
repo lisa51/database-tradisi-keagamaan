@@ -21,12 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string|string[] $ke
  * @param string          $judul
  * @param string          $isi
+ * @param string[]        $headers Header tambahan (mis. Reply-To).
+ * @return bool true bila wp_mail() berhasil.
  */
-function tk_kirim_email( $ke, $judul, $isi ) {
+function tk_kirim_email( $ke, $judul, $isi, $headers = array() ) {
     if ( ! $ke ) {
-        return;
+        return false;
     }
-    wp_mail( $ke, sprintf( '[%s] %s', get_bloginfo( 'name' ), $judul ), $isi );
+    return wp_mail( $ke, sprintf( '[%s] %s', get_bloginfo( 'name' ), $judul ), $isi, $headers );
 }
 
 /**

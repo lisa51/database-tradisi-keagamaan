@@ -56,13 +56,17 @@ tradisi-keagamaan/
 │   │   ├── admin.php              Kotak riwayat di editor wp-admin
 │   │   └── panel-kurator.php      Panel Kurator di halaman tradisi
 │   │
+│   ├── kontak/                    Form Hubungi Kami
+│   │   └── proses.php             Validasi, honeypot, batas per IP, email ke admin
+│   │
 │   └── shortcodes/                TAMPILAN halaman depan (satu file per shortcode)
 │       ├── hero.php               [tk_hero]
 │       ├── stats.php              [tk_stats]
 │       ├── koleksi.php            [tk_koleksi]
 │       ├── peta.php               [tk_peta]
 │       ├── form-tradisi.php       [tk_form_tradisi]
-│       └── kurasi.php             [tk_kurasi]
+│       ├── kurasi.php             [tk_kurasi]
+│       └── kontak.php             [tk_kontak]
 │
 ├── templates/
 │   └── single-tradisi.php         Halaman detail tradisi (HTML saja)
@@ -178,6 +182,7 @@ CSS dimuat oleh `core/assets.php` dalam urutan berikut. Semua file bergantung pa
 | `peta.css` | `[tk_peta]`, pin, panel, popup |
 | `kontribusi.css` | `[tk_form_tradisi]`, Kiriman Saya |
 | `kurasi.css` | `[tk_kurasi]`, Panel Kurator, riwayat, checklist |
+| `kontak.css` | `[tk_kontak]` (kotak & input memakai `.tk-form` dari `kontribusi.css`) |
 | `login.css` | Halaman wp-login.php (dimuat terpisah) |
 
 **Aturan:**

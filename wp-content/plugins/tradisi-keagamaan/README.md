@@ -41,6 +41,7 @@ Plugin custom untuk situs **WARISI (Warisan Religi Indonesia)**, database tradis
 | Tambah Tradisi | `tambah-tradisi` | `[tk_form_tradisi]` |
 | Dashboard Kurasi | `dashboard-kurasi` | `[tk_kurasi]` |
 | Tentang | bebas | teks biasa |
+| Hubungi Kami (sub-menu Tentang) | bebas | `[tk_kontak]` |
 
 6. Atur menu (lihat [bagian 7](#7-menu)).
 7. Jadikan akun tim kurasi sebagai Kurator: **Users → Edit → Role: Kurator**.
@@ -116,6 +117,18 @@ Tanpa atribut. Menghitung tradisi terbit, provinsi (term `wilayah` level teratas
 - Tradisi dengan koordinat sama (±11 m) digabung jadi **pin cokelat berangka**; klik untuk melihat daftarnya.
 - Halaman detail tradisi otomatis menampilkan peta kecil bila koordinat ada.
 - **Mengisi koordinat:** buka Google Maps, klik kanan lokasi, klik angka koordinat untuk menyalin (contoh `-8.4095, 115.1889`). Angka pertama → **Latitude**, kedua → **Longitude**. Sebisa mungkin isi **lokasi upacara**, bukan pusat kota.
+
+### `[tk_kontak]`: form Hubungi Kami
+
+```
+[tk_kontak]
+[tk_kontak judul="Hubungi Kami" deskripsi="..."]
+```
+
+- Isian: Nama, Email, Perihal (Pertanyaan umum / Koreksi data tradisi / Bantuan kontribusi / Kerja sama / Lainnya), Pesan. Nama & email terisi otomatis bila pengunjung sudah login.
+- Pesan dikirim ke email admin (atau `TK_KONTAK_EMAIL`). Tekan **Balas** di email untuk menjawab langsung ke pengirim.
+- Anti-spam: honeypot + maks. 3 pesan/jam/IP (`TK_KONTAK_BATAS_PER_JAM`).
+- Pesan tidak disimpan di database, hanya dikirim lewat email. Pastikan SMTP berfungsi di server.
 
 ### `[tk_form_tradisi]` dan `[tk_kurasi]`
 
@@ -202,6 +215,7 @@ Bagian yang datanya kosong tidak ditampilkan. Halaman tetap tampil walaupun ACF 
 | + Tambah Tradisi (tombol oranye) | Halaman Tambah Tradisi | `tk-menu-cta` |
 | Dashboard Kurasi (hanya kurator/admin) | Halaman Dashboard Kurasi | `tk-menu-kurator` |
 | Masuk / Keluar (otomatis) | Custom Link URL `#` | `tk-menu-akun` |
+| Hubungi Kami (sub-menu) | Halaman Hubungi Kami, geser ke kanan di bawah **Tentang** | – |
 
 ---
 
@@ -217,6 +231,8 @@ Semua ada di **`includes/config.php`**:
 | `TK_MIN_KATA_ISI` | `150` | Minimum kata untuk checklist "Isi" |
 | `TK_KURASI_HARI_PERINGATAN` | `7` | Batas hari sebelum antrean ditandai merah |
 | `TK_RIWAYAT_PER_HALAMAN` | `15` | Baris per halaman "Riwayat Kurasi Saya" |
+| `TK_KONTAK_EMAIL` | kosong (= email admin) | Penerima pesan Hubungi Kami |
+| `TK_KONTAK_BATAS_PER_JAM` | `3` | Batas pesan Hubungi Kami per jam per IP |
 | `TK_ROLES_VERSION` | `2` | Naikkan bila hak akses peran diubah |
 | `TK_FONTS_URL` | Google Fonts | Sumber font |
 | `TK_LEAFLET_VERSI` | `1.9.4` | Versi Leaflet dari CDN |

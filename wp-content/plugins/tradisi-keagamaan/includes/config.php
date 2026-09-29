@@ -57,6 +57,16 @@ define( 'TK_KURASI_HARI_PERINGATAN', 7 );
 /** Jumlah baris per halaman di "Riwayat Kurasi Saya". */
 define( 'TK_RIWAYAT_PER_HALAMAN', 15 );
 
+/* =============================================================================
+ * Form Hubungi Kami [tk_kontak]
+ * ========================================================================== */
+
+/** Penerima pesan. Kosong = email admin (Settings → General → Administration Email Address). */
+define( 'TK_KONTAK_EMAIL', '' );
+
+/** Batas pesan per jam per alamat IP (anti-spam). */
+define( 'TK_KONTAK_BATAS_PER_JAM', 3 );
+
 /**
  * Versi daftar peran & hak akses (includes/akun/peran.php).
  * Naikkan angka ini setiap kali hak akses peran diubah agar peran dibuat ulang.

@@ -1,0 +1,47 @@
+/* =============================================================================
+   WARISI — kontak.css
+   [tk_kontak]: form Hubungi Kami.
+   Kotak & input memakai gaya .tk-form dari kontribusi.css.
+   ============================================================================= */
+
+.tk-kontak { max-width: 760px; }
+
+.tk-kontak-judul     { margin: 0 0 6px; font-size: 24px; }
+.tk-kontak-deskripsi { margin: 0 0 20px; color: var(--tk-abu); font-size: 14.5px; }
+
+/* Nama & Email berdampingan */
+.tk-kontak-baris {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.tk-kontak-field       { margin: 0 0 18px; }
+.tk-kontak-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tk-teks);
+}
+.tk-kontak-form textarea { resize: vertical; }
+.tk-wajib { color: var(--tk-accent); }
+
+/* Honeypot: di luar layar, bukan display:none (sebagian bot melewatinya) */
+.tk-kontak-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.tk-kontak .tk-notice ul { margin: 6px 0 0 18px; }
+
+
+/* =============================================================================
+   Responsif
+   ============================================================================= */
+@media (max-width: 600px) {
+  .tk-kontak-baris { grid-template-columns: 1fr; gap: 0; }
+}

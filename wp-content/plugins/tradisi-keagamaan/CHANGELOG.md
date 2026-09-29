@@ -2,6 +2,16 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.1.0 (29 September 2026): Hubungi Kami
+
+**Baru**
+- Shortcode `[tk_kontak]`: form Hubungi Kami (nama, email, perihal, pesan) yang dikirim ke email admin dengan Reply-To ke pengirim. Dilengkapi honeypot dan batas 3 pesan/jam/IP.
+- Konstanta `TK_KONTAK_EMAIL` dan `TK_KONTAK_BATAS_PER_JAM` di `config.php`.
+- Gaya sub-menu dropdown di header (desktop).
+
+**Diubah**
+- `tk_kirim_email()` menerima header tambahan dan mengembalikan hasil `wp_mail()`.
+
 ## 2.0.0 (28 September 2026): Refactoring menyeluruh
 
 Perilaku dan tampilan **tidak berubah**. Semua fungsi, shortcode, nama class CSS, hook (32 hook, prioritas identik), dan data tetap sama.
