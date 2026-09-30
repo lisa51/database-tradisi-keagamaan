@@ -97,22 +97,32 @@ function tk_register_data_types() {
  *   /tradisi/nama/          koleksi berjenis Tradisi
  *   /budaya-material/nama/  koleksi berjenis Budaya Material
  *   /koleksi/               arsip semua koleksi (TK_SLUG_KOLEKSI)
+ *   /koleksi/nama/          link lama → dialihkan ke alamat sesuai jenis
+ *   /tradisi/, /budaya-material/  → dialihkan ke Jelajahi dengan filter jenis
  * Satu aturan per jenis (bukan rewrite tag), supaya awalan lain tidak ikut
- * tertangkap. Awalan yang tidak sesuai jenis dialihkan tk_alihkan_url_koleksi().
+ * tertangkap. Pengalihan: tk_alihkan_url_koleksi().
  */
 function tk_rewrite_jenis() {
     foreach ( array_keys( TK_JENIS ) as $jenis ) {
-        add_rewrite_rule( '^' . preg_quote( $jenis, '#' ) . '/([^/]+)/?$', 'index.php?tradisi=$matches[1]&tk_jenis_url=' . $jenis, 'top' );
+        $awal = '^' . preg_quote( $jenis, '#' );
+        add_rewrite_rule( $awal . '/([^/]+)/?$', 'index.php?tradisi=$matches[1]&tk_jenis_url=' . $jenis, 'top' );
+        add_rewrite_rule( $awal . '/?$', 'index.php?tk_jenis_arsip=' . $jenis, 'top' );
     }
     add_rewrite_rule( '^' . TK_SLUG_KOLEKSI . '/?$', 'index.php?post_type=tradisi', 'top' );
     add_rewrite_rule( '^' . TK_SLUG_KOLEKSI . '/page/([0-9]+)/?$', 'index.php?post_type=tradisi&paged=$matches[1]', 'top' );
+    add_rewrite_rule( '^' . TK_SLUG_KOLEKSI . '/([^/]+)/?$', 'index.php?tradisi=$matches[1]&tk_jenis_url=' . TK_SLUG_KOLEKSI, 'top' );
 }
 
 add_filter( 'query_vars', 'tk_query_var_jenis' );
 
-/** Daftarkan query var tk_jenis_url (awalan URL yang diminta). */
+/**
+ * Query var URL koleksi:
+ *   tk_jenis_url    awalan yang diminta (slug jenis, atau TK_SLUG_KOLEKSI untuk link lama)
+ *   tk_jenis_arsip  /tradisi/ atau /budaya-material/ tanpa nama
+ */
 function tk_query_var_jenis( $vars ) {
     $vars[] = 'tk_jenis_url';
+    $vars[] = 'tk_jenis_arsip';
     return $vars;
 }
 
@@ -141,11 +151,10 @@ add_action( 'init', 'tk_flush_bila_url_berubah', 99 );
  * daftar jenis), supaya tidak perlu membuka Settings → Permalinks manual.
  */
 function tk_flush_bila_url_berubah() {
-    $struktur = 'v2|' . TK_SLUG_KOLEKSI . '|' . implode( ',', array_keys( TK_JENIS ) );
+    $struktur = TK_SLUG_KOLEKSI . '|' . implode( ',', array_keys( TK_JENIS ) ) . '|arsip-jenis';
     if ( get_option( 'tk_struktur_url' ) !== $struktur ) {
         flush_rewrite_rules( false );
         update_option( 'tk_struktur_url', $struktur );
-        delete_option( 'tk_slug_koleksi' ); // Opsi lama (2.8.0 awal).
     }
 }
 
@@ -153,45 +162,21 @@ add_action( 'template_redirect', 'tk_alihkan_url_koleksi', 5 ); // Sebelum redir
 
 /**
  * Pastikan setiap koleksi dibuka lewat alamat yang benar (301):
- *   - awalan tidak sesuai jenis, mis. /tradisi/kitab-kuning/ untuk budaya
- *     material, atau jenis baru saja diganti → alamat sesuai jenis;
- *   - link lama /koleksi/nama/ (404) → alamat sesuai jenis;
+ *   - awalan tidak sesuai jenis (mis. jenis baru saja diganti) atau link lama
+ *     /koleksi/nama/ → alamat sesuai jenis;
  *   - /tradisi/ atau /budaya-material/ saja → Jelajahi dengan filter jenis.
  */
 function tk_alihkan_url_koleksi() {
-    // Awalan salah: WordPress tetap menemukan post-nya lewat nama.
-    if ( is_singular( 'tradisi' ) ) {
-        $diminta = get_query_var( 'tk_jenis_url' );
-        if ( $diminta && tk_get_jenis( get_queried_object_id() ) !== $diminta ) {
-            wp_safe_redirect( get_permalink( get_queried_object_id() ), 301 );
-            exit;
-        }
-        return;
-    }
-
-    if ( ! is_404() ) {
-        return;
-    }
-
-    $path = trim( (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ), '/' );
-    $home = trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' );
-    if ( $home && 0 === strpos( $path, $home . '/' ) ) {
-        $path = substr( $path, strlen( $home ) + 1 );
-    }
-    $bagian = explode( '/', $path );
-
-    if ( 1 === count( $bagian ) && isset( TK_JENIS[ $bagian[0] ] ) ) {
-        wp_safe_redirect( add_query_arg( 'tipe', $bagian[0], home_url( '/' ) ) . '#jelajahi', 301 );
+    $arsip = get_query_var( 'tk_jenis_arsip' );
+    if ( isset( TK_JENIS[ $arsip ] ) ) {
+        wp_safe_redirect( add_query_arg( 'tipe', $arsip, home_url( '/' ) ) . '#jelajahi', 301 );
         exit;
     }
 
-    $awalan = array_merge( array( TK_SLUG_KOLEKSI ), array_keys( TK_JENIS ) );
-    if ( 2 === count( $bagian ) && in_array( $bagian[0], $awalan, true ) ) {
-        $post = get_page_by_path( sanitize_title( $bagian[1] ), OBJECT, 'tradisi' );
-        if ( $post && 'publish' === $post->post_status ) {
-            wp_safe_redirect( get_permalink( $post ), 301 );
-            exit;
-        }
+    $diminta = get_query_var( 'tk_jenis_url' );
+    if ( $diminta && is_singular( 'tradisi' ) && tk_get_jenis( get_queried_object_id() ) !== $diminta ) {
+        wp_safe_redirect( get_permalink( get_queried_object_id() ), 301 );
+        exit;
     }
 }
 

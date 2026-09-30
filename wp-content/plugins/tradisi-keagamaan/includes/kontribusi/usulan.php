@@ -29,8 +29,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function tk_usulan_meta_disalin( $key ) {
+    // Kunci berawalan _tk_ (termasuk referensi ACF _tk_tamu_*) sudah tertangkap awalan di bawah.
     $kecuali = array( TK_VIEW_META, '_thumbnail_id', 'tk_tamu_nama', 'tk_tamu_email', 'tk_tamu_instansi', 'tk_tamu_setuju',
-        '_tk_tamu_nama', '_tk_tamu_email', '_tk_tamu_instansi', '_tk_tamu_setuju', 'galeri_unggah', '_galeri_unggah' );
+        'galeri_unggah', '_galeri_unggah' );
     if ( in_array( $key, $kecuali, true ) ) {
         return false;
     }
@@ -172,7 +173,6 @@ function tk_usulan_terapkan( $usulan_id ) {
 
     tk_log_tambah( $asal_id, 'ubah_diterapkan', 'Usulan dari ' . tk_nama_pengirim( $usulan_id ) . '.' );
 
-    $GLOBALS['tk_usulan_diterapkan'] = true;
     wp_delete_post( $usulan_id, true );
     return $asal_id;
 }
@@ -183,7 +183,8 @@ add_action( 'wp_trash_post', 'tk_usulan_bersihkan_tautan' );
 /**
  * Hapus ID usulan dari field "terkait" koleksi lain. Tautan dua arah ACF
  * menambahkannya saat usulan disimpan; setelah usulan diterapkan/ditolak
- * ID itu tidak berlaku lagi.
+ * ID itu tidak berlaku lagi. Hanya koleksi yang ada di "terkait" usulan
+ * sendiri yang mungkin berisi ID-nya, jadi cukup periksa daftar itu.
  *
  * @param int $post_id
  */
@@ -191,14 +192,7 @@ function tk_usulan_bersihkan_tautan( $post_id ) {
     if ( ! tk_usulan_asal( $post_id ) ) {
         return;
     }
-    $lain = get_posts( array(
-        'post_type'      => 'tradisi',
-        'post_status'    => 'any',
-        'posts_per_page' => -1,
-        'fields'         => 'ids',
-        'meta_query'     => array( array( 'key' => 'terkait', 'value' => '"' . $post_id . '"', 'compare' => 'LIKE' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
-    ) );
-    foreach ( $lain as $id ) {
+    foreach ( array_filter( array_map( 'absint', (array) get_post_meta( $post_id, 'terkait', true ) ) ) as $id ) {
         $ids = array_values( array_diff( (array) get_post_meta( $id, 'terkait', true ), array( (string) $post_id, $post_id ) ) );
         update_post_meta( $id, 'terkait', $ids );
     }
@@ -247,14 +241,16 @@ function tk_usulan_perubahan( $usulan_id ) {
         }
     }
 
-    $label_tax = array( 'jenis' => 'Jenis', 'agama' => 'Agama', 'wilayah' => 'Provinsi', 'kategori-tradisi' => 'Kategori', 'post_tag' => 'Kata kunci' );
+    // Term dibaca dari cache (get_the_terms); label dari pendaftaran taxonomy.
+    $id_term = function ( $post_id, $tax ) {
+        $terms = get_the_terms( $post_id, $tax );
+        $ids   = ( $terms && ! is_wp_error( $terms ) ) ? wp_list_pluck( $terms, 'term_id' ) : array();
+        sort( $ids );
+        return $ids;
+    };
     foreach ( tk_usulan_taxonomy() as $tax ) {
-        $ta = wp_get_object_terms( $asal_id, $tax, array( 'fields' => 'ids' ) );
-        $tu = wp_get_object_terms( $usulan_id, $tax, array( 'fields' => 'ids' ) );
-        sort( $ta );
-        sort( $tu );
-        if ( $ta != $tu ) { // phpcs:ignore Universal.Operators.StrictComparisons -- bandingkan isi array.
-            $ubah[] = $label_tax[ $tax ];
+        if ( $id_term( $asal_id, $tax ) !== $id_term( $usulan_id, $tax ) ) {
+            $ubah[] = 'post_tag' === $tax ? 'Kata kunci' : get_taxonomy( $tax )->labels->singular_name;
         }
     }
 
@@ -288,13 +284,14 @@ add_action( 'admin_notices', 'tk_usulan_pemberitahuan_admin' );
 function tk_usulan_pemberitahuan_admin() {
     $layar = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
     $id    = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
-    if ( ! $layar || 'tradisi' !== $layar->post_type || ! $id || ! tk_usulan_asal( $id ) ) {
+    $asal  = $id ? tk_usulan_asal( $id ) : 0;
+    if ( ! $layar || 'tradisi' !== $layar->post_type || ! $asal ) {
         return;
     }
     printf(
         '<div class="notice notice-warning"><p>Ini <strong>usulan perubahan</strong> untuk <a href="%s">%s</a>. Usulan tidak bisa diterbitkan sendiri; setujui lewat tombol Terbitkan di <a href="%s">Dashboard Kurasi</a> atau Panel Kurator agar isinya diterapkan ke versi terbit.</p></div>',
-        esc_url( get_permalink( tk_usulan_asal( $id ) ) ),
-        esc_html( get_the_title( tk_usulan_asal( $id ) ) ),
+        esc_url( get_permalink( $asal ) ),
+        esc_html( get_the_title( $asal ) ),
         esc_url( tk_url_kurasi() )
     );
 }

@@ -182,7 +182,7 @@ function tk_form_teks_tombol( $mode ) {
  */
 function tk_form_render_tombol( $tombol ) {
     return '<div class="tk-form-tombol">'
-        . ( isset( $tombol['draf'] ) ? '<button type="submit" name="tk_status" value="draft" class="tk-btn tk-btn-garis">' . esc_html( $tombol['draf'][1] ) . '</button>' : '' )
+        . ( isset( $tombol['draf'] ) ? '<button type="submit" name="tk_status" value="' . esc_attr( $tombol['draf'][0] ) . '" class="tk-btn tk-btn-garis">' . esc_html( $tombol['draf'][1] ) . '</button>' : '' )
         . '<button type="submit" name="tk_status" value="' . esc_attr( $tombol['utama'][0] ) . '" class="tk-btn tk-btn-utama">%s</button>'
         . '</div>';
 }

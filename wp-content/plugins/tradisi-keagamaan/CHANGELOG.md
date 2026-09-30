@@ -2,6 +2,15 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.10.1 (30 September 2026): Bersih-bersih kode
+
+**Diubah**
+- Lebih hemat query: jenis dibaca dari cache term (`tk_get_jenis()`), tautan "Terkait dengan" diambil dalam satu query, cache thumbnail/term disiapkan untuk Dashboard Kurasi & peta, hitungan kartu tidak diulang, daftar kategori per jenis di-memo, term jenis tidak dicek setiap request, pembersihan tautan usulan tanpa memindai tabel meta.
+- Terbitkan memakai `wp_update_post()`: slug dibuat otomatis bila kosong dan tanggal terbit = waktu diterbitkan.
+- Pengalihan `/koleksi/nama/`, `/tradisi/`, `/budaya-material/` lewat aturan rewrite (bukan membaca path saat 404).
+- Pemeriksaan aksi kurasi disatukan (`tk_kurasi_cek()`); tombol & konfirmasi usulan dari `tk_panel_tombol_aksi()`; ringkasan usulan `tk_kurasi_ringkasan_usulan()`; paginasi `tk_kurasi_render_halaman()`; URL halaman `tk_url_halaman()`; izin usulan `tk_form_boleh_usul()`.
+- Dihapus: `tk_get_jenis_label()`, fungsi pembungkus kategori per jenis, global & opsi yang tidak terpakai, CSS ganda (baris dashboard memakai `.tk-riwayat-daftar`).
+
 ## 2.10.0 (30 September 2026): Filter & aksi massal Dashboard Kurasi
 
 **Baru**

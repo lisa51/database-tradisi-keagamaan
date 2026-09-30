@@ -99,6 +99,10 @@ function tk_peta_get_titik( $ids = null ) {
         ) );
     }
 
+    // Permalink bergantung pada jenis (tk_permalink_jenis) & kategori ditampilkan:
+    // siapkan cache term semua titik dalam satu query.
+    update_object_term_cache( $ids, 'tradisi' );
+
     $titik = array();
     foreach ( $ids as $id ) {
         $koordinat = tk_peta_get_koordinat( $id );

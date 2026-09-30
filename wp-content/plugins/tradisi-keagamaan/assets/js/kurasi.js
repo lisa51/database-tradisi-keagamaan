@@ -19,7 +19,8 @@
 
   var semua = form.querySelector( '[data-tk-pilih-semua]' );
   var hitung = form.querySelector( '[data-tk-hitung]' );
-  var WAJIB_CATATAN = [ 'antrean', 'revisi', 'tolak' ];
+  // Aksi yang wajib bercatatan, dari tk_aksi_wajib_catatan() (PHP).
+  var WAJIB_CATATAN = ( form.getAttribute( 'data-wajib-catatan' ) || '' ).split( ',' );
 
   function kotak() {
     return Array.prototype.slice.call( document.querySelectorAll( 'input[form="tk-massal"][name="post_ids[]"]' ) );

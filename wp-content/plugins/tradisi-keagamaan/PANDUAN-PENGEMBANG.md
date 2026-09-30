@@ -158,7 +158,7 @@ function tk_nama_fungsi( $post_id ) { ... }
 |---|---|---|
 | Nama term sebuah post | `tk_term_names( $id, $tax, $sep, $limit )` | core/helpers.php |
 | Ikon SVG | `tk_icon( 'pin'\|'gedung'\|'buku'\|'benda'\|'user'\|'mata'\|'link', $size )` | core/helpers.php |
-| Jenis sebuah post | `tk_get_jenis( $id )` (slug) / `tk_get_jenis_label( $id )` | core/jenis.php |
+| Jenis sebuah post | `tk_get_jenis( $id )` (slug); label: `TK_JENIS[ tk_get_jenis( $id ) ]` | core/jenis.php |
 | URL halaman form / dashboard | `tk_url_tambah()`, `tk_url_kurasi()` | core/helpers.php |
 | URL tradisi untuk kurator | `tk_url_tinjau( $id )` (publik atau pratinjau) | core/helpers.php |
 | Semua data satu tradisi | `tk_single_get_data( $id )` | core/single-data.php |

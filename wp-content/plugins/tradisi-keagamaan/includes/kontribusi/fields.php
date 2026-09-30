@@ -199,13 +199,8 @@ add_filter( 'acf/load_value/key=field_tk_form_kata_kunci', 'tk_form_isi_kata_kun
  * @return mixed
  */
 function tk_form_isi_kata_kunci( $value, $post_id ) {
-    if ( is_numeric( $post_id ) && 'tradisi' === get_post_type( $post_id ) ) {
-        $tags = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'names' ) );
-        if ( $tags && ! is_wp_error( $tags ) ) {
-            return implode( ', ', array_map( 'html_entity_decode', $tags ) );
-        }
-    }
-    return $value;
+    $tags = ( is_numeric( $post_id ) && 'tradisi' === get_post_type( $post_id ) ) ? tk_term_names( $post_id, 'post_tag' ) : '';
+    return '' !== $tags ? html_entity_decode( $tags ) : $value;
 }
 
 add_filter( 'acf/prepare_field/key=field_6aa0f2fa51a58', 'tk_form_sembunyikan_galeri' );

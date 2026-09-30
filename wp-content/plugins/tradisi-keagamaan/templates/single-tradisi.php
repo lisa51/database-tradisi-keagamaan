@@ -70,7 +70,7 @@ while ( have_posts() ) :
     <?php /* 2. Badge, judul, tanggal terbit */ ?>
     <header class="tk-single__head">
       <div class="tk-single__badges">
-        <span class="tk-pill tk-pill--jenis tk-pill--<?php echo esc_attr( $d['jenis'] ); ?>"><?php echo esc_html( TK_JENIS[ $d['jenis'] ] ); ?></span>
+        <span class="tk-pill tk-pill--<?php echo esc_attr( $d['jenis'] ); ?>"><?php echo esc_html( TK_JENIS[ $d['jenis'] ] ); ?></span>
         <?php if ( $d['kategori'] ) : ?>
           <span class="tk-pill tk-pill--kat"><?php echo esc_html( $d['kategori'] ); ?></span>
         <?php endif; ?>
@@ -93,8 +93,7 @@ while ( have_posts() ) :
       </ul>
 
       <?php /* Pemilik (kontributor) bisa mengusulkan perubahan; kurator memakai Panel Kurator. */ ?>
-      <?php if ( is_user_logged_in() && ! current_user_can( 'tk_kurasi' ) && current_user_can( 'tk_kirim' )
-                 && (int) get_post_field( 'post_author', $id ) === get_current_user_id() ) : ?>
+      <?php if ( tk_form_boleh_usul( $id ) ) : ?>
         <a class="tk-btn-kecil tk-single__ubah" href="<?php echo esc_url( tk_url_ubah( $id ) ); ?>">Usulkan perubahan</a>
       <?php endif; ?>
     </header>

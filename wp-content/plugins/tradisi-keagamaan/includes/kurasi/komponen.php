@@ -61,6 +61,47 @@ function tk_kurasi_render_pesan() {
 }
 
 /**
+ * Ringkasan usulan perubahan untuk kurator (Dashboard & Panel):
+ * "Untuk versi terbit: <tautan> · Diubah: Judul, Kategori".
+ *
+ * @param int $usulan_id
+ * @return string HTML (sudah di-escape).
+ */
+function tk_kurasi_ringkasan_usulan( $usulan_id ) {
+    $asal = tk_usulan_asal( $usulan_id );
+    $ubah = tk_usulan_perubahan( $usulan_id );
+    return sprintf(
+        'Untuk versi terbit: <a href="%s" target="_blank" rel="noopener">%s</a> · Diubah: %s',
+        esc_url( get_permalink( $asal ) ),
+        esc_html( get_the_title( $asal ) ),
+        $ubah ? esc_html( implode( ', ', $ubah ) ) : '<em>tidak ada perbedaan</em>'
+    );
+}
+
+/**
+ * Nomor halaman (.tk-halaman) untuk daftar di Dashboard Kurasi.
+ *
+ * @param string $base    URL dengan %#% di tempat nomor halaman (boleh berakhiran #anchor).
+ * @param int    $current
+ * @param int    $total
+ * @param string $label   aria-label navigasi.
+ * @return string HTML, atau '' bila hanya satu halaman.
+ */
+function tk_kurasi_render_halaman( $base, $current, $total, $label ) {
+    if ( $total < 2 ) {
+        return '';
+    }
+    return '<nav class="tk-halaman" aria-label="' . esc_attr( $label ) . '">' . paginate_links( array(
+        'base'      => $base,
+        'format'    => '',
+        'current'   => $current,
+        'total'     => $total,
+        'prev_text' => '‹ Sebelumnya',
+        'next_text' => 'Berikutnya ›',
+    ) ) . '</nav>';
+}
+
+/**
  * Awal form POST aksi kurasi (nonce + field tersembunyi).
  *
  * @param int  $post_id

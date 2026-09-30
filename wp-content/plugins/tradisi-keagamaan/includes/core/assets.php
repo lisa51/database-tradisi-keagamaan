@@ -89,18 +89,20 @@ function tk_enqueue_assets() {
     }
 }
 
-add_action( 'admin_enqueue_scripts', 'tk_enqueue_akun' );
+// wp-admin: tanpa dependensi (hook ini mengirim nama halaman, bukan daftar CSS).
+add_action( 'admin_enqueue_scripts', function () {
+    tk_enqueue_akun();
+} );
 
 /**
  * Muat konfirmasi logout (assets/js/akun.js + assets/css/dialog.css).
  * Dipanggil di halaman depan dan di wp-admin. dialog.css berdiri sendiri,
  * jadi aman dimuat di wp-admin tanpa base.css.
  *
- * @param string[]|string $css_deps Dependensi CSS. Di wp-admin berisi nama
- *                                  hook halaman (string), jadi diabaikan.
+ * @param string[] $css_deps Dependensi CSS.
  */
 function tk_enqueue_akun( $css_deps = array() ) {
-    tk_enqueue_css( 'dialog', is_array( $css_deps ) ? $css_deps : array() );
+    tk_enqueue_css( 'dialog', $css_deps );
 
     $js = 'assets/js/akun.js';
     wp_enqueue_script( 'tk-akun', TK_URL . $js, array(), filemtime( TK_PATH . $js ), true );

@@ -72,13 +72,12 @@ function tk_kabkota_cari( $nama, $provinsi = '' ) {
 /**
  * Provinsi tempat sebuah kabupaten/kota berada.
  *
- * @param string $nama
+ * @param string $resmi Nama resmi (hasil tk_kabkota_cari()).
  * @return string Nama provinsi, atau ''.
  */
-function tk_kabkota_provinsi_dari( $nama ) {
-    $resmi = tk_kabkota_cari( $nama );
+function tk_kabkota_provinsi_dari( $resmi ) {
     foreach ( tk_kabkota_daftar() as $provinsi => $list ) {
-        if ( $resmi && in_array( $resmi, $list, true ) ) {
+        if ( in_array( $resmi, $list, true ) ) {
             return $provinsi;
         }
     }
@@ -113,17 +112,16 @@ function tk_kabkota_provinsi_dikirim() {
     return '';
 }
 
-add_filter( 'acf/validate_value/name=asal_daerah', 'tk_kabkota_validasi', 10, 3 );
+add_filter( 'acf/validate_value/name=asal_daerah', 'tk_kabkota_validasi', 10, 2 );
 
 /**
  * Isian harus ada di daftar resmi (dan di provinsi yang dipilih).
  *
  * @param bool|string $valid
  * @param mixed       $value
- * @param array       $field
  * @return bool|string
  */
-function tk_kabkota_validasi( $valid, $value, $field ) {
+function tk_kabkota_validasi( $valid, $value ) {
     if ( true !== $valid || '' === trim( (string) $value ) ) {
         return $valid;
     }
@@ -133,25 +131,24 @@ function tk_kabkota_validasi( $valid, $value, $field ) {
         return true;
     }
 
-    $lain = $provinsi ? tk_kabkota_provinsi_dari( $value ) : '';
+    $resmi = $provinsi ? tk_kabkota_cari( $value ) : '';
+    $lain  = $resmi ? tk_kabkota_provinsi_dari( $resmi ) : '';
     if ( $lain ) {
-        return sprintf( '%s ada di Provinsi %s, bukan %s. Periksa kembali pilihan Provinsi.', tk_kabkota_cari( $value ), $lain, $provinsi );
+        return sprintf( '%s ada di Provinsi %s, bukan %s. Periksa kembali pilihan Provinsi.', $resmi, $lain, $provinsi );
     }
 
     return 'Pilih dari saran yang muncul saat mengetik, misalnya "Kabupaten Tana Toraja" atau "Kota Makassar".';
 }
 
-add_filter( 'acf/update_value/name=asal_daerah', 'tk_kabkota_seragamkan', 10, 3 );
+add_filter( 'acf/update_value/name=asal_daerah', 'tk_kabkota_seragamkan' );
 
 /**
  * Simpan dengan penulisan resmi. Isian yang tidak dikenali disimpan apa adanya.
  *
  * @param mixed $value
- * @param int   $post_id
- * @param array $field
  * @return mixed
  */
-function tk_kabkota_seragamkan( $value, $post_id, $field ) {
+function tk_kabkota_seragamkan( $value ) {
     $resmi = tk_kabkota_cari( $value, tk_kabkota_provinsi_dikirim() );
     if ( ! $resmi ) {
         $resmi = tk_kabkota_cari( $value );

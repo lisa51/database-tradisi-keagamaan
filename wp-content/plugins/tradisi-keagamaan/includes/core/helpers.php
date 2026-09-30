@@ -83,35 +83,48 @@ function tk_icon( $name, $size = 14 ) {
 }
 
 /**
- * URL halaman "Tambah Tradisi" (slug diatur TK_SLUG_TAMBAH di config.php).
+ * URL sebuah halaman plugin berdasarkan slug (TK_SLUG_* di config.php).
+ * Bila halaman belum dibuat, pakai /<slug>/.
  *
+ * @param string $slug
  * @return string
  */
+function tk_url_halaman( $slug ) {
+    $page = get_page_by_path( $slug );
+    return $page ? get_permalink( $page ) : home_url( '/' . $slug . '/' );
+}
+
+/** URL halaman "Tambah Tradisi". */
 function tk_url_tambah() {
-    $page = get_page_by_path( TK_SLUG_TAMBAH );
-    return $page ? get_permalink( $page ) : home_url( '/' . TK_SLUG_TAMBAH . '/' );
+    return tk_url_halaman( TK_SLUG_TAMBAH );
 }
 
 /**
- * URL halaman "Ubah Tradisi" (slug TK_SLUG_UBAH), opsional langsung ke satu koleksi.
+ * URL halaman "Ubah Tradisi", opsional langsung ke satu koleksi.
  *
  * @param int $post_id 0 = halaman Ubah tanpa koleksi terpilih.
  * @return string
  */
 function tk_url_ubah( $post_id = 0 ) {
-    $page = get_page_by_path( TK_SLUG_UBAH );
-    $url  = $page ? get_permalink( $page ) : home_url( '/' . TK_SLUG_UBAH . '/' );
+    $url = tk_url_halaman( TK_SLUG_UBAH );
     return $post_id ? add_query_arg( 'edit', absint( $post_id ), $url ) : $url;
 }
 
+/** URL halaman "Dashboard Kurasi". */
+function tk_url_kurasi() {
+    return tk_url_halaman( TK_SLUG_KURASI );
+}
+
 /**
- * URL halaman "Dashboard Kurasi" (slug diatur TK_SLUG_KURASI di config.php).
+ * URL halaman "Riwayat Suntingan" untuk satu koleksi.
  *
+ * @param int $post_id
+ * @param int $revisi_id Opsional: langsung ke revisi ini.
  * @return string
  */
-function tk_url_kurasi() {
-    $page = get_page_by_path( TK_SLUG_KURASI );
-    return $page ? get_permalink( $page ) : home_url( '/' . TK_SLUG_KURASI . '/' );
+function tk_url_riwayat_suntingan( $post_id, $revisi_id = 0 ) {
+    $url = add_query_arg( 'id', absint( $post_id ), tk_url_halaman( TK_SLUG_RIWAYAT ) );
+    return $revisi_id ? $url . '#rev-' . absint( $revisi_id ) : $url;
 }
 
 /**

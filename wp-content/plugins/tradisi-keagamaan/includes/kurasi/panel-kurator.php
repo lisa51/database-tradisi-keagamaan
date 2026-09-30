@@ -2,7 +2,7 @@
 /**
  * Panel Kurator: kotak khusus kurator di halaman tradisi (termasuk pratinjau).
  *
- * Tampil di bagian atas templates/single-tradisi.php, HANYA untuk pengguna
+ * Tampil di bawah isi koleksi (templates/single-tradisi.php), HANYA untuk pengguna
  * dengan hak tk_kurasi (Kurator & Administrator). Pengunjung biasa tidak
  * melihat apa pun.
  *
@@ -30,17 +30,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Label & gaya tombol untuk setiap aksi kurasi.
+ * Label, gaya, dan teks konfirmasi tombol untuk setiap aksi kurasi.
+ * Untuk usulan perubahan, "terbitkan" menjadi "Setujui & Terapkan".
+ * Dipakai Panel Kurator, Dashboard Kurasi, dan aksi massal (daftar aksi sah).
  *
- * @return array[] aksi => array( label, class modifier )
+ * @param int $post_id Opsional: koleksi yang tombolnya ditampilkan.
+ * @return array[] aksi => array( label, class modifier, teks konfirmasi atau '' )
  */
-function tk_panel_tombol_aksi() {
-    return array(
-        'terbitkan' => array( 'Terbitkan', 'terbit' ),
-        'revisi'    => array( 'Minta Revisi', 'revisi' ),
-        'antrean'   => array( 'Kembalikan ke Antrean', 'revisi' ),
-        'tolak'     => array( 'Tolak', 'tolak' ),
+function tk_panel_tombol_aksi( $post_id = 0 ) {
+    $tombol = array(
+        'terbitkan' => array( 'Terbitkan', 'terbit', '' ),
+        'revisi'    => array( 'Minta Revisi', 'revisi', '' ),
+        'antrean'   => array( 'Kembalikan ke Antrean', 'revisi', '' ),
+        'tolak'     => array( 'Tolak', 'tolak', 'Tolak tradisi ini dan pindahkan ke Trash? Pengirim akan menerima alasan Anda.' ),
     );
+    if ( $post_id && tk_usulan_asal( $post_id ) ) {
+        $tombol['terbitkan'] = array( 'Setujui & Terapkan', 'terbit', 'Terapkan usulan ini ke versi terbit? Isi halaman yang terbit akan diganti.' );
+    }
+    return $tombol;
+}
+
+/**
+ * Atribut onclick konfirmasi untuk sebuah tombol aksi, atau ''.
+ *
+ * @param array $tombol Satu entri dari tk_panel_tombol_aksi().
+ * @return string
+ */
+function tk_panel_konfirmasi( $tombol ) {
+    return $tombol[2] ? ' onclick="return confirm(\'' . esc_js( $tombol[2] ) . '\');"' : '';
 }
 
 /**
@@ -108,11 +125,7 @@ function tk_panel_kurator( $post_id ) {
     $penyunting  = tk_panel_penyunting( $revisi );
     $edit_akhir  = get_post_meta( $post_id, '_edit_last', true );
     $aksi        = tk_aksi_diizinkan( $post->post_status );
-    $tombol      = tk_panel_tombol_aksi();
-    $asal        = tk_usulan_asal( $post_id );
-    if ( $asal ) {
-        $tombol['terbitkan'][0] = 'Setujui & Terapkan';
-    }
+    $tombol      = tk_panel_tombol_aksi( $post_id );
 
     ob_start();
     ?>
@@ -125,12 +138,9 @@ function tk_panel_kurator( $post_id ) {
 
       <?php echo tk_kurasi_render_pesan(); // phpcs:ignore WordPress.Security.EscapeOutput -- sudah di-escape. ?>
 
-      <?php if ( $asal ) : ?>
-        <?php $ubah = tk_usulan_perubahan( $post_id ); ?>
+      <?php if ( tk_usulan_asal( $post_id ) ) : ?>
         <div class="tk-notice tk-notice--info">
-          Ini <strong>usulan perubahan</strong> untuk
-          <a href="<?php echo esc_url( get_permalink( $asal ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( get_the_title( $asal ) ); ?></a>
-          yang sudah terbit. Diubah: <?php echo $ubah ? esc_html( implode( ', ', $ubah ) ) : '<em>tidak ada perbedaan</em>'; ?>.
+          Ini <strong>usulan perubahan</strong>. <?php echo tk_kurasi_ringkasan_usulan( $post_id ); // phpcs:ignore WordPress.Security.EscapeOutput -- di-escape di dalam fungsi. ?>.
           "Setujui &amp; Terapkan" mengganti isi versi terbit dengan usulan ini.
         </div>
       <?php endif; ?>
@@ -200,9 +210,7 @@ function tk_panel_kurator( $post_id ) {
             <div class="tk-kurasi-panel-tombol">
               <?php foreach ( $aksi as $a ) : ?>
                 <button type="submit" name="aksi" value="<?php echo esc_attr( $a ); ?>"
-                        class="tk-btn-kecil tk-btn-kecil--<?php echo esc_attr( $tombol[ $a ][1] ); ?>"
-                        <?php if ( 'tolak' === $a ) : ?>onclick="return confirm('Tolak tradisi ini dan pindahkan ke Trash? Pengirim akan menerima alasan Anda.');"<?php endif; ?>
-                        <?php if ( 'terbitkan' === $a && $asal ) : ?>onclick="return confirm('Terapkan usulan ini ke versi terbit? Isi halaman yang terbit akan diganti.');"<?php endif; ?>>
+                        class="tk-btn-kecil tk-btn-kecil--<?php echo esc_attr( $tombol[ $a ][1] ); ?>"<?php echo tk_panel_konfirmasi( $tombol[ $a ] ); // phpcs:ignore WordPress.Security.EscapeOutput -- esc_js di dalam fungsi. ?>>
                   <?php echo esc_html( $tombol[ $a ][0] ); ?>
                 </button>
               <?php endforeach; ?>

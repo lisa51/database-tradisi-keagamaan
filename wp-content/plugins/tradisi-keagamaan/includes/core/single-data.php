@@ -156,12 +156,26 @@ function tk_format_tanggal_acf( $raw ) {
  * @return array<string, int[]> Slug jenis => daftar ID, mis. array( 'tradisi' => array( 27 ) ).
  */
 function tk_single_get_tautan( $id ) {
-    $ids   = array_filter( array_map( 'absint', (array) get_post_meta( $id, 'terkait', true ) ) );
+    $ids = array_filter( array_map( 'absint', (array) get_post_meta( $id, 'terkait', true ) ) );
+    if ( ! $ids ) {
+        return array();
+    }
+
+    // Satu query: status disaring di SQL, dan cache post/meta/term untuk
+    // card (tk_koleksi_render_kartu) terisi sekaligus.
+    $q = new WP_Query( array(
+        'post_type'      => 'tradisi',
+        'post_status'    => 'publish',
+        'post__in'       => $ids,
+        'orderby'        => 'post__in',
+        'posts_per_page' => count( $ids ),
+        'no_found_rows'  => true,
+    ) );
+    update_post_thumbnail_cache( $q );
+
     $hasil = array();
-    foreach ( $ids as $tautan ) {
-        if ( 'publish' === get_post_status( $tautan ) && 'tradisi' === get_post_type( $tautan ) ) {
-            $hasil[ tk_get_jenis( $tautan ) ][] = $tautan;
-        }
+    foreach ( $q->posts as $p ) {
+        $hasil[ tk_get_jenis( $p->ID ) ][] = $p->ID;
     }
     return $hasil;
 }

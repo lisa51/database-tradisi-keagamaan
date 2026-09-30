@@ -56,6 +56,7 @@ function tk_kurasi_shortcode() {
         'orderby'        => 'pending' === $f['tampil'] ? 'date' : 'modified',
         'order'          => 'pending' === $f['tampil'] ? 'ASC' : 'DESC', // Antrean: terlama dulu.
     ) );
+    update_post_thumbnail_cache( $q ); // Thumbnail semua baris dalam satu query.
 
     wp_enqueue_script( 'tk-kurasi', TK_URL . 'assets/js/kurasi.js', array(), filemtime( TK_PATH . 'assets/js/kurasi.js' ), true );
 
@@ -119,23 +120,17 @@ function tk_kurasi_shortcode() {
             <?php foreach ( $q->posts as $p ) { echo tk_kurasi_render_item( $p ); } ?>
           </ul>
         <?php else : ?>
-          <ul class="tk-kurasi-baris">
+          <ul class="tk-riwayat-daftar tk-riwayat-daftar--kurasi">
             <?php foreach ( $q->posts as $p ) { echo tk_kurasi_render_baris( $p ); } ?>
           </ul>
         <?php endif; ?>
 
-        <?php if ( $q->max_num_pages > 1 ) : ?>
-          <nav class="tk-halaman" aria-label="Halaman daftar kurasi">
-            <?php echo paginate_links( array(
-                'base'      => add_query_arg( 'khal', '%#%', tk_kurasi_url( array( 'tampil' => $f['tampil'], 'tipe' => $f['tipe'], 'kcari' => $f['cari'] ) ) ) . '#daftar-kurasi',
-                'format'    => '',
-                'current'   => $f['hal'],
-                'total'     => $q->max_num_pages,
-                'prev_text' => '‹ Sebelumnya',
-                'next_text' => 'Berikutnya ›',
-            ) ); ?>
-          </nav>
-        <?php endif; ?>
+        <?php echo tk_kurasi_render_halaman( // phpcs:ignore WordPress.Security.EscapeOutput -- keluaran paginate_links().
+            add_query_arg( 'khal', '%#%', tk_kurasi_url( array( 'tampil' => $f['tampil'], 'tipe' => $f['tipe'], 'kcari' => $f['cari'] ) ) ) . '#daftar-kurasi',
+            $f['hal'],
+            $q->max_num_pages,
+            'Halaman daftar kurasi'
+        ); ?>
       <?php endif; ?>
     </section>
     <?php
@@ -225,8 +220,18 @@ function tk_kurasi_query_args( $tampil, $tipe, $cari = '' ) {
  * @return int
  */
 function tk_kurasi_hitung( $tampil, $tipe, $cari = '' ) {
-    $q = new WP_Query( tk_kurasi_query_args( $tampil, $tipe, $cari ) + array( 'posts_per_page' => 1, 'fields' => 'ids' ) );
-    return (int) $q->found_posts;
+    static $memo = array(); // Kartu & tab jenis meminta kombinasi yang sama.
+    $kunci = "$tampil|$tipe|$cari";
+    if ( ! isset( $memo[ $kunci ] ) ) {
+        $q = new WP_Query( tk_kurasi_query_args( $tampil, $tipe, $cari ) + array(
+            'posts_per_page'         => 1,
+            'fields'                 => 'ids',
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+        ) );
+        $memo[ $kunci ] = (int) $q->found_posts;
+    }
+    return $memo[ $kunci ];
 }
 
 /**
@@ -248,7 +253,8 @@ function tk_kurasi_render_massal( $f ) {
 
     ob_start();
     ?>
-    <form id="tk-massal" class="tk-massal" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+    <form id="tk-massal" class="tk-massal" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+          data-wajib-catatan="<?php echo esc_attr( implode( ',', tk_aksi_wajib_catatan() ) ); ?>">
       <input type="hidden" name="action" value="tk_kurasi_massal">
       <input type="hidden" name="kembali" value="<?php echo esc_url( $kembali ); ?>">
       <?php wp_nonce_field( 'tk_kurasi_massal', '_tk_nonce' ); ?>
@@ -291,12 +297,12 @@ function tk_kurasi_checkbox( $id ) {
 function tk_kurasi_render_baris( $p ) {
     $id    = $p->ID;
     $cek   = tk_kelengkapan( $id );
-    $info  = array_filter( array( tk_get_jenis_label( $id ), tk_term_names( $id, 'kategori-tradisi' ), tk_term_names( $id, 'wilayah' ), tk_nama_pengirim( $id ) ) );
+    $info  = array_filter( array( TK_JENIS[ tk_get_jenis( $id ) ], tk_term_names( $id, 'kategori-tradisi' ), tk_term_names( $id, 'wilayah' ), tk_nama_pengirim( $id ) ) );
     list( $status_label, $status_mod ) = tk_status_kiriman( $p );
 
     ob_start();
     ?>
-    <li class="tk-kurasi-baris-item">
+    <li>
       <?php echo tk_kurasi_checkbox( $id ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
       <div class="tk-riwayat-thumb"><?php echo get_the_post_thumbnail( $p, 'thumbnail' ); ?></div>
       <div class="tk-riwayat-isi">
@@ -331,6 +337,7 @@ function tk_kurasi_render_item( $p ) {
     $ulang   = $log && 'kirim_ulang' === end( $log )['aksi'];
     $catatan = (string) get_post_meta( $id, '_tk_catatan', true );
     $asal    = tk_usulan_asal( $id );
+    $terbit  = tk_panel_tombol_aksi( $id )['terbitkan'];
 
     ob_start();
     ?>
@@ -345,11 +352,7 @@ function tk_kurasi_render_item( $p ) {
           <?php if ( $ulang ) : ?><span class="tk-status tk-status--revisi">Kiriman ulang</span><?php endif; ?>
         </h3>
         <?php if ( $asal ) : ?>
-          <?php $ubah = tk_usulan_perubahan( $id ); ?>
-          <p class="tk-kurasi-usulan">
-            Untuk versi terbit: <a href="<?php echo esc_url( get_permalink( $asal ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( get_the_title( $asal ) ); ?></a>
-            · Diubah: <?php echo $ubah ? esc_html( implode( ', ', $ubah ) ) : '<em>tidak ada perbedaan</em>'; ?>
-          </p>
+          <p class="tk-kurasi-usulan"><?php echo tk_kurasi_ringkasan_usulan( $id ); // phpcs:ignore WordPress.Security.EscapeOutput -- di-escape di dalam fungsi. ?></p>
         <?php endif; ?>
         <p class="tk-kurasi-meta">
           <?php echo esc_html( tk_nama_pengirim( $id ) ); ?>
@@ -371,9 +374,8 @@ function tk_kurasi_render_item( $p ) {
         <a class="tk-btn-kecil" href="<?php echo esc_url( tk_url_ubah( $id ) ); ?>">Ubah</a>
         <a class="tk-btn-kecil" href="<?php echo esc_url( get_edit_post_link( $id ) ); ?>">Edit di wp-admin</a>
         <?php echo tk_kurasi_form_buka( $id ); ?>
-          <button type="submit" name="aksi" value="terbitkan" class="tk-btn-kecil tk-btn-kecil--terbit"
-                  <?php if ( $asal ) : ?>onclick="return confirm('Terapkan usulan ini ke versi terbit? Isi halaman yang terbit akan diganti.');"<?php endif; ?>>
-            <?php echo $asal ? 'Setujui &amp; Terapkan' : 'Terbitkan'; ?>
+          <button type="submit" name="aksi" value="terbitkan" class="tk-btn-kecil tk-btn-kecil--terbit"<?php echo tk_panel_konfirmasi( $terbit ); // phpcs:ignore WordPress.Security.EscapeOutput -- esc_js di dalam fungsi. ?>>
+            <?php echo esc_html( $terbit[0] ); ?>
           </button>
         </form>
       </div>
@@ -518,18 +520,12 @@ function tk_kurasi_render_riwayat_saya() {
           <?php endforeach; ?>
         </ul>
 
-        <?php if ( $total_hal > 1 ) : ?>
-          <nav class="tk-halaman" aria-label="Halaman riwayat">
-            <?php echo paginate_links( array(
-                'base'      => add_query_arg( 'rhal', '%#%', $filter ? add_query_arg( 'riwayat', $filter, $url_dasar ) : $url_dasar ) . '#riwayat-saya',
-                'format'    => '',
-                'current'   => $hal,
-                'total'     => $total_hal,
-                'prev_text' => '‹ Sebelumnya',
-                'next_text' => 'Berikutnya ›',
-            ) ); ?>
-          </nav>
-        <?php endif; ?>
+        <?php echo tk_kurasi_render_halaman( // phpcs:ignore WordPress.Security.EscapeOutput -- keluaran paginate_links().
+            add_query_arg( 'rhal', '%#%', $filter ? add_query_arg( 'riwayat', $filter, $url_dasar ) : $url_dasar ) . '#riwayat-saya',
+            $hal,
+            $total_hal,
+            'Halaman riwayat'
+        ); ?>
       <?php endif; ?>
     </section>
     <?php

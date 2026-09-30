@@ -96,6 +96,22 @@ function tk_form_ubah_langsung( $post_id ) {
 }
 
 /**
+ * Kontributor boleh mengusulkan perubahan (usulan, includes/kontribusi/usulan.php)
+ * untuk koleksi terbit miliknya. Kurator tidak: ia menyunting langsung.
+ *
+ * @param int $post_id
+ * @return bool
+ */
+function tk_form_boleh_usul( $post_id ) {
+    return is_user_logged_in()
+        && current_user_can( 'tk_kirim' )
+        && 'tradisi' === get_post_type( $post_id )
+        && 'publish' === get_post_status( $post_id )
+        && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id()
+        && ! tk_form_boleh_edit( $post_id );
+}
+
+/**
  * Status yang diminta tombol yang diklik:
  *   'draft'    Simpan Draf
  *   'pending'  Kirim untuk Dikurasi / Simpan Perubahan (kiriman yang menunggu)
@@ -143,9 +159,7 @@ function tk_form_head() {
             exit;
         }
 
-        if ( is_user_logged_in() && current_user_can( 'tk_kirim' ) && ! tk_form_boleh_edit( $edit )
-            && 'publish' === get_post_status( $edit ) && 'tradisi' === get_post_type( $edit )
-            && (int) get_post_field( 'post_author', $edit ) === get_current_user_id() ) {
+        if ( tk_form_boleh_usul( $edit ) ) {
             $usulan = tk_usulan_cari( $edit, get_current_user_id() );
             if ( ! $usulan ) {
                 $usulan = tk_usulan_buat( $edit );

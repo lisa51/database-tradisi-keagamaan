@@ -27,19 +27,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_shortcode( 'tk_riwayat_suntingan', 'tk_riwayat_sunting_shortcode' );
 
 /**
- * URL halaman Riwayat Suntingan untuk satu koleksi.
- *
- * @param int $post_id
- * @param int $revisi_id Opsional: langsung ke revisi ini.
- * @return string
- */
-function tk_url_riwayat_suntingan( $post_id, $revisi_id = 0 ) {
-    $page = get_page_by_path( TK_SLUG_RIWAYAT );
-    $url  = add_query_arg( 'id', absint( $post_id ), $page ? get_permalink( $page ) : home_url( '/' . TK_SLUG_RIWAYAT . '/' ) );
-    return $revisi_id ? $url . '#rev-' . absint( $revisi_id ) : $url;
-}
-
-/**
  * Render shortcode.
  *
  * @return string
@@ -55,11 +42,7 @@ function tk_riwayat_sunting_shortcode() {
         return '<p class="tk-kosong">Koleksi tidak ditemukan. Buka halaman ini dari tautan "Riwayat suntingan" di Panel Kurator.</p>';
     }
 
-    // Terbaru dulu; autosave diabaikan.
-    $revisi = array_values( array_filter(
-        wp_get_post_revisions( $id, array( 'check_enabled' => false ) ),
-        function ( $r ) { return ! wp_is_post_autosave( $r ); }
-    ) );
+    $revisi = tk_panel_get_revisi( $id ); // Terbaru dulu; autosave diabaikan (sama dengan Panel Kurator).
 
     ob_start();
     ?>

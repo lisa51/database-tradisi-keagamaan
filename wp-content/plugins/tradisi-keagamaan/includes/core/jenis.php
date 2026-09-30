@@ -48,32 +48,28 @@ function tk_jenis_register() {
         'rewrite'           => array( 'slug' => 'jenis' ),
     ) );
 
-    foreach ( TK_JENIS as $slug => $label ) {
-        if ( ! term_exists( $slug, 'jenis' ) ) {
-            wp_insert_term( $label, 'jenis', array( 'slug' => $slug ) );
+    // Pastikan term ada, sekali setiap daftar TK_JENIS berubah (bukan tiap request).
+    $versi = implode( ',', array_keys( TK_JENIS ) );
+    if ( get_option( 'tk_jenis_terms' ) !== $versi ) {
+        foreach ( TK_JENIS as $slug => $label ) {
+            if ( ! term_exists( $slug, 'jenis' ) ) {
+                wp_insert_term( $label, 'jenis', array( 'slug' => $slug ) );
+            }
         }
+        update_option( 'tk_jenis_terms', $versi );
     }
 }
 
 /**
  * Jenis sebuah tradisi. Tanpa term dianggap "tradisi".
+ * Memakai cache term (get_the_terms), jadi murah dipanggil berulang.
  *
  * @param int $id
  * @return string Slug dari TK_JENIS.
  */
 function tk_get_jenis( $id ) {
-    $slugs = wp_get_object_terms( $id, 'jenis', array( 'fields' => 'slugs' ) );
-    return ( ! is_wp_error( $slugs ) && $slugs && isset( TK_JENIS[ $slugs[0] ] ) ) ? $slugs[0] : 'tradisi';
-}
-
-/**
- * Label jenis, mis. "Budaya Material".
- *
- * @param int $id
- * @return string
- */
-function tk_get_jenis_label( $id ) {
-    return TK_JENIS[ tk_get_jenis( $id ) ];
+    $terms = get_the_terms( $id, 'jenis' );
+    return ( $terms && ! is_wp_error( $terms ) && isset( TK_JENIS[ $terms[0]->slug ] ) ) ? $terms[0]->slug : 'tradisi';
 }
 
 add_filter( 'acf/load_value/name=jenis_warisan', 'tk_jenis_load_value', 10, 2 );
@@ -116,14 +112,30 @@ function tk_jenis_update_value( $value, $post_id ) {
  * @return int[]
  */
 function tk_kategori_ids_jenis( $jenis ) {
-    $ids = get_terms( array(
-        'taxonomy'   => 'kategori-tradisi',
-        'hide_empty' => false,
-        'fields'     => 'ids',
-        'meta_key'   => 'tk_jenis', // phpcs:ignore WordPress.DB.SlowDBQuery -- daftar kategori kecil.
-        'meta_value' => $jenis,     // phpcs:ignore WordPress.DB.SlowDBQuery
-    ) );
-    return is_wp_error( $ids ) ? array() : array_map( 'intval', $ids );
+    static $memo = array(); // Dipakai berulang dalam satu request (form, validasi, dropdown).
+    if ( ! isset( $memo[ $jenis ] ) ) {
+        $ids = get_terms( array(
+            'taxonomy'   => 'kategori-tradisi',
+            'hide_empty' => false,
+            'fields'     => 'ids',
+            'meta_key'   => 'tk_jenis', // phpcs:ignore WordPress.DB.SlowDBQuery -- daftar kategori kecil.
+            'meta_value' => $jenis,     // phpcs:ignore WordPress.DB.SlowDBQuery
+        ) );
+        $memo[ $jenis ] = is_wp_error( $ids ) ? array() : array_map( 'intval', $ids );
+    }
+    return $memo[ $jenis ];
+}
+
+/**
+ * Key field ACF Kategori per jenis (lihat includes/core/acf-fields.php).
+ *
+ * @return string[] field key => slug jenis
+ */
+function tk_kategori_field_jenis() {
+    return array(
+        'field_tk_kategori_tradisi'  => 'tradisi',
+        'field_tk_kategori_material' => 'budaya-material',
+    );
 }
 
 add_action( 'acf/include_fields', 'tk_kategori_register_field_jenis' );
@@ -156,18 +168,16 @@ function tk_kategori_register_field_jenis() {
     ) );
 }
 
-add_filter( 'acf/fields/taxonomy/wp_list_categories/key=field_tk_kategori_tradisi', 'tk_kategori_saring_tradisi' );
-add_filter( 'acf/fields/taxonomy/wp_list_categories/key=field_tk_kategori_material', 'tk_kategori_saring_material' );
-
-/** Pilihan field Kategori untuk Tradisi. */
-function tk_kategori_saring_tradisi( $args ) {
-    return tk_kategori_saring( $args, 'tradisi' );
+// Setiap field Kategori: pilihan disaring & divalidasi sesuai jenisnya.
+foreach ( tk_kategori_field_jenis() as $tk_key => $tk_jenis ) {
+    add_filter( 'acf/fields/taxonomy/wp_list_categories/key=' . $tk_key, function ( $args ) use ( $tk_jenis ) {
+        return tk_kategori_saring( $args, $tk_jenis );
+    } );
+    add_filter( 'acf/validate_value/key=' . $tk_key, function ( $valid, $value ) use ( $tk_jenis ) {
+        return tk_kategori_validasi( $valid, $value, $tk_jenis );
+    }, 10, 2 );
 }
-
-/** Pilihan field Kategori untuk Budaya Material. */
-function tk_kategori_saring_material( $args ) {
-    return tk_kategori_saring( $args, 'budaya-material' );
-}
+unset( $tk_key, $tk_jenis );
 
 /**
  * Batasi daftar checkbox kategori ke jenis tertentu.
@@ -180,19 +190,6 @@ function tk_kategori_saring( $args, $jenis ) {
     $ids             = tk_kategori_ids_jenis( $jenis );
     $args['include'] = $ids ? $ids : array( 0 ); // Kosong = tidak ada pilihan.
     return $args;
-}
-
-add_filter( 'acf/validate_value/key=field_tk_kategori_tradisi', 'tk_kategori_validasi_tradisi', 10, 2 );
-add_filter( 'acf/validate_value/key=field_tk_kategori_material', 'tk_kategori_validasi_material', 10, 2 );
-
-/** Validasi kategori Tradisi. */
-function tk_kategori_validasi_tradisi( $valid, $value ) {
-    return tk_kategori_validasi( $valid, $value, 'tradisi' );
-}
-
-/** Validasi kategori Budaya Material. */
-function tk_kategori_validasi_material( $valid, $value ) {
-    return tk_kategori_validasi( $valid, $value, 'budaya-material' );
 }
 
 /**
