@@ -20,9 +20,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function tk_kurasi_render_pesan() {
-    $hasil = isset( $_GET['kurasi'] ) ? sanitize_key( $_GET['kurasi'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- hanya menampilkan pesan.
+    // phpcs:disable WordPress.Security.NonceVerification -- hanya menampilkan pesan.
+    $hasil = isset( $_GET['kurasi'] ) ? sanitize_key( $_GET['kurasi'] ) : '';
+
+    // Aksi massal: "N koleksi diterbitkan. M dilewati ..."
+    if ( 'massal' === $hasil ) {
+        $n     = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
+        $lewat = isset( $_GET['lewat'] ) ? absint( $_GET['lewat'] ) : 0;
+        $aksi  = isset( $_GET['aksi_massal'] ) ? sanitize_key( $_GET['aksi_massal'] ) : '';
+        $kata  = array( 'terbitkan' => 'diterbitkan', 'revisi' => 'dikembalikan untuk revisi', 'antrean' => 'dikembalikan ke antrean', 'tolak' => 'ditolak (dipindah ke Trash)' );
+        $teks  = sprintf( '%d koleksi %s.', $n, isset( $kata[ $aksi ] ) ? $kata[ $aksi ] : 'diproses' );
+        if ( $lewat ) {
+            $teks .= sprintf( ' %d dilewati karena aksi ini tidak berlaku untuk statusnya.', $lewat );
+        }
+        return sprintf( '<div class="tk-notice tk-notice--%s">%s</div>', $n ? 'sukses' : 'gagal', esc_html( $teks ) );
+    }
+    // phpcs:enable
 
     $pesan = array(
+        'massal_kosong' => array( 'gagal', 'Pilih minimal satu koleksi dan satu aksi massal.' ),
         'terbitkan'     => array( 'sukses', 'Tradisi diterbitkan dan pengirim sudah diberi tahu.' ),
         'revisi'        => array( 'info', 'Kiriman dikembalikan untuk revisi. Pengirim sudah menerima catatan Anda.' ),
         'tolak'         => array( 'info', 'Kiriman ditolak dan dipindah ke Trash (bisa dipulihkan dalam 30 hari). Pengirim sudah menerima alasannya.' ),

@@ -5,7 +5,14 @@
  * Pemakaian: taruh di halaman Dashboard Kurasi (slug TK_SLUG_KURASI).
  * Hanya untuk pengguna dengan hak tk_kurasi.
  *
- *   Ringkasan        jumlah menunggu kurasi, menunggu revisi, terpublikasi.
+ *   Kartu status     Menunggu Kurasi · Menunggu Revisi · Terpublikasi. Kartu adalah
+ *                    filter (?tampil=pending|revisi|publish), angkanya mengikuti
+ *                    filter jenis (?tipe=tradisi|budaya-material) & pencarian
+ *                    (?kcari=, judul & isi). Halaman: ?khal=2.
+ *   Aksi massal      centang koleksi → Terbitkan / Kembalikan ke Antrean / Minta
+ *                    Revisi / Tolak (tk_kurasi_massal_handle(), includes/kurasi/aksi.php).
+ *   Menunggu Revisi & Terpublikasi  baris ringkas: jenis, kategori, provinsi,
+ *                    kelengkapan, status, tombol Lihat/Ubah.
  *   Antrean Kurasi   kiriman "pending", terlama di atas; checklist, lama menunggu,
  *                    tombol Pratinjau/Ubah/Edit di wp-admin/Terbitkan, panel Minta Revisi/Tolak, riwayat.
  *                    Usulan perubahan diberi label, tautan versi terbit, daftar
@@ -39,63 +46,271 @@ function tk_kurasi_shortcode() {
         return '<p class="tk-kosong">Halaman ini khusus untuk kurator WARISI.</p>';
     }
 
-    $pending = get_posts( array(
-        'post_type'      => 'tradisi',
-        'post_status'    => 'pending',
-        'posts_per_page' => 50,
-        'orderby'        => 'date',
-        'order'          => 'ASC', // Kiriman terlama ditinjau lebih dulu.
+    $f      = tk_kurasi_get_filter();
+    $status = tk_kurasi_status();
+    $conf   = $status[ $f['tampil'] ];
+
+    $q = new WP_Query( tk_kurasi_query_args( $f['tampil'], $f['tipe'], $f['cari'] ) + array(
+        'posts_per_page' => 'pending' === $f['tampil'] ? 50 : TK_KURASI_PER_HALAMAN,
+        'paged'          => $f['hal'],
+        'orderby'        => 'pending' === $f['tampil'] ? 'date' : 'modified',
+        'order'          => 'pending' === $f['tampil'] ? 'ASC' : 'DESC', // Antrean: terlama dulu.
     ) );
 
-    $jumlah_revisi = count( get_posts( array(
-        'post_type'      => 'tradisi',
-        'post_status'    => 'draft',
-        'posts_per_page' => -1,
-        'fields'         => 'ids',
-        'meta_key'       => '_tk_perlu_revisi',
-        'meta_value'     => '1',
-    ) ) );
-    $jumlah = wp_count_posts( 'tradisi' );
-
-    $ringkasan = array(
-        'Menunggu Kurasi'   => $jumlah->pending,
-        'Menunggu Revisi'   => $jumlah_revisi,
-        'Terpublikasi'      => $jumlah->publish,
-    );
+    wp_enqueue_script( 'tk-kurasi', TK_URL . 'assets/js/kurasi.js', array(), filemtime( TK_PATH . 'assets/js/kurasi.js' ), true );
 
     ob_start();
 
     echo tk_kurasi_render_pesan();
     ?>
-    <div class="tk-stats">
-      <?php foreach ( $ringkasan as $label => $angka ) : ?>
-        <div class="tk-stat">
+    <?php /* Kartu = filter status. Angka mengikuti filter jenis. */ ?>
+    <nav class="tk-stats tk-stats--kurasi" aria-label="Filter status">
+      <?php foreach ( $status as $kunci => $s ) :
+          $jumlah = tk_kurasi_hitung( $kunci, $f['tipe'], $f['cari'] );
+          $aktif  = $kunci === $f['tampil'];
+          ?>
+        <a class="tk-stat tk-stat--filter<?php echo $aktif ? ' is-aktif' : ''; ?>"
+           href="<?php echo esc_url( tk_kurasi_url( array( 'tampil' => $kunci, 'tipe' => $f['tipe'], 'kcari' => $f['cari'] ) ) ); ?>"
+           <?php echo $aktif ? 'aria-current="true"' : ''; ?>>
           <div class="tk-stat-teks">
-            <span class="tk-stat-angka"><?php echo esc_html( number_format_i18n( $angka ) ); ?></span>
-            <span class="tk-stat-label"><?php echo esc_html( $label ); ?></span>
+            <span class="tk-stat-angka"><?php echo esc_html( number_format_i18n( $jumlah ) ); ?></span>
+            <span class="tk-stat-label"><?php echo esc_html( $s['label'] ); ?></span>
           </div>
-        </div>
+        </a>
       <?php endforeach; ?>
-    </div>
+    </nav>
 
-    <section class="tk-kurasi">
+    <section class="tk-kurasi" id="daftar-kurasi">
       <div class="tk-koleksi-head">
-        <h2>Antrean Kurasi</h2>
-        <span class="tk-jumlah-kecil">Terlama di atas</span>
+        <h2><?php echo esc_html( $conf['judul'] ); ?></h2>
+        <span class="tk-jumlah-kecil"><?php echo esc_html( number_format_i18n( $q->found_posts ) ); ?> koleksi<?php echo 'pending' === $f['tampil'] ? ' · terlama di atas' : ''; ?></span>
       </div>
 
-      <?php if ( ! $pending ) : ?>
-        <p class="tk-kosong">Tidak ada kiriman yang menunggu. Semua sudah ditinjau.</p>
+      <div class="tk-kurasi-filter">
+        <?php /* Filter jenis */ ?>
+        <nav class="tk-tab" aria-label="Filter jenis">
+          <?php foreach ( array( '' => 'Semua' ) + TK_JENIS as $slug => $label ) : ?>
+            <a class="tk-tab-item<?php echo $slug === $f['tipe'] ? ' is-aktif' : ''; ?>"
+               href="<?php echo esc_url( tk_kurasi_url( array( 'tampil' => $f['tampil'], 'tipe' => $slug, 'kcari' => $f['cari'] ) ) ); ?>">
+              <?php echo esc_html( $label ); ?> <span><?php echo esc_html( number_format_i18n( tk_kurasi_hitung( $f['tampil'], $slug, $f['cari'] ) ) ); ?></span>
+            </a>
+          <?php endforeach; ?>
+        </nav>
+
+        <?php /* Pencarian: judul & isi, dalam status + jenis yang dipilih */ ?>
+        <form class="tk-kurasi-cari" method="get" action="<?php echo esc_url( tk_url_kurasi() ); ?>#daftar-kurasi" role="search">
+          <?php if ( 'pending' !== $f['tampil'] ) : ?><input type="hidden" name="tampil" value="<?php echo esc_attr( $f['tampil'] ); ?>"><?php endif; ?>
+          <?php if ( $f['tipe'] ) : ?><input type="hidden" name="tipe" value="<?php echo esc_attr( $f['tipe'] ); ?>"><?php endif; ?>
+          <input type="search" name="kcari" value="<?php echo esc_attr( $f['cari'] ); ?>" placeholder="Cari judul atau isi…" aria-label="Cari koleksi">
+          <button type="submit" class="tk-btn-kecil">Cari</button>
+          <?php if ( '' !== $f['cari'] ) : ?>
+            <a class="tk-reset" href="<?php echo esc_url( tk_kurasi_url( array( 'tampil' => $f['tampil'], 'tipe' => $f['tipe'] ) ) ); ?>#daftar-kurasi">× Hapus pencarian</a>
+          <?php endif; ?>
+        </form>
+      </div>
+
+      <?php if ( ! $q->have_posts() ) : ?>
+        <p class="tk-kosong"><?php echo esc_html( '' !== $f['cari'] ? 'Tidak ada koleksi yang cocok dengan "' . $f['cari'] . '".' : $conf['kosong'] ); ?></p>
       <?php else : ?>
-        <ul class="tk-kurasi-daftar">
-          <?php foreach ( $pending as $p ) { echo tk_kurasi_render_item( $p ); } ?>
-        </ul>
+        <?php echo tk_kurasi_render_massal( $f ); // phpcs:ignore WordPress.Security.EscapeOutput -- di-escape di dalam fungsi. ?>
+
+        <?php if ( 'pending' === $f['tampil'] ) : ?>
+          <ul class="tk-kurasi-daftar">
+            <?php foreach ( $q->posts as $p ) { echo tk_kurasi_render_item( $p ); } ?>
+          </ul>
+        <?php else : ?>
+          <ul class="tk-kurasi-baris">
+            <?php foreach ( $q->posts as $p ) { echo tk_kurasi_render_baris( $p ); } ?>
+          </ul>
+        <?php endif; ?>
+
+        <?php if ( $q->max_num_pages > 1 ) : ?>
+          <nav class="tk-halaman" aria-label="Halaman daftar kurasi">
+            <?php echo paginate_links( array(
+                'base'      => add_query_arg( 'khal', '%#%', tk_kurasi_url( array( 'tampil' => $f['tampil'], 'tipe' => $f['tipe'], 'kcari' => $f['cari'] ) ) ) . '#daftar-kurasi',
+                'format'    => '',
+                'current'   => $f['hal'],
+                'total'     => $q->max_num_pages,
+                'prev_text' => '‹ Sebelumnya',
+                'next_text' => 'Berikutnya ›',
+            ) ); ?>
+          </nav>
+        <?php endif; ?>
       <?php endif; ?>
     </section>
     <?php
 
     echo tk_kurasi_render_riwayat_saya();
 
+    return ob_get_clean();
+}
+
+/**
+ * Status yang bisa dipilih lewat kartu.
+ *
+ * @return array[] kunci => label, judul daftar, pesan kosong
+ */
+function tk_kurasi_status() {
+    return array(
+        'pending' => array( 'label' => 'Menunggu Kurasi', 'judul' => 'Antrean Kurasi', 'kosong' => 'Tidak ada kiriman yang menunggu. Semua sudah ditinjau.' ),
+        'revisi'  => array( 'label' => 'Menunggu Revisi', 'judul' => 'Menunggu Revisi dari Pengirim', 'kosong' => 'Tidak ada kiriman yang sedang direvisi.' ),
+        'publish' => array( 'label' => 'Terpublikasi', 'judul' => 'Koleksi Terpublikasi', 'kosong' => 'Belum ada koleksi terbit.' ),
+    );
+}
+
+/**
+ * Filter dari URL: ?tampil=pending|revisi|publish &tipe=<jenis> &kcari=<kata> &khal=N.
+ * (Bukan "status"/"jenis"/"s": nama itu dipakai WordPress/taxonomy.)
+ *
+ * @return array
+ */
+function tk_kurasi_get_filter() {
+    // phpcs:disable WordPress.Security.NonceVerification -- filter tampilan.
+    $tampil = isset( $_GET['tampil'] ) ? sanitize_key( $_GET['tampil'] ) : 'pending';
+    $tipe   = isset( $_GET['tipe'] ) ? sanitize_key( $_GET['tipe'] ) : '';
+    $cari   = isset( $_GET['kcari'] ) ? sanitize_text_field( wp_unslash( $_GET['kcari'] ) ) : '';
+    $hal    = isset( $_GET['khal'] ) ? max( 1, absint( $_GET['khal'] ) ) : 1;
+    // phpcs:enable
+    return array(
+        'tampil' => isset( tk_kurasi_status()[ $tampil ] ) ? $tampil : 'pending',
+        'tipe'   => isset( TK_JENIS[ $tipe ] ) ? $tipe : '',
+        'cari'   => trim( $cari ),
+        'hal'    => $hal,
+    );
+}
+
+/**
+ * URL dashboard dengan filter (nilai kosong dibuang, pesan lama dihapus).
+ *
+ * @param array $args
+ * @return string
+ */
+function tk_kurasi_url( $args ) {
+    if ( isset( $args['tampil'] ) && 'pending' === $args['tampil'] ) {
+        unset( $args['tampil'] );
+    }
+    // add_query_arg() tidak meng-encode nilai; kata pencarian bisa berisi spasi/simbol.
+    return add_query_arg( array_map( 'rawurlencode', array_filter( array_map( 'strval', $args ), 'strlen' ) ), tk_url_kurasi() );
+}
+
+/**
+ * Argumen WP_Query untuk satu status + jenis.
+ *
+ * @param string $tampil
+ * @param string $tipe
+ * @param string $cari   Kata kunci (judul & isi), opsional.
+ * @return array
+ */
+function tk_kurasi_query_args( $tampil, $tipe, $cari = '' ) {
+    $args = array( 'post_type' => 'tradisi', 'post_status' => 'revisi' === $tampil ? 'draft' : $tampil );
+    if ( '' !== $cari ) {
+        $args['s'] = $cari;
+    }
+    if ( 'revisi' === $tampil ) {
+        $args['meta_key']   = '_tk_perlu_revisi'; // phpcs:ignore WordPress.DB.SlowDBQuery
+        $args['meta_value'] = '1';                // phpcs:ignore WordPress.DB.SlowDBQuery
+    }
+    if ( $tipe ) {
+        $args['tax_query'] = array( array( 'taxonomy' => 'jenis', 'field' => 'slug', 'terms' => $tipe ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+    }
+    return $args;
+}
+
+/**
+ * Jumlah koleksi untuk satu status + jenis.
+ *
+ * @param string $tampil
+ * @param string $tipe
+ * @param string $cari
+ * @return int
+ */
+function tk_kurasi_hitung( $tampil, $tipe, $cari = '' ) {
+    $q = new WP_Query( tk_kurasi_query_args( $tampil, $tipe, $cari ) + array( 'posts_per_page' => 1, 'fields' => 'ids' ) );
+    return (int) $q->found_posts;
+}
+
+/**
+ * Bilah aksi massal. Checkbox di setiap koleksi terhubung ke form ini lewat
+ * atribut form="tk-massal" (form tidak bisa bersarang di form tombol per koleksi).
+ * Pilih semua & konfirmasi: assets/js/kurasi.js.
+ *
+ * @param array $f Filter aktif (untuk kembali ke tampilan yang sama).
+ * @return string
+ */
+function tk_kurasi_render_massal( $f ) {
+    $aksi = array(
+        'terbitkan' => 'Terbitkan / Setujui & Terapkan',
+        'antrean'   => 'Kembalikan ke Antrean',
+        'revisi'    => 'Minta Revisi',
+        'tolak'     => 'Tolak (pindah ke Trash)',
+    );
+    $kembali = tk_kurasi_url( array( 'tampil' => $f['tampil'], 'tipe' => $f['tipe'], 'kcari' => $f['cari'], 'khal' => $f['hal'] > 1 ? $f['hal'] : 0 ) );
+
+    ob_start();
+    ?>
+    <form id="tk-massal" class="tk-massal" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+      <input type="hidden" name="action" value="tk_kurasi_massal">
+      <input type="hidden" name="kembali" value="<?php echo esc_url( $kembali ); ?>">
+      <?php wp_nonce_field( 'tk_kurasi_massal', '_tk_nonce' ); ?>
+
+      <label class="tk-massal-semua"><input type="checkbox" data-tk-pilih-semua> Pilih semua</label>
+      <span class="tk-massal-hitung" data-tk-hitung>0 dipilih</span>
+      <select name="aksi" aria-label="Aksi massal">
+        <option value="">Aksi massal…</option>
+        <?php foreach ( $aksi as $k => $label ) : ?>
+          <option value="<?php echo esc_attr( $k ); ?>"><?php echo esc_html( $label ); ?></option>
+        <?php endforeach; ?>
+      </select>
+      <textarea name="catatan" rows="1" placeholder="Catatan (wajib untuk Kembalikan ke Antrean, Minta Revisi, Tolak; dikirim ke pengirim)"></textarea>
+      <button type="submit" class="tk-btn-kecil tk-btn-kecil--terbit">Terapkan</button>
+    </form>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Checkbox pilih untuk aksi massal.
+ *
+ * @param int $id
+ * @return string
+ */
+function tk_kurasi_checkbox( $id ) {
+    return sprintf(
+        '<label class="tk-pilih"><input type="checkbox" form="tk-massal" name="post_ids[]" value="%1$d" aria-label="Pilih %2$s"></label>',
+        absint( $id ),
+        esc_attr( get_the_title( $id ) )
+    );
+}
+
+/**
+ * Satu baris ringkas (Menunggu Revisi / Terpublikasi).
+ *
+ * @param WP_Post $p
+ * @return string
+ */
+function tk_kurasi_render_baris( $p ) {
+    $id    = $p->ID;
+    $cek   = tk_kelengkapan( $id );
+    $info  = array_filter( array( tk_get_jenis_label( $id ), tk_term_names( $id, 'kategori-tradisi' ), tk_term_names( $id, 'wilayah' ), tk_nama_pengirim( $id ) ) );
+    list( $status_label, $status_mod ) = tk_status_kiriman( $p );
+
+    ob_start();
+    ?>
+    <li class="tk-kurasi-baris-item">
+      <?php echo tk_kurasi_checkbox( $id ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+      <div class="tk-riwayat-thumb"><?php echo get_the_post_thumbnail( $p, 'thumbnail' ); ?></div>
+      <div class="tk-riwayat-isi">
+        <strong class="tk-riwayat-judul"><a href="<?php echo esc_url( tk_url_tinjau( $id ) ); ?>#panel-kurator"><?php echo esc_html( get_the_title( $p ) ); ?></a></strong>
+        <span class="tk-riwayat-meta"><?php echo esc_html( implode( ' · ', $info ) ); ?> · diubah <?php echo esc_html( get_the_modified_date( 'j M Y', $p ) ); ?></span>
+      </div>
+      <span class="tk-cek-skor" title="Kelengkapan"><?php echo esc_html( count( array_filter( $cek ) ) . '/' . count( $cek ) ); ?></span>
+      <span class="tk-status tk-status--<?php echo esc_attr( $status_mod ); ?>"><?php echo esc_html( $status_label ); ?></span>
+      <div class="tk-riwayat-aksi">
+        <?php echo tk_kurasi_tombol_lihat( $p ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+        <a class="tk-btn-kecil" href="<?php echo esc_url( tk_url_ubah( $id ) ); ?>">Ubah</a>
+      </div>
+    </li>
+    <?php
     return ob_get_clean();
 }
 
@@ -120,6 +335,7 @@ function tk_kurasi_render_item( $p ) {
     ob_start();
     ?>
     <li class="tk-kurasi-item">
+      <?php echo tk_kurasi_checkbox( $id ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
       <div class="tk-kurasi-thumb"><?php echo get_the_post_thumbnail( $id, 'thumbnail' ); ?></div>
 
       <div class="tk-kurasi-isi">

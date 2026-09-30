@@ -7,7 +7,6 @@
  * Gaya ada di assets/css/single.css.
  *
  * Urutan bagian:
- *   0. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *   1. Link kembali
  *   2. Badge jenis + kategori + status, judul, tanggal terbit
  *   3. Baris meta: penulis, kabupaten/kota, provinsi, pembaca; tombol
@@ -21,6 +20,7 @@
  *   8. Galeri foto
  *   9. Lokasi di peta (kalau koordinat diisi)
  *  10. Kata kunci + sumber referensi
+ *  10b. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *  11. Tautan "Terkait dengan": "Digunakan dalam Tradisi" / "Budaya Material Terkait"
  *  12. Lihat Juga (otomatis: kategori/provinsi sama)
  *
@@ -63,9 +63,6 @@ while ( have_posts() ) :
 
 <div class="container">
   <article class="tk-single">
-
-    <?php /* 0. Panel Kurator (hanya terlihat oleh kurator/admin) */ ?>
-    <?php echo tk_panel_kurator( $id ); // phpcs:ignore WordPress.Security.EscapeOutput -- di-escape di dalam fungsi. ?>
 
     <?php /* 1. Link kembali */ ?>
     <a class="tk-single__kembali" href="<?php echo esc_url( tk_url_jelajahi() ); ?>">← Kembali ke koleksi</a>
@@ -183,6 +180,9 @@ while ( have_posts() ) :
         <?php endif; ?>
       </footer>
     <?php endif; ?>
+
+    <?php /* 10b. Panel Kurator (hanya terlihat oleh kurator/admin), setelah isi koleksi */ ?>
+    <?php echo tk_panel_kurator( $id ); // phpcs:ignore WordPress.Security.EscapeOutput -- di-escape di dalam fungsi. ?>
 
   </article>
 

@@ -2,6 +2,21 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.10.0 (30 September 2026): Filter & aksi massal Dashboard Kurasi
+
+**Baru**
+- Kartu Menunggu Kurasi / Menunggu Revisi / Terpublikasi di Dashboard Kurasi menjadi filter (`?tampil=`), dengan pilihan Jenis Semua / Tradisi / Budaya Material (`?tipe=`); angka kartu mengikuti jenis. Menunggu Revisi & Terpublikasi tampil sebagai baris ringkas (jenis, kategori, provinsi, kelengkapan, Lihat, Ubah), 20 per halaman (`TK_KURASI_PER_HALAMAN`, `?khal=`).
+- **Aksi massal**: centang koleksi (atau Pilih semua) → Terbitkan / Kembalikan ke Antrean / Minta Revisi / Tolak, dengan satu catatan untuk semua (`tk_kurasi_massal_handle()`, `assets/js/kurasi.js`). Koleksi yang aksinya tidak berlaku untuk statusnya dilewati dan dilaporkan.
+- Tombol **Ubah** di setiap koleksi pada Dashboard Kurasi.
+- **Pencarian** di Dashboard Kurasi (`?kcari=`, judul & isi), di dalam status & jenis yang dipilih; angka kartu, tab jenis, paging, dan aksi massal ikut hasil pencarian.
+
+**Diubah**
+- Panel Kurator dipindah ke bawah isi koleksi (sebelum tautan & Lihat Juga).
+- Aksi kurasi disatukan di `tk_kurasi_jalankan()` (dipakai tombol per koleksi & aksi massal).
+
+**Diperbaiki**
+- Menerbitkan draf tanpa slug (mis. hasil impor) kini membuat slug dari judul; sebelumnya URL-nya rusak.
+
 ## 2.9.0 (30 September 2026): Ubah Tradisi & Riwayat Suntingan
 
 **Baru**

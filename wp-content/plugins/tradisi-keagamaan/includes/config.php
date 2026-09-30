@@ -82,6 +82,9 @@ define( 'TK_FOTO_MAKS_MB', 5 );
 /** Kiriman yang menunggu lebih dari sekian hari ditandai merah di dashboard. */
 define( 'TK_KURASI_HARI_PERINGATAN', 7 );
 
+/** Jumlah koleksi per halaman di Dashboard Kurasi (Menunggu Revisi, Terpublikasi). */
+define( 'TK_KURASI_PER_HALAMAN', 20 );
+
 /** Jumlah baris per halaman di "Riwayat Kurasi Saya". */
 define( 'TK_RIWAYAT_PER_HALAMAN', 15 );
 

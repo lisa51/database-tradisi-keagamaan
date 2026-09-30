@@ -12,7 +12,7 @@
 .tk-kurasi-daftar { margin: 0; padding: 0; list-style: none; }
 .tk-kurasi-item {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) auto;
+  grid-template-columns: 20px 72px minmax(0, 1fr) auto; /* [pilih] [thumb] [isi] [aksi] */
   align-items: center;
   gap: 16px;
   margin-bottom: 12px;
@@ -188,7 +188,8 @@
    6. Panel Kurator (atas halaman tradisi, khusus kurator)
    ============================================================================= */
 .tk-panel-kurator {
-  margin: 0 0 28px;
+  margin: 40px 0 0; /* Di bawah isi koleksi, sebelum tautan/Lihat Juga */
+  scroll-margin-top: 24px;
   padding: 18px 20px;
   border: 2px dashed var(--tk-accent);
   border-radius: 14px;
@@ -220,12 +221,104 @@
 
 
 /* =============================================================================
+   7. Dashboard: kartu filter, aksi massal, baris ringkas
+   ============================================================================= */
+.tk-stats--kurasi { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+a.tk-stat--filter {
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+a.tk-stat--filter:hover   { border-color: var(--tk-accent-garis); }
+a.tk-stat--filter.is-aktif {
+  border-color: var(--tk-accent);
+  box-shadow: 0 0 0 2px rgba(196, 85, 45, .15);
+  background: var(--tk-accent-muda);
+}
+a.tk-stat--filter.is-aktif .tk-stat-label { color: var(--tk-accent-gelap); }
+
+/* Baris filter: [tab jenis] ............ [cari] */
+.tk-kurasi-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 16px;
+}
+.tk-kurasi-filter .tk-tab { margin-bottom: 0; }
+.tk-kurasi-cari { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tk-kurasi-cari input[type="search"] {
+  width: 240px;
+  max-width: 100%;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+.tk-kurasi-cari input[type="search"]:focus { border-color: var(--tk-accent); outline: 0; box-shadow: 0 0 0 2px rgba(196, 85, 45, .15); }
+.tk-kurasi-cari button.tk-btn-kecil { cursor: pointer; font-family: inherit; }
+.tk-kurasi-cari .tk-reset { font-size: 13px; }
+
+.tk-massal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: var(--tk-krem);
+}
+.tk-massal-semua { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.tk-massal-hitung { font-size: 12px; color: var(--tk-abu); }
+.tk-massal select,
+.tk-massal textarea {
+  padding: 6px 10px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius-kecil);
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+.tk-massal textarea { flex: 1 1 260px; min-height: 34px; resize: vertical; }
+
+.tk-pilih { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.tk-pilih input,
+.tk-massal-semua input { width: 16px; height: 16px; accent-color: var(--tk-accent); cursor: pointer; }
+
+.tk-kurasi-baris { margin: 0; padding: 0; list-style: none; }
+.tk-kurasi-baris-item {
+  display: grid;
+  grid-template-columns: 20px 48px minmax(0, 1fr) auto auto auto; /* pilih, thumb, judul, skor, status, tombol */
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+}
+.tk-kurasi-baris-item:has(.tk-pilih input:checked),
+.tk-kurasi-item:has(> .tk-pilih input:checked) { border-color: var(--tk-accent); background: var(--tk-accent-muda); }
+.tk-kurasi-baris-item .tk-riwayat-aksi { display: flex; gap: 6px; }
+
+
+/* =============================================================================
    Responsif
    ============================================================================= */
 @media (max-width: 600px) {
-  .tk-kurasi-item  { grid-template-columns: 56px minmax(0, 1fr); }
+  .tk-kurasi-item  { grid-template-columns: 20px 56px minmax(0, 1fr); }
   .tk-kurasi-thumb { width: 56px; height: 56px; }
   .tk-kurasi-aksi  { grid-column: 1 / -1; justify-content: flex-start; }
+
+  .tk-stats--kurasi { grid-template-columns: 1fr; }
+  .tk-kurasi-baris-item { grid-template-columns: 20px 40px minmax(0, 1fr) auto; }
+  .tk-kurasi-baris-item .tk-riwayat-aksi { grid-column: 3 / -1; }
 
   .tk-riwayat-daftar > li { grid-template-columns: 40px minmax(0, 1fr) auto; }
   .tk-riwayat-thumb       { width: 40px; height: 40px; }
