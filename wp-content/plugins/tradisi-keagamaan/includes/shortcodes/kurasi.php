@@ -7,7 +7,9 @@
  *
  *   Ringkasan        jumlah menunggu kurasi, menunggu revisi, terpublikasi.
  *   Antrean Kurasi   kiriman "pending", terlama di atas; checklist, lama menunggu,
- *                    tombol Pratinjau/Edit/Terbitkan, panel Minta Revisi/Tolak, riwayat.
+ *                    tombol Pratinjau/Ubah/Edit di wp-admin/Terbitkan, panel Minta Revisi/Tolak, riwayat.
+ *                    Usulan perubahan diberi label, tautan versi terbit, daftar
+ *                    bagian yang diubah, dan tombol "Setujui & Terapkan".
  *   Riwayat Kurasi Saya  tradisi yang pernah diputuskan kurator ini, dengan tab
  *                    (?riwayat=terbitkan|revisi|tolak|antrean) dan halaman (?rhal=2).
  *
@@ -106,12 +108,14 @@ function tk_kurasi_shortcode() {
 function tk_kurasi_render_item( $p ) {
     $id      = $p->ID;
     $tamu    = tk_is_kiriman_tamu( $id );
-    $hari    = (int) floor( ( time() - get_post_time( 'U', true, $p ) ) / DAY_IN_SECONDS );
+    // Waktu lokal: draf yang kemudian dikirim tidak punya post_date_gmt (0000-00-00).
+    $hari    = (int) floor( ( current_time( 'timestamp' ) - get_post_time( 'U', false, $p ) ) / DAY_IN_SECONDS );
     $lama    = 0 === $hari ? 'hari ini' : $hari . ' hari';
     $info    = array_filter( array( tk_term_names( $id, 'wilayah' ), tk_term_names( $id, 'kategori-tradisi' ) ) );
     $log     = tk_log_get( $id );
     $ulang   = $log && 'kirim_ulang' === end( $log )['aksi'];
     $catatan = (string) get_post_meta( $id, '_tk_catatan', true );
+    $asal    = tk_usulan_asal( $id );
 
     ob_start();
     ?>
@@ -121,8 +125,16 @@ function tk_kurasi_render_item( $p ) {
       <div class="tk-kurasi-isi">
         <h3 class="tk-kurasi-judul">
           <a href="<?php echo esc_url( tk_url_tinjau( $id ) ); ?>#panel-kurator"><?php echo esc_html( get_the_title( $id ) ); ?></a>
+          <?php if ( $asal ) : ?><span class="tk-status tk-status--usulan">Usulan perubahan</span><?php endif; ?>
           <?php if ( $ulang ) : ?><span class="tk-status tk-status--revisi">Kiriman ulang</span><?php endif; ?>
         </h3>
+        <?php if ( $asal ) : ?>
+          <?php $ubah = tk_usulan_perubahan( $id ); ?>
+          <p class="tk-kurasi-usulan">
+            Untuk versi terbit: <a href="<?php echo esc_url( get_permalink( $asal ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( get_the_title( $asal ) ); ?></a>
+            · Diubah: <?php echo $ubah ? esc_html( implode( ', ', $ubah ) ) : '<em>tidak ada perbedaan</em>'; ?>
+          </p>
+        <?php endif; ?>
         <p class="tk-kurasi-meta">
           <?php echo esc_html( tk_nama_pengirim( $id ) ); ?>
           <?php if ( $tamu ) : ?>
@@ -140,9 +152,13 @@ function tk_kurasi_render_item( $p ) {
 
       <div class="tk-kurasi-aksi">
         <a class="tk-btn-kecil" href="<?php echo esc_url( get_preview_post_link( $id ) ); ?>" target="_blank" rel="noopener">Pratinjau</a>
-        <a class="tk-btn-kecil" href="<?php echo esc_url( get_edit_post_link( $id ) ); ?>">Edit</a>
+        <a class="tk-btn-kecil" href="<?php echo esc_url( tk_url_ubah( $id ) ); ?>">Ubah</a>
+        <a class="tk-btn-kecil" href="<?php echo esc_url( get_edit_post_link( $id ) ); ?>">Edit di wp-admin</a>
         <?php echo tk_kurasi_form_buka( $id ); ?>
-          <button type="submit" name="aksi" value="terbitkan" class="tk-btn-kecil tk-btn-kecil--terbit">Terbitkan</button>
+          <button type="submit" name="aksi" value="terbitkan" class="tk-btn-kecil tk-btn-kecil--terbit"
+                  <?php if ( $asal ) : ?>onclick="return confirm('Terapkan usulan ini ke versi terbit? Isi halaman yang terbit akan diganti.');"<?php endif; ?>>
+            <?php echo $asal ? 'Setujui &amp; Terapkan' : 'Terbitkan'; ?>
+          </button>
         </form>
       </div>
 

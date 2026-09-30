@@ -42,16 +42,13 @@ function tk_token_cocok( $post_id, $token ) {
 }
 
 /**
- * URL untuk melanjutkan/merevisi kiriman.
- * Akun → form?edit=ID. Tamu → form?edit=ID&token=... (token baru dibuat).
+ * URL untuk melanjutkan/merevisi kiriman di halaman Ubah Tradisi.
+ * Akun → ubah?edit=ID. Tamu → ubah?edit=ID&token=... (token baru dibuat).
  *
  * @param int $post_id
  * @return string
  */
 function tk_url_revisi( $post_id ) {
-    $args = array( 'edit' => $post_id );
-    if ( tk_is_kiriman_tamu( $post_id ) ) {
-        $args['token'] = tk_token_buat( $post_id );
-    }
-    return add_query_arg( $args, tk_url_tambah() );
+    $url = tk_url_ubah( $post_id );
+    return tk_is_kiriman_tamu( $post_id ) ? add_query_arg( 'token', tk_token_buat( $post_id ), $url ) : $url;
 }

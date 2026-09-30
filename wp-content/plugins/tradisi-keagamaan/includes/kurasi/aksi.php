@@ -5,6 +5,8 @@
  * Dipakai tombol di Dashboard Kurasi dan Panel Kurator.
  * Aksi yang sah bergantung pada status saat ini (tk_aksi_diizinkan()):
  *   terbitkan · revisi · antrean · tolak
+ * Untuk usulan perubahan, "terbitkan" menerapkan isi usulan ke versi terbit
+ * (tk_usulan_terapkan(), includes/kontribusi/usulan.php).
  *
  * Keamanan: nonce per tradisi, cek hak tk_kurasi + edit_post, cek aksi
  * sah untuk status saat ini, dan catatan wajib untuk revisi/antrean/tolak.
@@ -48,6 +50,13 @@ function tk_kurasi_handle() {
     }
 
     $GLOBALS['tk_aksi_dashboard'] = true; // Agar tidak dicatat dua kali oleh hook transisi status.
+
+    // Usulan perubahan: "Terbitkan" = terapkan ke versi terbit, lalu usulan dihapus.
+    if ( 'terbitkan' === $aksi && tk_usulan_asal( $post_id ) ) {
+        tk_email_ke_pengirim( $post_id, 'terapkan' ); // Sebelum usulan dihapus.
+        $asal = tk_usulan_terapkan( $post_id );
+        tk_kurasi_redirect( $asal ? 'terapkan' : 'gagal', $panel ? $asal : 0 );
+    }
 
     switch ( $aksi ) {
         case 'terbitkan':

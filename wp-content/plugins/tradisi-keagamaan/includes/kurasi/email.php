@@ -2,8 +2,9 @@
 /**
  * Email pemberitahuan alur kurasi (lewat wp_mail()).
  *
- *   Ke kurator   kiriman baru & kiriman ulang setelah revisi.
- *   Ke pengirim  diterima, terbit, diminta revisi (dengan link), ditolak (dengan alasan).
+ *   Ke kurator   kiriman baru, kiriman ulang setelah revisi, usulan perubahan.
+ *   Ke pengirim  diterima, terbit, diminta revisi (dengan link), ditolak (dengan alasan);
+ *                untuk usulan perubahan: disetujui, diminta revisi, ditolak.
  *
  * Di LocalWP email tidak terkirim sungguhan; lihat tab "Mailpit".
  * Di server, pastikan SMTP berfungsi (mis. plugin WP Mail SMTP).
@@ -44,12 +45,22 @@ function tk_email_ke_kurator( $post_id, $ulang = false ) {
         $emails = array( get_option( 'admin_email' ) );
     }
 
+    $usulan = tk_usulan_asal( $post_id );
+    if ( $usulan ) {
+        $subjek  = ( $ulang ? 'Revisi usulan masuk: ' : 'Usulan perubahan: ' ) . get_the_title( $post_id );
+        $pembuka = 'Kontributor mengusulkan perubahan untuk tradisi yang sudah terbit. Versi terbit tetap tampil sampai usulan disetujui.'
+            . "\nVersi terbit: " . get_permalink( $usulan );
+    } else {
+        $subjek  = ( $ulang ? 'Revisi masuk: ' : 'Kiriman baru: ' ) . get_the_title( $post_id );
+        $pembuka = $ulang ? 'Kontributor sudah mengirim ulang tradisi yang diminta revisi.' : 'Ada tradisi baru yang menunggu kurasi.';
+    }
+
     tk_kirim_email(
         $emails,
-        ( $ulang ? 'Revisi masuk: ' : 'Kiriman baru: ' ) . get_the_title( $post_id ),
+        $subjek,
         sprintf(
             "%s\n\nJudul    : %s\nPengirim : %s%s\n\nTinjau di Dashboard Kurasi:\n%s\n",
-            $ulang ? 'Kontributor sudah mengirim ulang tradisi yang diminta revisi.' : 'Ada tradisi baru yang menunggu kurasi.',
+            $pembuka,
             get_the_title( $post_id ),
             tk_nama_pengirim( $post_id ),
             tk_is_kiriman_tamu( $post_id ) ? ' (tamu, ' . tk_email_pengirim( $post_id ) . ')' : '',
@@ -62,12 +73,36 @@ function tk_email_ke_kurator( $post_id, $ulang = false ) {
  * Beri tahu pengirim tentang hasil kurasi atau penerimaan kiriman.
  *
  * @param int    $post_id
- * @param string $jenis   'diterima' | 'terbitkan' | 'revisi' | 'tolak'
+ * @param string $jenis   'diterima' | 'terbitkan' | 'terapkan' | 'revisi' | 'tolak'
  * @param string $catatan Catatan kurator (untuk revisi/tolak).
  */
 function tk_email_ke_pengirim( $post_id, $jenis, $catatan = '' ) {
     $judul = get_the_title( $post_id );
     $halo  = 'Halo ' . tk_nama_pengirim( $post_id ) . ",\n\n";
+
+    // Usulan perubahan untuk tradisi yang sudah terbit.
+    $asal = tk_usulan_asal( $post_id );
+    if ( $asal ) {
+        switch ( $jenis ) {
+            case 'terapkan':
+                $subjek = 'Usulan perubahan disetujui: ' . $judul;
+                $isi    = $halo . "Usulan perubahan Anda untuk \"$judul\" sudah disetujui kurator dan kini tampil di:\n" . get_permalink( $asal ) . "\n\nTerima kasih atas kontribusi Anda.\n";
+                break;
+            case 'revisi':
+                $subjek = 'Mohon revisi usulan: ' . $judul;
+                $isi    = $halo . "Kurator meminta beberapa perbaikan untuk usulan perubahan \"$judul\":\n\n$catatan\n\n"
+                    . "Silakan perbaiki lalu kirim ulang melalui link berikut:\n" . tk_url_revisi( $post_id ) . "\n";
+                break;
+            case 'tolak':
+                $subjek = 'Hasil kurasi usulan: ' . $judul;
+                $isi    = $halo . "Mohon maaf, usulan perubahan untuk \"$judul\" belum dapat kami terapkan. Versi yang terbit tidak berubah.\n\nAlasan kurator:\n$catatan\n";
+                break;
+            default:
+                return;
+        }
+        tk_kirim_email( tk_email_pengirim( $post_id ), $subjek, $isi );
+        return;
+    }
 
     switch ( $jenis ) {
         case 'diterima':

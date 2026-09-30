@@ -85,6 +85,9 @@
   text-transform: uppercase;
 }
 
+/* Tombol "Usulkan perubahan" untuk pemilik koleksi */
+.tk-single__ubah { margin-top: 12px; }
+
 /* Fungsi/Kegunaan (budaya material): gaya mirip abstrak, tanpa miring */
 .tk-single__fungsi {
   margin: -12px 0 28px;

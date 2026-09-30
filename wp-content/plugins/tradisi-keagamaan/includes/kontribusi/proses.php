@@ -9,6 +9,9 @@
  *   acf/validate_value tk_form_validasi_draf() "Simpan Draf" boleh tanpa field wajib
  *   acf/save_post      tk_form_after_save()    status, foto utama, tags, riwayat, email
  *
+ * Mengubah koleksi (halaman Ubah Tradisi, ?edit=ID): lihat tk_form_boleh_edit().
+ * Koleksi terbit milik kontributor diubah lewat usulan (includes/kontribusi/usulan.php).
+ *
  * Mode form (tk_form_konteks()):
  *   akun        pengguna login dengan hak tk_kirim; bisa draf & lanjutkan (?edit=ID)
  *   tamu        pengunjung tanpa login; revisi lewat ?edit=ID&token=...
@@ -56,23 +59,47 @@ function tk_form_konteks() {
 }
 
 /**
- * Pengguna login boleh membuka kiriman di form bila: tradisi, berstatus
- * draf (draf biasa atau perlu revisi), dan miliknya sendiri.
+ * Pengguna login boleh membuka koleksi di form bila:
+ *   Kurator/admin  koleksi apa pun berstatus draf, menunggu, atau terbit.
+ *   Kontributor    miliknya sendiri berstatus draf (termasuk perlu revisi)
+ *                  atau menunggu kurasi. Koleksi terbit miliknya diubah lewat
+ *                  usulan perubahan (includes/kontribusi/usulan.php).
  *
  * @param int $post_id
  * @return bool
  */
 function tk_form_boleh_edit( $post_id ) {
     $post = get_post( $post_id );
-
-    return $post
-        && 'tradisi' === $post->post_type
-        && 'draft' === $post->post_status
+    if ( ! $post || 'tradisi' !== $post->post_type ) {
+        return false;
+    }
+    if ( current_user_can( 'tk_kurasi' ) && current_user_can( 'edit_post', $post_id ) ) {
+        return in_array( $post->post_status, array( 'draft', 'pending', 'publish' ), true );
+    }
+    return in_array( $post->post_status, array( 'draft', 'pending' ), true )
         && (int) $post->post_author === get_current_user_id();
 }
 
 /**
- * Status yang diminta tombol yang diklik: 'draft' atau 'pending'.
+ * Kurator menyunting langsung (tanpa mengubah status): koleksi yang sudah
+ * terbit/menunggu, atau milik orang lain. Tombolnya "Simpan Perubahan".
+ *
+ * @param int $post_id
+ * @return bool
+ */
+function tk_form_ubah_langsung( $post_id ) {
+    $post = get_post( $post_id );
+    return $post
+        && current_user_can( 'tk_kurasi' )
+        && current_user_can( 'edit_post', $post_id )
+        && ( 'draft' !== $post->post_status || (int) $post->post_author !== get_current_user_id() );
+}
+
+/**
+ * Status yang diminta tombol yang diklik:
+ *   'draft'    Simpan Draf
+ *   'pending'  Kirim untuk Dikurasi / Simpan Perubahan (kiriman yang menunggu)
+ *   'tetap'    Simpan Perubahan oleh kurator, status tidak diubah
  * Tamu selalu 'pending' (tidak punya draf).
  *
  * @return string
@@ -82,7 +109,7 @@ function tk_form_status_diminta() {
         return 'pending';
     }
     $status = isset( $_POST['tk_status'] ) ? sanitize_key( $_POST['tk_status'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- nonce dicek ACF.
-    return 'draft' === $status ? 'draft' : 'pending';
+    return in_array( $status, array( 'draft', 'tetap' ), true ) ? $status : 'pending';
 }
 
 /* =============================================================================
@@ -92,17 +119,46 @@ function tk_form_status_diminta() {
 add_action( 'template_redirect', 'tk_form_head' );
 
 /**
- * acf_form_head() wajib dipanggil sebelum header halaman dicetak.
- * Hanya di halaman yang berisi [tk_form_tradisi].
+ * Di halaman yang berisi [tk_form_tradisi]:
+ *   1. Tambah Tradisi?edit=ID → dialihkan ke Ubah Tradisi (link lama tetap jalan).
+ *   2. Kontributor membuka Ubah pada koleksi terbit miliknya → dibuatkan /
+ *      dibuka usulan perubahan, lalu dialihkan ke ?edit=<usulan>.
+ *   3. acf_form_head() (wajib sebelum header halaman dicetak).
  */
 function tk_form_head() {
     if ( ! function_exists( 'acf_form_head' ) || ! is_singular() ) {
         return;
     }
     $post = get_post();
-    if ( $post && has_shortcode( $post->post_content, 'tk_form_tradisi' ) ) {
-        acf_form_head();
+    if ( ! $post || ! has_shortcode( $post->post_content, 'tk_form_tradisi' ) ) {
+        return;
     }
+
+    // phpcs:disable WordPress.Security.NonceVerification -- hanya memilih halaman; izin dicek di bawah & di tk_form_guard().
+    $edit = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
+    if ( $edit && empty( $_POST ) ) {
+        if ( TK_SLUG_TAMBAH === $post->post_name ) {
+            $args = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'edit', 'token' ) ) );
+            wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $args ), tk_url_ubah() ) );
+            exit;
+        }
+
+        if ( is_user_logged_in() && current_user_can( 'tk_kirim' ) && ! tk_form_boleh_edit( $edit )
+            && 'publish' === get_post_status( $edit ) && 'tradisi' === get_post_type( $edit )
+            && (int) get_post_field( 'post_author', $edit ) === get_current_user_id() ) {
+            $usulan = tk_usulan_cari( $edit, get_current_user_id() );
+            if ( ! $usulan ) {
+                $usulan = tk_usulan_buat( $edit );
+            }
+            if ( $usulan ) {
+                wp_safe_redirect( tk_url_ubah( $usulan ) );
+                exit;
+            }
+        }
+    }
+    // phpcs:enable
+
+    acf_form_head();
 }
 
 add_filter( 'acf/pre_save_post', 'tk_form_guard', 1 );
@@ -126,6 +182,9 @@ function tk_form_guard( $post_id ) {
         }
         if ( ! $baru && ! tk_form_boleh_edit( $post_id ) ) {
             wp_die( 'Anda tidak berhak mengubah tradisi ini.', 403 );
+        }
+        if ( 'tetap' === tk_form_status_diminta() && ( $baru || ! tk_form_ubah_langsung( $post_id ) ) ) {
+            wp_die( 'Aksi simpan ini hanya untuk kurator.', 403 );
         }
     } else {
         $token = isset( $_REQUEST['token'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
@@ -196,8 +255,8 @@ function tk_form_after_save( $post_id ) {
     $sebelum = get_post_status( $post_id );
     $diminta = tk_form_status_diminta();
 
-    // Status sesuai tombol. Tradisi yang sudah terbit tidak disentuh.
-    if ( in_array( $sebelum, array( 'draft', 'pending' ), true ) && $sebelum !== $diminta ) {
+    // Status sesuai tombol. Tradisi yang sudah terbit, dan "tetap" (kurator), tidak disentuh.
+    if ( 'tetap' !== $diminta && in_array( $sebelum, array( 'draft', 'pending' ), true ) && $sebelum !== $diminta ) {
         wp_update_post( array( 'ID' => $post_id, 'post_status' => $diminta ) );
     }
 
@@ -210,10 +269,16 @@ function tk_form_after_save( $post_id ) {
     // Foto Tambahan → Galeri Foto.
     tk_form_pindahkan_galeri( $post_id );
 
-    // Kata kunci "a, b, c" → Tags.
+    // Kata kunci "a, b, c" → Tags. Dikosongkan di form = Tags dihapus.
     $tags = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $post_id, 'kata_kunci', true ) ) ) );
-    if ( $tags ) {
+    if ( $tags || ( ! $baru && isset( $_POST['acf']['field_tk_form_kata_kunci'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- nonce dicek ACF.
         wp_set_post_terms( $post_id, $tags, 'post_tag', false );
+    }
+
+    // Disunting tanpa pindah status (kurator, atau kontributor pada kiriman yang menunggu).
+    if ( ! $baru && ( 'tetap' === $diminta || ( 'pending' === $diminta && 'pending' === $sebelum ) ) ) {
+        tk_log_tambah( $post_id, 'ubah' );
+        return;
     }
 
     // Baru dikirim (atau dikirim ulang setelah draf/revisi) → catat & beri tahu.

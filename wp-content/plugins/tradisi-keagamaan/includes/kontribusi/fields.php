@@ -10,7 +10,8 @@
  * sehingga TIDAK tampil di editor wp-admin (di sana taxonomy & featured image
  * sudah punya panel sendiri). acf_form() tetap menampilkannya lewat 'field_groups'.
  *
- * Juga mengganti label bawaan ACF "Title"/"Content" ke Bahasa Indonesia.
+ * Juga mengganti label bawaan ACF "Title"/"Content" ke Bahasa Indonesia, dan
+ * mengisi Foto Utama & Kata Kunci dari data tersimpan saat mengubah koleksi.
  *
  * @package TradisiKeagamaan
  */
@@ -168,6 +169,43 @@ function tk_form_register_fields() {
         'location' => $lokasi_form,
         'active'   => true,
     ) );
+}
+
+add_filter( 'acf/load_value/key=field_tk_form_foto', 'tk_form_isi_foto_utama', 10, 2 );
+
+/**
+ * Saat mengubah koleksi yang sudah ada, Foto Utama terisi dari featured image
+ * (koleksi dari wp-admin/impor tidak punya meta foto_utama).
+ *
+ * @param mixed      $value
+ * @param int|string $post_id
+ * @return mixed
+ */
+function tk_form_isi_foto_utama( $value, $post_id ) {
+    if ( ! $value && is_numeric( $post_id ) && 'tradisi' === get_post_type( $post_id ) ) {
+        $foto = get_post_thumbnail_id( $post_id );
+        return $foto ? $foto : $value;
+    }
+    return $value;
+}
+
+add_filter( 'acf/load_value/key=field_tk_form_kata_kunci', 'tk_form_isi_kata_kunci', 10, 2 );
+
+/**
+ * Kata Kunci terisi dari Tags yang tersimpan ("a, b, c").
+ *
+ * @param mixed      $value
+ * @param int|string $post_id
+ * @return mixed
+ */
+function tk_form_isi_kata_kunci( $value, $post_id ) {
+    if ( is_numeric( $post_id ) && 'tradisi' === get_post_type( $post_id ) ) {
+        $tags = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'names' ) );
+        if ( $tags && ! is_wp_error( $tags ) ) {
+            return implode( ', ', array_map( 'html_entity_decode', $tags ) );
+        }
+    }
+    return $value;
 }
 
 add_filter( 'acf/prepare_field/key=field_6aa0f2fa51a58', 'tk_form_sembunyikan_galeri' );

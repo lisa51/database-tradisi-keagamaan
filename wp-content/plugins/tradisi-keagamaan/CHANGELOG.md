@@ -2,6 +2,19 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.9.0 (30 September 2026): Ubah Tradisi & Riwayat Suntingan
+
+**Baru**
+- Halaman **Ubah Tradisi** (`ubah-tradisi`, `[tk_form_tradisi]`, `?edit=ID`), form yang sama dengan Tambah Tradisi. Link lama `tambah-tradisi?edit=` dialihkan ke sini.
+  - Kontributor: mengubah draf / kiriman yang menunggu kurasi miliknya (tombol "Simpan Perubahan", status tetap), dan mengusulkan perubahan untuk koleksi terbit miliknya (tombol "Usulkan perubahan" di halaman detail).
+  - Kurator & admin: menyunting koleksi apa pun dari form ("Ubah di form" di Panel Kurator, "Ubah" di Dashboard Kurasi); perubahan langsung berlaku, status tidak berubah.
+- **Usulan perubahan** (`includes/kontribusi/usulan.php`): perubahan kontributor atas koleksi terbit disimpan sebagai salinan; versi terbit tetap tampil sampai kurator menekan **Setujui & Terapkan**, lalu isi usulan diterapkan dan salinan dihapus. Dashboard & Panel Kurator menandai usulan dan menampilkan bagian yang diubah; email & riwayat menyesuaikan. Usulan tidak bisa terbit sendiri.
+- Halaman **Riwayat Suntingan** (`riwayat-suntingan`, `[tk_riwayat_suntingan]`, `?id=ID`), khusus kurator: daftar revisi dengan perbandingan sebelum/sesudah per bagian (judul, ringkasan, isi, field Detail). Panel Kurator menautkan ke sini, bukan ke wp-admin.
+- Form mengisi Foto Utama & Kata Kunci dari data tersimpan saat mengubah; Kata Kunci yang dikosongkan menghapus Tags.
+
+**Diperbaiki**
+- Dashboard Kurasi: lama menunggu salah ("20000+ hari") untuk kiriman yang sebelumnya draf.
+
 ## 2.8.0 (30 September 2026): Kategori per jenis & nama "Koleksi"
 
 **Baru**

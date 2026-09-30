@@ -11,7 +11,9 @@
  *   2. Orang-orang: pengirim (akun/tamu + email + instansi), kurator yang pernah
  *      memutuskan, penyunting (dari revisi WordPress), dan penyunting terakhir.
  *   3. Checklist kelengkapan (sama dengan di dashboard).
- *   4. Tautan: Edit di wp-admin, Bandingkan revisi, Dashboard Kurasi.
+ *   4. Tautan: Ubah di form (halaman Ubah Tradisi), Edit di wp-admin,
+ *      Riwayat suntingan (halaman [tk_riwayat_suntingan]), Dashboard Kurasi. Untuk usulan perubahan: keterangan
+ *      versi terbit + bagian yang diubah; tombol Terbitkan = "Setujui & Terapkan".
  *   5. Ubah status: tombol sesuai status saat ini (tk_aksi_diizinkan()),
  *      dengan kotak catatan. Aksi diproses tk_kurasi_handle(), lalu kembali
  *      ke halaman ini.
@@ -107,6 +109,10 @@ function tk_panel_kurator( $post_id ) {
     $edit_akhir  = get_post_meta( $post_id, '_edit_last', true );
     $aksi        = tk_aksi_diizinkan( $post->post_status );
     $tombol      = tk_panel_tombol_aksi();
+    $asal        = tk_usulan_asal( $post_id );
+    if ( $asal ) {
+        $tombol['terbitkan'][0] = 'Setujui & Terapkan';
+    }
 
     ob_start();
     ?>
@@ -118,6 +124,16 @@ function tk_panel_kurator( $post_id ) {
       </div>
 
       <?php echo tk_kurasi_render_pesan(); // phpcs:ignore WordPress.Security.EscapeOutput -- sudah di-escape. ?>
+
+      <?php if ( $asal ) : ?>
+        <?php $ubah = tk_usulan_perubahan( $post_id ); ?>
+        <div class="tk-notice tk-notice--info">
+          Ini <strong>usulan perubahan</strong> untuk
+          <a href="<?php echo esc_url( get_permalink( $asal ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( get_the_title( $asal ) ); ?></a>
+          yang sudah terbit. Diubah: <?php echo $ubah ? esc_html( implode( ', ', $ubah ) ) : '<em>tidak ada perbedaan</em>'; ?>.
+          "Setujui &amp; Terapkan" mengganti isi versi terbit dengan usulan ini.
+        </div>
+      <?php endif; ?>
 
       <?php /* --- Orang-orang --------------------------------------------- */ ?>
       <dl class="tk-panel-orang">
@@ -165,9 +181,10 @@ function tk_panel_kurator( $post_id ) {
       <?php echo tk_kurasi_render_checklist( $post_id ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
       <div class="tk-panel-tautan">
+        <a class="tk-btn-kecil" href="<?php echo esc_url( tk_url_ubah( $post_id ) ); ?>">Ubah di form</a>
         <a class="tk-btn-kecil" href="<?php echo esc_url( get_edit_post_link( $post_id ) ); ?>">Edit di wp-admin</a>
-        <?php if ( count( $revisi ) > 1 ) : ?>
-          <a class="tk-btn-kecil" href="<?php echo esc_url( admin_url( 'revision.php?revision=' . $revisi[0]->ID ) ); ?>">Bandingkan revisi</a>
+        <?php if ( $revisi ) : ?>
+          <a class="tk-btn-kecil" href="<?php echo esc_url( tk_url_riwayat_suntingan( $post_id ) ); ?>">Riwayat suntingan</a>
         <?php endif; ?>
         <a class="tk-btn-kecil" href="<?php echo esc_url( tk_url_kurasi() ); ?>">Dashboard Kurasi</a>
       </div>
@@ -184,7 +201,8 @@ function tk_panel_kurator( $post_id ) {
               <?php foreach ( $aksi as $a ) : ?>
                 <button type="submit" name="aksi" value="<?php echo esc_attr( $a ); ?>"
                         class="tk-btn-kecil tk-btn-kecil--<?php echo esc_attr( $tombol[ $a ][1] ); ?>"
-                        <?php if ( 'tolak' === $a ) : ?>onclick="return confirm('Tolak tradisi ini dan pindahkan ke Trash? Pengirim akan menerima alasan Anda.');"<?php endif; ?>>
+                        <?php if ( 'tolak' === $a ) : ?>onclick="return confirm('Tolak tradisi ini dan pindahkan ke Trash? Pengirim akan menerima alasan Anda.');"<?php endif; ?>
+                        <?php if ( 'terbitkan' === $a && $asal ) : ?>onclick="return confirm('Terapkan usulan ini ke versi terbit? Isi halaman yang terbit akan diganti.');"<?php endif; ?>>
                   <?php echo esc_html( $tombol[ $a ][0] ); ?>
                 </button>
               <?php endforeach; ?>
@@ -209,7 +227,7 @@ function tk_panel_kurator( $post_id ) {
               <li>
                 <strong><?php echo esc_html( get_the_author_meta( 'display_name', $r->post_author ) ); ?></strong>
                 <span class="tk-log-waktu"><?php echo esc_html( mysql2date( 'j M Y, H:i', $r->post_date ) ); ?></span>
-                · <a href="<?php echo esc_url( admin_url( 'revision.php?revision=' . $r->ID ) ); ?>">lihat perubahan</a>
+                · <a href="<?php echo esc_url( tk_url_riwayat_suntingan( $post_id, $r->ID ) ); ?>">lihat perubahan</a>
               </li>
             <?php endforeach; ?>
           </ol>

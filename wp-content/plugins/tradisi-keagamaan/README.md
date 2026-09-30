@@ -48,7 +48,9 @@ Plugin custom untuk situs **WARISI (Warisan Religi Indonesia)**, database tradis
 | Beranda (jadikan Homepage) | bebas | `[tk_hero]` `[tk_stats]` `[tk_koleksi]` |
 | Peta Tradisi | bebas | `[tk_peta]` |
 | Tambah Tradisi | `tambah-tradisi` | `[tk_form_tradisi]` |
+| Ubah Tradisi (tidak perlu di menu) | `ubah-tradisi` | `[tk_form_tradisi]` |
 | Dashboard Kurasi | `dashboard-kurasi` | `[tk_kurasi]` |
+| Riwayat Suntingan (tidak perlu di menu) | `riwayat-suntingan` | `[tk_riwayat_suntingan]` |
 | Tentang | bebas | teks biasa |
 | Hubungi Kami (sub-menu Tentang) | bebas | `[tk_kontak]` |
 

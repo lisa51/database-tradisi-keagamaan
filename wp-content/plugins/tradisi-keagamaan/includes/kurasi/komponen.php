@@ -27,6 +27,8 @@ function tk_kurasi_render_pesan() {
         'revisi'        => array( 'info', 'Kiriman dikembalikan untuk revisi. Pengirim sudah menerima catatan Anda.' ),
         'tolak'         => array( 'info', 'Kiriman ditolak dan dipindah ke Trash (bisa dipulihkan dalam 30 hari). Pengirim sudah menerima alasannya.' ),
         'antrean'       => array( 'info', 'Tradisi dikembalikan ke antrean kurasi (status Menunggu Kurasi).' ),
+        'terapkan'      => array( 'sukses', 'Usulan perubahan diterapkan ke versi terbit, dan pengirim sudah diberi tahu.' ),
+        'ubah'          => array( 'sukses', 'Perubahan tersimpan.' ),
         'catatan_kosong'=> array( 'gagal', 'Catatan wajib diisi untuk Minta Revisi, Tolak, atau Kembalikan ke Antrean.' ),
         'gagal'         => array( 'gagal', 'Aksi gagal atau tidak berlaku untuk status tradisi saat ini. Muat ulang halaman lalu coba lagi.' ),
     );

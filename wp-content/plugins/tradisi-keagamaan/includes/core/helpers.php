@@ -93,6 +93,18 @@ function tk_url_tambah() {
 }
 
 /**
+ * URL halaman "Ubah Tradisi" (slug TK_SLUG_UBAH), opsional langsung ke satu koleksi.
+ *
+ * @param int $post_id 0 = halaman Ubah tanpa koleksi terpilih.
+ * @return string
+ */
+function tk_url_ubah( $post_id = 0 ) {
+    $page = get_page_by_path( TK_SLUG_UBAH );
+    $url  = $page ? get_permalink( $page ) : home_url( '/' . TK_SLUG_UBAH . '/' );
+    return $post_id ? add_query_arg( 'edit', absint( $post_id ), $url ) : $url;
+}
+
+/**
  * URL halaman "Dashboard Kurasi" (slug diatur TK_SLUG_KURASI di config.php).
  *
  * @return string

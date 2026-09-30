@@ -10,7 +10,8 @@
  *   0. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *   1. Link kembali
  *   2. Badge jenis + kategori + status, judul, tanggal terbit
- *   3. Baris meta: penulis, kabupaten/kota, provinsi, pembaca
+ *   3. Baris meta: penulis, kabupaten/kota, provinsi, pembaca; tombol
+ *      "Usulkan perubahan" untuk pemiliknya (kontributor)
  *   4. Gambar utama
  *   5. Abstrak (deskripsi_singkat)
  *   6. Kotak info, sesuai jenis:
@@ -93,6 +94,12 @@ while ( have_posts() ) :
         <?php endif; ?>
         <li><?php echo tk_icon( 'mata' ); ?><?php echo esc_html( number_format_i18n( $d['pembaca'] ) ); ?> pembaca</li>
       </ul>
+
+      <?php /* Pemilik (kontributor) bisa mengusulkan perubahan; kurator memakai Panel Kurator. */ ?>
+      <?php if ( is_user_logged_in() && ! current_user_can( 'tk_kurasi' ) && current_user_can( 'tk_kirim' )
+                 && (int) get_post_field( 'post_author', $id ) === get_current_user_id() ) : ?>
+        <a class="tk-btn-kecil tk-single__ubah" href="<?php echo esc_url( tk_url_ubah( $id ) ); ?>">Usulkan perubahan</a>
+      <?php endif; ?>
     </header>
 
     <?php /* 4. Gambar utama */ ?>

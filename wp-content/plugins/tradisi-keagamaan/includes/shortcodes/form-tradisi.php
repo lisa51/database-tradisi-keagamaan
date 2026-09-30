@@ -2,11 +2,15 @@
 /**
  * Shortcode [tk_form_tradisi]: tampilan form kirim tradisi.
  *
- * Pemakaian: taruh di halaman Tambah Tradisi (slug TK_SLUG_TAMBAH).
+ * Pemakaian: taruh di halaman Tambah Tradisi (slug TK_SLUG_TAMBAH) DAN
+ * halaman Ubah Tradisi (slug TK_SLUG_UBAH).
  *
  *   Tamu (tanpa login)  identitas + form; hanya tombol "Kirim untuk Dikurasi".
  *   Kontributor (akun)  form + "Simpan Draf"; di bawahnya daftar "Kiriman Saya".
- *   Melanjutkan / revisi  ?edit=ID (akun) atau ?edit=ID&token=... (tamu).
+ *   Mengubah            halaman Ubah: ?edit=ID (akun) atau ?edit=ID&token=... (tamu).
+ *                       Tambah?edit=ID dialihkan ke halaman Ubah (tk_form_head()).
+ *                       Tombol & pesan per keadaan: tk_form_mode_tombol().
+ *                       Tanpa ?edit: petunjuk + "Kiriman Saya".
  *
  * File ini hanya berisi TAMPILAN. Field ACF ada di includes/kontribusi/fields.php,
  * logika simpan & izin di includes/kontribusi/proses.php, tombol draf di
@@ -44,6 +48,14 @@ function tk_form_shortcode() {
     $tamu    = ( 'tamu' === $k['mode'] );
     $edit_id = $k['edit_id'];
 
+    // Halaman Ubah Tradisi tanpa koleksi yang boleh dibuka: tampilkan petunjuk, bukan form kosong.
+    if ( ! $edit_id && TK_SLUG_UBAH === get_post_field( 'post_name', get_the_ID() ) ) {
+        return tk_form_render_ubah_kosong( $tamu );
+    }
+
+    // Tombol & teks sesuai keadaan (lihat tk_form_mode_tombol()).
+    $mode_tombol = tk_form_mode_tombol( $edit_id, $tamu );
+
     // Grup field: identitas hanya untuk kiriman tamu yang baru.
     $grup = array( TK_FORM_GROUP, TK_DETAIL_GROUP );
     if ( $tamu && ! $edit_id ) {
@@ -60,9 +72,15 @@ function tk_form_shortcode() {
     }
 
     // Tujuan setelah simpan. Untuk tamu yang merevisi, token tidak dibawa lagi.
-    $kembali = $tamu
-        ? add_query_arg( 'terkirim', 'tamu', get_permalink() )
-        : add_query_arg( 'tersimpan', '%post_id%', get_permalink() );
+    // Kurator yang menyunting langsung kembali ke halaman koleksinya.
+    if ( 'langsung' === $mode_tombol ) {
+        $kembali = add_query_arg( 'kurasi', 'ubah', tk_url_tinjau( $edit_id ) ) . '#panel-kurator';
+    } elseif ( $tamu ) {
+        $kembali = add_query_arg( 'terkirim', 'tamu', get_permalink() );
+    } else {
+        $kembali = add_query_arg( array_filter( array( 'tersimpan' => '%post_id%', 'diubah' => $edit_id ? 1 : 0 ) ), get_permalink() );
+    }
+    $tombol = tk_form_teks_tombol( $mode_tombol );
 
     wp_enqueue_script( 'tk-form', TK_URL . 'assets/js/form.js', array( 'acf-input' ), filemtime( TK_PATH . 'assets/js/form.js' ), true );
 
@@ -71,7 +89,7 @@ function tk_form_shortcode() {
     echo tk_form_render_pesan();
 
     if ( $edit_id ) {
-        echo tk_form_render_info_edit( $edit_id, $tamu );
+        echo tk_form_render_info_edit( $edit_id, $tamu, $mode_tombol );
     } elseif ( $tamu ) {
         echo tk_form_render_info_tamu();
     }
@@ -87,8 +105,8 @@ function tk_form_shortcode() {
         'uploader'           => 'basic',
         'honeypot'           => true,
         'return'             => $kembali,
-        'submit_value'       => 'Kirim untuk Dikurasi',
-        'html_submit_button' => tk_form_render_tombol( ! $tamu ),
+        'submit_value'       => $tombol['utama'][1],
+        'html_submit_button' => tk_form_render_tombol( $tombol ),
         'html_after_fields'  => ( $tamu && ! $edit_id ) ? tk_turnstile_widget( 'tk-tradisi' ) : '', // Anti-bot, kiriman baru tamu.
         'updated_message'    => false, // Pesan ditangani tk_form_render_pesan().
     ) );
@@ -106,20 +124,90 @@ function tk_form_shortcode() {
  * ========================================================================== */
 
 /**
+ * Keadaan form, penentu tombol & pesan:
+ *   tamu       kiriman tamu (baru / revisi lewat token)
+ *   akun       kiriman baru atau draf/perlu revisi milik sendiri (juga usulan draf)
+ *   menunggu   kiriman milik sendiri yang sedang menunggu kurasi
+ *   langsung   kurator menyunting koleksi terbit/menunggu/milik orang lain
+ *
+ * @param int  $edit_id
+ * @param bool $tamu
+ * @return string
+ */
+function tk_form_mode_tombol( $edit_id, $tamu ) {
+    if ( $tamu ) {
+        return 'tamu';
+    }
+    if ( $edit_id && tk_form_ubah_langsung( $edit_id ) ) {
+        return 'langsung';
+    }
+    if ( $edit_id && 'pending' === get_post_status( $edit_id ) ) {
+        return 'menunggu';
+    }
+    return 'akun';
+}
+
+/**
+ * Tombol per keadaan: 'draf' (opsional) dan 'utama', masing-masing
+ * array( nilai tk_status, teks ).
+ *
+ * @param string $mode Hasil tk_form_mode_tombol().
+ * @return array[]
+ */
+function tk_form_teks_tombol( $mode ) {
+    switch ( $mode ) {
+        case 'langsung':
+            return array( 'utama' => array( 'tetap', 'Simpan Perubahan' ) );
+        case 'menunggu':
+            return array( 'utama' => array( 'pending', 'Simpan Perubahan' ) );
+        case 'tamu':
+            return array( 'utama' => array( 'pending', 'Kirim untuk Dikurasi' ) );
+        default:
+            return array(
+                'draf'  => array( 'draft', 'Simpan Draf' ),
+                'utama' => array( 'pending', 'Kirim untuk Dikurasi' ),
+            );
+    }
+}
+
+/**
  * Tombol di akhir form.
  *
  * Tombol memakai name="tk_status" sehingga nilainya ikut terkirim.
  * ACF memasukkan 'submit_value' ke %s lewat sprintf(), dan ACF 6.2+
  * menyaring HTML ini, jadi tidak memakai onclick atau <input> tersembunyi.
  *
- * @param bool $dengan_draf Tampilkan tombol "Simpan Draf" (khusus akun).
+ * @param array[] $tombol Hasil tk_form_teks_tombol().
  * @return string
  */
-function tk_form_render_tombol( $dengan_draf ) {
+function tk_form_render_tombol( $tombol ) {
     return '<div class="tk-form-tombol">'
-        . ( $dengan_draf ? '<button type="submit" name="tk_status" value="draft" class="tk-btn tk-btn-garis">Simpan Draf</button>' : '' )
-        . '<button type="submit" name="tk_status" value="pending" class="tk-btn tk-btn-utama">%s</button>'
+        . ( isset( $tombol['draf'] ) ? '<button type="submit" name="tk_status" value="draft" class="tk-btn tk-btn-garis">' . esc_html( $tombol['draf'][1] ) . '</button>' : '' )
+        . '<button type="submit" name="tk_status" value="' . esc_attr( $tombol['utama'][0] ) . '" class="tk-btn tk-btn-utama">%s</button>'
         . '</div>';
+}
+
+/**
+ * Halaman Ubah Tradisi dibuka tanpa koleksi (atau koleksi yang tidak boleh diubah).
+ *
+ * @param bool $tamu
+ * @return string
+ */
+function tk_form_render_ubah_kosong( $tamu ) {
+    if ( $tamu ) {
+        return '<p class="tk-kosong">Untuk mengubah kiriman, buka link revisi yang kami kirim ke email Anda, atau <a href="'
+            . esc_url( wp_login_url( get_permalink() ) ) . '">masuk</a> bila Anda punya akun.</p>';
+    }
+
+    // phpcs:ignore WordPress.Security.NonceVerification -- hanya memilih pesan.
+    $html = isset( $_GET['edit'] )
+        ? '<div class="tk-notice tk-notice--gagal">Koleksi ini tidak bisa Anda ubah dari sini. Pilih salah satu kiriman Anda di bawah.</div>'
+        : '<div class="tk-notice tk-notice--info">Pilih koleksi yang ingin diubah dari daftar <strong>Kiriman Saya</strong> di bawah'
+            . ( current_user_can( 'tk_kurasi' ) ? ', atau buka halaman koleksi mana pun lalu klik <strong>Ubah di form</strong> pada Panel Kurator' : '' )
+            . '.</div>';
+
+    $daftar = tk_form_render_kiriman_saya();
+    return $html . ( $daftar ? $daftar : '<p class="tk-kosong">Anda belum punya kiriman. <a href="' . esc_url( tk_url_tambah() ) . '">Tambah tradisi</a></p>' );
 }
 
 /**
@@ -146,8 +234,19 @@ function tk_form_render_pesan() {
     if ( 'draft' === $post->post_status ) {
         return sprintf(
             '<div class="tk-notice tk-notice--info"><strong>Draf tersimpan.</strong> Anda bisa melanjutkannya kapan saja dari "Kiriman Saya". <a href="%s">Lanjutkan sekarang</a></div>',
-            esc_url( add_query_arg( 'edit', $id, get_permalink() ) )
+            esc_url( tk_url_ubah( $id ) )
         );
+    }
+
+    $usulan = tk_usulan_asal( $id );
+    if ( $usulan ) {
+        return '<div class="tk-notice tk-notice--sukses"><strong>Usulan perubahan terkirim.</strong> Halaman "' . esc_html( get_the_title( $usulan ) )
+            . '" di situs tetap menampilkan versi lama sampai kurator menyetujui usulan Anda.</div>';
+    }
+
+    // phpcs:ignore WordPress.Security.NonceVerification -- hanya menampilkan pesan.
+    if ( ! empty( $_GET['diubah'] ) && 'pending' === $post->post_status ) {
+        return '<div class="tk-notice tk-notice--sukses"><strong>Perubahan tersimpan.</strong> Kiriman Anda masih menunggu kurasi.</div>';
     }
 
     return '<div class="tk-notice tk-notice--sukses"><strong>Terima kasih!</strong> Tradisi Anda sudah terkirim dan sedang menunggu kurasi. Statusnya bisa dipantau di bagian "Kiriman Saya".</div>';
@@ -171,21 +270,39 @@ function tk_form_render_info_tamu() {
 }
 
 /**
- * Info saat melanjutkan draf / merevisi, termasuk catatan kurator.
+ * Info di atas form saat mengubah: draf, revisi, kiriman yang menunggu,
+ * usulan perubahan, atau suntingan langsung kurator; plus catatan kurator.
  *
- * @param int  $edit_id
- * @param bool $tamu
+ * @param int    $edit_id
+ * @param bool   $tamu
+ * @param string $mode    Hasil tk_form_mode_tombol().
  * @return string
  */
-function tk_form_render_info_edit( $edit_id, $tamu ) {
+function tk_form_render_info_edit( $edit_id, $tamu, $mode = 'akun' ) {
     $revisi  = (bool) get_post_meta( $edit_id, '_tk_perlu_revisi', true );
     $catatan = (string) get_post_meta( $edit_id, '_tk_catatan', true );
+    $asal    = tk_usulan_asal( $edit_id );
+    $judul   = '<strong>' . esc_html( get_the_title( $edit_id ) ) . '</strong>';
+
+    if ( $asal ) {
+        $teks = sprintf(
+            'Anda mengusulkan perubahan untuk %s yang sudah terbit (<a href="%s" target="_blank" rel="noopener">lihat versi terbit</a>). Halaman di situs tidak berubah sampai kurator menyetujui usulan ini.',
+            $judul,
+            esc_url( get_permalink( $asal ) )
+        );
+    } elseif ( 'langsung' === $mode ) {
+        list( $status ) = tk_status_kiriman( get_post( $edit_id ) );
+        $teks = sprintf( 'Anda menyunting %s sebagai kurator (status: %s). Perubahan langsung berlaku; status tidak berubah.', $judul, esc_html( $status ) );
+    } elseif ( 'menunggu' === $mode ) {
+        $teks = sprintf( 'Mengubah %s yang sedang menunggu kurasi. Perubahan langsung terlihat oleh kurator.', $judul );
+    } else {
+        $teks = ( $revisi ? 'Merevisi kiriman ' : 'Melanjutkan draf ' ) . $judul . '.';
+    }
 
     $html = sprintf(
-        '<div class="tk-notice tk-notice--info">%s <strong>%s</strong>.%s</div>',
-        $revisi ? 'Merevisi kiriman' : 'Melanjutkan draf',
-        esc_html( get_the_title( $edit_id ) ),
-        $tamu ? '' : sprintf( ' <a href="%s">Buat kiriman baru</a>', esc_url( get_permalink() ) )
+        '<div class="tk-notice tk-notice--info">%s%s</div>',
+        $teks,
+        $tamu ? '' : sprintf( ' <a href="%s">Buat kiriman baru</a>', esc_url( tk_url_tambah() ) )
     );
 
     if ( $revisi && $catatan ) {
@@ -221,9 +338,12 @@ function tk_form_render_kiriman_saya() {
         <?php foreach ( $kiriman as $p ) :
             list( $label, $mod ) = tk_status_kiriman( $p );
             $catatan = in_array( $mod, array( 'revisi', 'trash' ), true ) ? (string) get_post_meta( $p->ID, '_tk_catatan', true ) : '';
+            $usulan  = tk_usulan_asal( $p->ID );
+            $tombol  = array( 'draft' => 'revisi' === $mod ? 'Revisi' : 'Lanjutkan', 'pending' => 'Ubah', 'publish' => 'Ubah' );
             ?>
           <li>
             <span class="tk-kiriman-judul">
+              <?php if ( $usulan ) : ?><small class="tk-kiriman-usulan">Usulan perubahan</small><?php endif; ?>
               <?php if ( 'publish' === $p->post_status ) : ?>
                 <a href="<?php echo esc_url( get_permalink( $p ) ); ?>"><?php echo esc_html( get_the_title( $p ) ); ?></a>
               <?php else : ?>
@@ -232,8 +352,8 @@ function tk_form_render_kiriman_saya() {
             </span>
             <span class="tk-kiriman-tgl"><?php echo esc_html( get_the_date( '', $p ) ); ?></span>
             <span class="tk-status tk-status--<?php echo esc_attr( $mod ); ?>"><?php echo esc_html( $label ); ?></span>
-            <?php if ( 'draft' === $p->post_status ) : ?>
-              <a class="tk-btn-kecil" href="<?php echo esc_url( add_query_arg( 'edit', $p->ID, get_permalink() ) ); ?>"><?php echo 'revisi' === $mod ? 'Revisi' : 'Lanjutkan'; ?></a>
+            <?php if ( isset( $tombol[ $p->post_status ] ) ) : ?>
+              <a class="tk-btn-kecil" href="<?php echo esc_url( tk_url_ubah( $p->ID ) ); ?>"><?php echo esc_html( $tombol[ $p->post_status ] ); ?></a>
             <?php else : ?>
               <span></span>
             <?php endif; ?>

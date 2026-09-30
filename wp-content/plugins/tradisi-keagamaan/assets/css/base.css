@@ -303,6 +303,7 @@ button.tk-btn-kecil { cursor: pointer; font-family: inherit; line-height: 1; }
 .tk-status--publish { background: var(--tk-hijau-bg);    color: var(--tk-hijau); }
 .tk-status--draft   { background: var(--tk-netral-bg);   color: var(--tk-abu); }
 .tk-status--revisi  { background: var(--tk-accent-muda); color: var(--tk-accent-gelap); }
+.tk-status--usulan  { background: var(--tk-kuning-bg);   color: var(--tk-kuning-teks); }
 .tk-status--trash   { background: var(--tk-merah-bg);    color: var(--tk-merah); }
 
 /* --- Pesan (.tk-notice) ------------------------------------------------------ */

@@ -112,6 +112,14 @@
   border-bottom: 1px solid var(--tk-garis);
 }
 .tk-kiriman-judul { font-weight: 600; }
+.tk-kiriman-usulan {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--tk-kuning-teks);
+}
 .tk-kiriman-tgl   { font-size: 13px; color: var(--tk-abu); }
 .tk-kiriman-catatan {
   grid-column: 1 / -1;

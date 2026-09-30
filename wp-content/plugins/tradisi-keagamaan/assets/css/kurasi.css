@@ -35,6 +35,7 @@
 .tk-kurasi-judul a:hover    { color: var(--tk-accent); }
 .tk-kurasi-judul .tk-status { margin-left: 8px; vertical-align: middle; }
 .tk-kurasi-meta             { margin: 0; font-size: 13px; color: var(--tk-abu); }
+.tk-kurasi-usulan           { margin: 0 0 4px; font-size: 13px; color: var(--tk-kuning-teks); } /* Usulan perubahan: versi terbit & bagian yang diubah */
 
 .tk-kurasi-aksi      { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 .tk-kurasi-aksi form { display: inline; margin: 0; }
@@ -229,4 +230,63 @@
   .tk-riwayat-daftar > li { grid-template-columns: 40px minmax(0, 1fr) auto; }
   .tk-riwayat-thumb       { width: 40px; height: 40px; }
   .tk-riwayat-aksi        { grid-column: 2 / -1; }
+}
+
+
+/* =============================================================================
+   Riwayat Suntingan [tk_riwayat_suntingan]
+   ============================================================================= */
+.tk-riwayat-sunting__info    { margin: 12px 0 20px; font-size: 14px; color: var(--tk-abu); }
+.tk-riwayat-sunting__daftar  { margin: 0; padding: 0; list-style: none; }
+.tk-riwayat-sunting__daftar > li {
+  margin-bottom: 12px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+  scroll-margin-top: 24px;
+}
+.tk-riwayat-sunting__daftar > li:target { border-color: var(--tk-accent); box-shadow: 0 0 0 2px rgba(196, 85, 45, .15); }
+.tk-riwayat-sunting__daftar summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 14px 18px;
+  cursor: pointer;
+}
+.tk-riwayat-sunting__ringkas { flex: 1 1 100%; font-size: 13px; color: var(--tk-abu); }
+.tk-riwayat-sunting__catatan { margin: 0 18px 12px; font-size: 13px; color: var(--tk-kuning-teks); }
+
+.tk-riwayat-sunting__tabel {
+  width: calc(100% - 36px);
+  margin: 0 18px 18px;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+}
+.tk-riwayat-sunting__tabel th,
+.tk-riwayat-sunting__tabel td {
+  padding: 8px 10px;
+  border-top: 1px solid var(--tk-garis);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.tk-riwayat-sunting__tabel thead th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--tk-abu); border-top: 0; }
+.tk-riwayat-sunting__tabel tbody th { width: 22%; font-weight: 700; }
+.tk-riwayat-sunting__lama { background: var(--tk-merah-bg); color: var(--tk-merah); }
+.tk-riwayat-sunting__baru { background: var(--tk-hijau-bg); color: var(--tk-hijau-gelap); }
+
+/* Keluaran wp_text_diff() (table.diff) */
+.tk-riwayat-sunting__diff { padding: 0 !important; }
+.tk-riwayat-sunting__diff table.diff { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.tk-riwayat-sunting__diff table.diff td { padding: 6px 10px; border: 0; vertical-align: top; overflow-wrap: anywhere; font-size: 13px; line-height: 1.5; }
+.tk-riwayat-sunting__diff table.diff col.content { width: 50%; }
+.tk-riwayat-sunting__diff .diff-deletedline { background: var(--tk-merah-bg); }
+.tk-riwayat-sunting__diff .diff-addedline   { background: var(--tk-hijau-bg); }
+.tk-riwayat-sunting__diff del { background: #f3b8ad; text-decoration: line-through; }
+.tk-riwayat-sunting__diff ins { background: #a9dcbf; text-decoration: none; }
+
+@media (max-width: 600px) {
+  .tk-riwayat-sunting__tabel tbody th { width: 30%; }
 }

@@ -36,6 +36,8 @@ function tk_log_label() {
         'terbitkan'  => 'Diterbitkan',
         'pulihkan'   => 'Dipulihkan dari Trash',
         'antrean'    => 'Dikembalikan ke antrean kurasi',
+        'ubah'       => 'Disunting lewat form',
+        'ubah_diterapkan' => 'Usulan perubahan disetujui & diterapkan',
     );
 }
 
@@ -45,7 +47,7 @@ function tk_log_label() {
  * @return string[]
  */
 function tk_log_aksi_kurator() {
-    return array( 'terbitkan', 'revisi', 'tolak', 'antrean' );
+    return array( 'terbitkan', 'revisi', 'tolak', 'antrean', 'ubah_diterapkan' );
 }
 
 /**

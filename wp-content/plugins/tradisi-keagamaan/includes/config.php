@@ -29,6 +29,12 @@ define( 'TK_SLUG_KOLEKSI', 'koleksi' );
 /** Halaman berisi [tk_form_tradisi]. */
 define( 'TK_SLUG_TAMBAH', 'tambah-tradisi' );
 
+/** Halaman "Ubah Tradisi", juga berisi [tk_form_tradisi] (dibuka dengan ?edit=ID). */
+define( 'TK_SLUG_UBAH', 'ubah-tradisi' );
+
+/** Halaman "Riwayat Suntingan", berisi [tk_riwayat_suntingan] (dibuka dengan ?id=ID). */
+define( 'TK_SLUG_RIWAYAT', 'riwayat-suntingan' );
+
 /** Halaman berisi [tk_kurasi]. */
 define( 'TK_SLUG_KURASI', 'dashboard-kurasi' );
 
