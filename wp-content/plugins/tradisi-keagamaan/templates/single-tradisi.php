@@ -9,16 +9,19 @@
  * Urutan bagian:
  *   0. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *   1. Link kembali
- *   2. Badge kategori + status, judul, tanggal terbit
+ *   2. Badge jenis + kategori + status, judul, tanggal terbit
  *   3. Baris meta: penulis, kabupaten/kota, provinsi, pembaca
  *   4. Gambar utama
  *   5. Abstrak (deskripsi_singkat)
- *   6. Kotak info: waktu pelaksanaan, tanggal terdekat, agama
+ *   6. Kotak info, sesuai jenis:
+ *        Tradisi          waktu pelaksanaan, tanggal terdekat, agama
+ *        Budaya Material  bahan, lokasi penyimpanan, agama; lalu 6b. fungsi
  *   7. Isi artikel
  *   8. Galeri foto
  *   9. Lokasi di peta (kalau koordinat diisi)
  *  10. Kata kunci + sumber referensi
- *  11. Tradisi terkait
+ *  11. Tautan "Terkait dengan": "Digunakan dalam Tradisi" / "Budaya Material Terkait"
+ *  12. Lihat Juga (otomatis: kategori/provinsi sama)
  *
  * Bagian yang datanya kosong otomatis tidak ditampilkan.
  *
@@ -37,13 +40,24 @@ while ( have_posts() ) :
     $id = get_the_ID();
     $d  = tk_single_get_data( $id );
 
-    // Kotak info (label => nilai). Baris kosong dilewati.
+    $material = ( 'budaya-material' === $d['jenis'] );
+
+    // Kotak info (label => nilai), sesuai jenis. Baris kosong dilewati.
     // Kabupaten/kota & provinsi tidak di sini: sudah tampil di baris meta.
-    $info = array_filter( array(
-        'Waktu Pelaksanaan' => $d['waktu'],
-        'Tanggal Terdekat'  => $d['tanggal'],
-        'Agama'             => $d['agama'],
-    ) );
+    $info = array_filter( $material
+        ? array(
+            'Bahan'                         => $d['bahan'],
+            'Lokasi Penyimpanan/Keberadaan' => $d['lokasi'],
+            'Agama'                         => $d['agama'],
+        )
+        : array(
+            'Waktu Pelaksanaan' => $d['waktu'],
+            'Tanggal Terdekat'  => $d['tanggal'],
+            'Agama'             => $d['agama'],
+        )
+    );
+
+    $tautan = tk_single_get_tautan( $id );
     ?>
 
 <div class="container">
@@ -58,6 +72,7 @@ while ( have_posts() ) :
     <?php /* 2. Badge, judul, tanggal terbit */ ?>
     <header class="tk-single__head">
       <div class="tk-single__badges">
+        <span class="tk-pill tk-pill--jenis tk-pill--<?php echo esc_attr( $d['jenis'] ); ?>"><?php echo esc_html( TK_JENIS[ $d['jenis'] ] ); ?></span>
         <?php if ( $d['kategori'] ) : ?>
           <span class="tk-pill tk-pill--kat"><?php echo esc_html( $d['kategori'] ); ?></span>
         <?php endif; ?>
@@ -103,6 +118,14 @@ while ( have_posts() ) :
           </div>
         <?php endforeach; ?>
       </dl>
+    <?php endif; ?>
+
+    <?php /* 6b. Fungsi (budaya material): teks panjang, di luar kotak info */ ?>
+    <?php if ( $material && $d['fungsi'] ) : ?>
+      <div class="tk-single__fungsi">
+        <span class="tk-single__abstract-label">Fungsi/Kegunaan</span>
+        <?php echo nl2br( esc_html( $d['fungsi'] ) ); ?>
+      </div>
     <?php endif; ?>
 
     <?php /* 7. Isi artikel */ ?>
@@ -156,11 +179,21 @@ while ( have_posts() ) :
 
   </article>
 
-  <?php /* 11. Tradisi terkait */ ?>
-  <?php $terkait = tk_single_get_terkait( $id ); ?>
+  <?php /* 11. Tautan pilihan (field "Terkait dengan"), dikelompokkan per jenis */ ?>
+  <?php foreach ( $tautan as $jenis_tautan => $ids ) : ?>
+    <section class="tk-single__terkait">
+      <div class="tk-koleksi-head"><h2><?php echo esc_html( tk_single_judul_tautan( $jenis_tautan, $d['jenis'] ) ); ?></h2></div>
+      <div class="tk-grid">
+        <?php foreach ( $ids as $tautan_id ) { echo tk_koleksi_render_kartu( $tautan_id ); } ?>
+      </div>
+    </section>
+  <?php endforeach; ?>
+
+  <?php /* 12. Lihat juga: koleksi mirip (otomatis), tanpa mengulang tautan */ ?>
+  <?php $terkait = tk_single_get_terkait( $id, 3, $tautan ? array_merge( ...array_values( $tautan ) ) : array() ); ?>
   <?php if ( $terkait ) : ?>
     <section class="tk-single__terkait">
-      <div class="tk-koleksi-head"><h2>Tradisi Terkait</h2></div>
+      <div class="tk-koleksi-head"><h2>Lihat Juga</h2></div>
       <div class="tk-grid">
         <?php foreach ( $terkait as $terkait_id ) { echo tk_koleksi_render_kartu( $terkait_id ); } ?>
       </div>

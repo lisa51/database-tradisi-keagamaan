@@ -10,7 +10,8 @@
  *   tk_get_galeri_ids()      Isi field galeri → daftar ID gambar (Image maupun Gallery ACF Pro).
  *   tk_format_waktu_pelaksanaan()  "12 Rabiul Awal (kalender Hijriah)".
  *   tk_format_tanggal_acf()  Tanggal ACF (Ymd) → "17 Agustus 2026".
- *   tk_single_get_terkait()  Tradisi terkait (kategori ATAU wilayah sama).
+ *   tk_single_get_tautan()   Tautan pilihan di field "Terkait dengan", per jenis.
+ *   tk_single_get_terkait()  Koleksi mirip (kategori ATAU wilayah sama), untuk "Lihat Juga".
  *
  * @package TradisiKeagamaan
  */
@@ -24,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param int $id ID tradisi.
  * @return array {
+ *     @type string   $jenis     Slug jenis ('tradisi' / 'budaya-material').
  *     @type string   $kategori  Nama kategori, dipisah koma.
  *     @type string   $wilayah   Nama wilayah, dipisah koma.
  *     @type string   $agama     Nama agama, dipisah koma.
@@ -31,6 +33,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     @type string   $abstrak   Deskripsi singkat.
  *     @type string   $waktu     Waktu pelaksanaan + sistem penanggalan, atau ''.
  *     @type string   $tanggal   Tanggal terdekat terformat, atau ''.
+ *     @type string   $bahan     Bahan (budaya material).
+ *     @type string   $fungsi    Fungsi/kegunaan (budaya material).
+ *     @type string   $lokasi    Lokasi penyimpanan/keberadaan (budaya material).
  *     @type string   $sumber    URL sumber referensi.
  *     @type int[]    $galeri    Daftar ID gambar galeri.
  *     @type WP_Term[] $tags     Kata kunci.
@@ -41,12 +46,16 @@ function tk_single_get_data( $id ) {
     $tags = get_the_terms( $id, 'post_tag' );
 
     return array(
+        'jenis'    => tk_get_jenis( $id ),
         'kategori' => tk_term_names( $id, 'kategori-tradisi' ),
         'wilayah'  => tk_term_names( $id, 'wilayah' ),
         'agama'    => tk_term_names( $id, 'agama' ),
         'asal'     => get_post_meta( $id, 'asal_daerah', true ),
         'abstrak'  => get_post_meta( $id, 'deskripsi_singkat', true ),
         'waktu'    => tk_format_waktu_pelaksanaan( $id ),
+        'bahan'    => get_post_meta( $id, 'bahan', true ),
+        'fungsi'   => get_post_meta( $id, 'fungsi', true ),
+        'lokasi'   => get_post_meta( $id, 'lokasi_keberadaan', true ),
         'tanggal'  => tk_format_tanggal_acf( get_post_meta( $id, 'tanggal_perayaan', true ) ),
         'sumber'   => get_post_meta( $id, 'sumber_referensi', true ),
         'galeri'   => tk_get_galeri_ids( get_post_meta( $id, 'galeri_foto', true ) ),
@@ -140,19 +149,52 @@ function tk_format_tanggal_acf( $raw ) {
 }
 
 /**
- * Cari tradisi terkait: kategori ATAU wilayah yang sama.
- * Kalau tidak ada, tampilkan tradisi terbaru lainnya.
+ * Tautan yang dipilih kurator/kontributor di field "Terkait dengan",
+ * dikelompokkan per jenis. Hanya yang sudah terbit.
  *
- * @param int $id     ID tradisi yang sedang dibuka.
- * @param int $jumlah Jumlah tradisi terkait. Default 3.
+ * @param int $id
+ * @return array<string, int[]> Slug jenis => daftar ID, mis. array( 'tradisi' => array( 27 ) ).
+ */
+function tk_single_get_tautan( $id ) {
+    $ids   = array_filter( array_map( 'absint', (array) get_post_meta( $id, 'terkait', true ) ) );
+    $hasil = array();
+    foreach ( $ids as $tautan ) {
+        if ( 'publish' === get_post_status( $tautan ) && 'tradisi' === get_post_type( $tautan ) ) {
+            $hasil[ tk_get_jenis( $tautan ) ][] = $tautan;
+        }
+    }
+    return $hasil;
+}
+
+/**
+ * Judul bagian tautan di halaman detail.
+ *
+ * @param string $jenis_tautan  Jenis item yang ditautkan.
+ * @param string $jenis_halaman Jenis halaman yang sedang dibuka.
+ * @return string
+ */
+function tk_single_judul_tautan( $jenis_tautan, $jenis_halaman ) {
+    if ( 'budaya-material' === $jenis_tautan ) {
+        return 'Budaya Material Terkait';
+    }
+    return 'budaya-material' === $jenis_halaman ? 'Digunakan dalam Tradisi' : 'Tradisi Terkait';
+}
+
+/**
+ * Cari koleksi lain yang mirip: kategori ATAU wilayah yang sama.
+ * Kalau tidak ada, tampilkan yang terbaru lainnya.
+ *
+ * @param int   $id      ID tradisi yang sedang dibuka.
+ * @param int   $jumlah  Jumlah hasil. Default 3.
+ * @param int[] $kecuali ID yang tidak perlu ditampilkan lagi (mis. tautan).
  * @return int[] Daftar ID tradisi.
  */
-function tk_single_get_terkait( $id, $jumlah = 3 ) {
+function tk_single_get_terkait( $id, $jumlah = 3, $kecuali = array() ) {
     $dasar = array(
         'post_type'      => 'tradisi',
         'post_status'    => 'publish',
         'posts_per_page' => $jumlah,
-        'post__not_in'   => array( $id ),
+        'post__not_in'   => array_merge( array( $id ), $kecuali ),
         'fields'         => 'ids',
         'no_found_rows'  => true,
     );

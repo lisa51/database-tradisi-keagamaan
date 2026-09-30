@@ -47,7 +47,7 @@ function tk_term_names( $post_id, $taxonomy, $sep = ', ', $limit = 0 ) {
  *   tk_icon( 'pin' )         // 14px, untuk lokasi di card
  *   tk_icon( 'buku', 22 )    // 22px, untuk kotak stats
  *
- * @param string $name Nama ikon: 'pin', 'gedung', 'buku', 'user', 'mata', 'link';
+ * @param string $name Nama ikon: 'pin', 'gedung', 'buku', 'benda', 'user', 'mata', 'link';
  *                     untuk menu: 'rumah', 'cari', 'peta', 'kurasi', 'info',
  *                     'surat', 'tambah', 'masuk', 'keluar'.
  * @param int    $size Ukuran dalam piksel. Default 14.
@@ -61,6 +61,7 @@ function tk_icon( $name, $size = 14 ) {
         'mata'   => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
         'link'   => '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
         'buku'   => '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+        'benda'  => '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/>', // Kotak: budaya material.
 
         // Menu (lihat includes/core/menu.php).
         'rumah'  => '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',

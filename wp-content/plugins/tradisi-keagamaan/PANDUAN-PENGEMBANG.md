@@ -31,7 +31,9 @@ tradisi-keagamaan/
 │   ├── core/                      Fondasi, dipakai semua fitur
 │   │   ├── helpers.php            tk_term_names, tk_icon, tk_url_* (URL halaman)
 │   │   ├── post-types.php         Post type "tradisi", taxonomy, template single
+│   │   ├── jenis.php              Jenis: Tradisi / Budaya Material (taxonomy + field ACF)
 │   │   ├── acf-fields.php         Field ACF "Detail Tradisi"
+│   │   ├── kabupaten-kota.php     Saran, validasi & penyeragaman Kabupaten/Kota
 │   │   ├── single-data.php        Data untuk templates/single-tradisi.php
 │   │   ├── view-counter.php       Penghitung pembaca
 │   │   ├── assets.php             Font, CSS per fitur, registrasi script peta
@@ -155,7 +157,8 @@ function tk_nama_fungsi( $post_id ) { ... }
 | Kebutuhan | Fungsi | File |
 |---|---|---|
 | Nama term sebuah post | `tk_term_names( $id, $tax, $sep, $limit )` | core/helpers.php |
-| Ikon SVG | `tk_icon( 'pin'\|'gedung'\|'buku'\|'user'\|'mata'\|'link', $size )` | core/helpers.php |
+| Ikon SVG | `tk_icon( 'pin'\|'gedung'\|'buku'\|'benda'\|'user'\|'mata'\|'link', $size )` | core/helpers.php |
+| Jenis sebuah post | `tk_get_jenis( $id )` (slug) / `tk_get_jenis_label( $id )` | core/jenis.php |
 | URL halaman form / dashboard | `tk_url_tambah()`, `tk_url_kurasi()` | core/helpers.php |
 | URL tradisi untuk kurator | `tk_url_tinjau( $id )` (publik atau pratinjau) | core/helpers.php |
 | Semua data satu tradisi | `tk_single_get_data( $id )` | core/single-data.php |
@@ -253,7 +256,7 @@ Ubah daftar di `tk_setup_roles()` (`akun/peran.php`), lalu **naikkan `TK_ROLES_V
 
 | Meta | Isi | Ditulis oleh |
 |---|---|---|
-| `asal_daerah`, `deskripsi_singkat`, `sistem_penanggalan`, `waktu_pelaksanaan`, `tanggal_perayaan`, `sumber_referensi`, `galeri_foto`, `latitude`, `longitude` | Field Detail Tradisi | ACF |
+| `asal_daerah`, `deskripsi_singkat`, `sistem_penanggalan`, `waktu_pelaksanaan`, `tanggal_perayaan`, `bahan`, `lokasi_keberadaan`, `fungsi`, `terkait`, `sumber_referensi`, `galeri_foto`, `latitude`, `longitude` | Field Detail Tradisi | ACF |
 | `foto_utama`, `kata_kunci`, `tk_form_*` | Field form (diubah menjadi featured image, Tags, dan term) | ACF (form) |
 | `tk_tamu_nama`, `tk_tamu_email`, `tk_tamu_instansi`, `tk_tamu_setuju` | Identitas kontributor tamu | ACF (form tamu) |
 | `tk_view_count` | Jumlah pembaca | `core/view-counter.php` |

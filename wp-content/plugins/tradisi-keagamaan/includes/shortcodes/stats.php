@@ -1,6 +1,6 @@
 <?php
 /**
- * Shortcode [tk_stats]: tiga kotak angka ringkasan di Beranda.
+ * Shortcode [tk_stats]: empat kotak angka ringkasan di Beranda.
  *
  * Pemakaian:
  *   [tk_stats]
@@ -13,7 +13,8 @@
  *   └─────────────────────────────┘
  *
  * Sumber angka (hanya tradisi berstatus "publish"):
- *   Tradisi         Jumlah post "tradisi".
+ *   Tradisi         Jumlah post "tradisi" dikurangi Budaya Material.
+ *   Budaya Material Jumlah post dengan term "jenis" = budaya-material.
  *   Provinsi        Jumlah term "wilayah" level teratas yang dipakai.
  *   Kabupaten/Kota  Jumlah nilai unik field "asal_daerah".
  *
@@ -39,13 +40,23 @@ add_shortcode( 'tk_stats', 'tk_stats_shortcode' );
  * @return string HTML.
  */
 function tk_stats_shortcode() {
+    $material = tk_stats_count_jenis( 'budaya-material' );
+
     $items = array(
         array(
-            'angka' => (int) wp_count_posts( 'tradisi' )->publish,
+            // Tanpa term jenis dianggap tradisi (tk_get_jenis()), jadi dihitung dari selisih.
+            'angka' => (int) wp_count_posts( 'tradisi' )->publish - $material,
             'label' => 'Tradisi Terdokumentasi',
-            'ket'   => 'Tercatat dalam arsip WARISI',
+            'ket'   => 'Ritual, upacara, dan kebiasaan',
             'ikon'  => 'buku',
             'warna' => 'oranye',
+        ),
+        array(
+            'angka' => $material,
+            'label' => 'Budaya Material',
+            'ket'   => 'Benda, naskah, bangunan, kuliner',
+            'ikon'  => 'benda',
+            'warna' => 'emas',
         ),
         array(
             'angka' => tk_stats_count_provinsi(),
@@ -57,9 +68,9 @@ function tk_stats_shortcode() {
         array(
             'angka' => tk_stats_count_kabupaten(),
             'label' => 'Kabupaten/Kota',
-            'ket'   => 'Wilayah asal tradisi',
+            'ket'   => 'Wilayah asal koleksi',
             'ikon'  => 'gedung',
-            'warna' => 'emas',
+            'warna' => 'abu',
         ),
     );
 
@@ -82,6 +93,17 @@ function tk_stats_shortcode() {
         );
     }
     return $html . '</div>';
+}
+
+/**
+ * Jumlah tradisi terbit dengan jenis tertentu (count term "jenis").
+ *
+ * @param string $slug Slug jenis, mis. 'budaya-material'.
+ * @return int
+ */
+function tk_stats_count_jenis( $slug ) {
+    $term = get_term_by( 'slug', $slug, 'jenis' );
+    return $term ? (int) $term->count : 0;
 }
 
 /**

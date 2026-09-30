@@ -11,6 +11,7 @@
  *
  * Parameter URL yang dibaca (dikirim oleh form pencarian):
  *   ?cari=pasola        Cari kata di judul/isi tradisi.
+ *   ?tipe=budaya-material  Filter berdasarkan slug term "jenis".
  *   ?provinsi=bali      Filter berdasarkan slug term "wilayah" (level teratas).
  *   ?kategori=kematian  Filter berdasarkan slug term "kategori-tradisi".
  *   ?hal=2              Nomor halaman (pagination).
@@ -57,7 +58,7 @@ function tk_koleksi_shortcode( $atts ) {
     ?>
     <section class="tk-koleksi" id="koleksi">
       <div class="tk-koleksi-head">
-        <h2>Koleksi Tradisi Lokal</h2>
+        <h2>Koleksi Warisan Religi</h2>
         <span class="tk-jumlah-kecil"><?php echo esc_html( $q->post_count ); ?> item tampil</span>
       </div>
 
@@ -72,7 +73,7 @@ function tk_koleksi_shortcode( $atts ) {
         </div>
         <?php echo tk_koleksi_render_paging( $filter, $q->max_num_pages, $url_dasar ); ?>
       <?php else : ?>
-        <p class="tk-kosong">Tidak ada tradisi yang cocok dengan pencarian Anda.</p>
+        <p class="tk-kosong">Tidak ada koleksi yang cocok dengan pencarian Anda.</p>
       <?php endif; ?>
     </section>
     <?php
@@ -90,19 +91,22 @@ function tk_koleksi_shortcode( $atts ) {
  *
  * Kunci array = nama parameter di URL.
  *   PENTING: jangan pakai nama yang sama dengan nama taxonomy (agama, wilayah,
- *   kategori-tradisi) atau parameter bawaan WordPress (s, p, cat, tag, page,
+ *   kategori-tradisi, jenis) atau parameter bawaan WordPress (s, p, cat, tag, page,
  *   paged, name, author, year, m). Nama itu dibaca WordPress sendiri dan
  *   membuat Beranda berubah menjadi halaman arsip.
  *   taxonomy     Nama taxonomy.
  *   label        Teks pilihan kosong (tanpa filter).
  *   hanya_induk  true = hanya term level teratas (mis. provinsi, bukan kabupaten).
+ *   per_jenis    true = pilihan dikelompokkan per jenis (<optgroup>); bila filter
+ *                "tipe" aktif, hanya kategori jenis itu. Khusus kategori-tradisi.
  *
  * @return array[]
  */
 function tk_koleksi_filter_taksonomi() {
     return array(
+        'tipe'     => array( 'taxonomy' => 'jenis', 'label' => 'Semua Jenis', 'hanya_induk' => false ),
         'provinsi' => array( 'taxonomy' => 'wilayah', 'label' => 'Semua Provinsi', 'hanya_induk' => true ),
-        'kategori' => array( 'taxonomy' => 'kategori-tradisi', 'label' => 'Semua Kategori', 'hanya_induk' => false ),
+        'kategori' => array( 'taxonomy' => 'kategori-tradisi', 'label' => 'Semua Kategori', 'hanya_induk' => false, 'per_jenis' => true ),
     );
 }
 
@@ -191,14 +195,14 @@ function tk_koleksi_render_form( $filter, $total, $url_dasar ) {
       <div class="tk-jelajah-head">
         <div>
           <span class="tk-label">Pencarian Arsip</span>
-          <h2 class="tk-jelajah-judul">Jelajahi Tradisi Lokal</h2>
+          <h2 class="tk-jelajah-judul">Jelajahi Warisan Religi</h2>
         </div>
-        <span class="tk-jumlah">Menampilkan <?php echo esc_html( number_format_i18n( $total ) ); ?> tradisi</span>
+        <span class="tk-jumlah">Menampilkan <?php echo esc_html( number_format_i18n( $total ) ); ?> koleksi</span>
       </div>
 
       <form class="tk-cari" method="get" action="<?php echo esc_url( $url_dasar ); ?>#jelajahi"
             style="--tk-jumlah-filter: <?php echo count( $dropdown ); ?>">
-        <input type="search" name="cari" placeholder="Cari nama tradisi..." aria-label="Cari nama tradisi" value="<?php echo esc_attr( $filter['cari'] ); ?>">
+        <input type="search" name="cari" placeholder="Cari tradisi atau benda..." aria-label="Cari tradisi atau budaya material" value="<?php echo esc_attr( $filter['cari'] ); ?>">
 
         <?php foreach ( $dropdown as $kunci => $conf ) :
             $terms = get_terms( array(
@@ -206,16 +210,35 @@ function tk_koleksi_render_form( $filter, $total, $url_dasar ) {
                 'hide_empty' => true, // Hanya term yang punya tradisi terbit.
                 'parent'     => $conf['hanya_induk'] ? 0 : '',
             ) );
+            $terms = is_wp_error( $terms ) ? array() : $terms;
+
+            // Kelompok pilihan: label => term. Tanpa per_jenis = satu kelompok tanpa label.
+            $kelompok = array( '' => $terms );
+            if ( ! empty( $conf['per_jenis'] ) ) {
+                $kelompok = array();
+                foreach ( TK_JENIS as $slug_jenis => $label_jenis ) {
+                    if ( '' !== $filter['tipe'] && $filter['tipe'] !== $slug_jenis ) {
+                        continue;
+                    }
+                    $ids = tk_kategori_ids_jenis( $slug_jenis );
+                    $isi = array_filter( $terms, function ( $t ) use ( $ids ) { return in_array( $t->term_id, $ids, true ); } );
+                    if ( $isi ) {
+                        $kelompok[ $label_jenis ] = $isi;
+                    }
+                }
+            }
             ?>
           <select name="<?php echo esc_attr( $kunci ); ?>" aria-label="<?php echo esc_attr( $conf['label'] ); ?>">
             <option value=""><?php echo esc_html( $conf['label'] ); ?></option>
-            <?php if ( ! is_wp_error( $terms ) ) : ?>
-              <?php foreach ( $terms as $term ) : ?>
+            <?php foreach ( $kelompok as $label_kelompok => $isi ) : ?>
+              <?php if ( $label_kelompok ) : ?><optgroup label="<?php echo esc_attr( $label_kelompok ); ?>"><?php endif; ?>
+              <?php foreach ( $isi as $term ) : ?>
                 <option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $filter[ $kunci ], $term->slug ); ?>>
                   <?php echo esc_html( $term->name ); ?>
                 </option>
               <?php endforeach; ?>
-            <?php endif; ?>
+              <?php if ( $label_kelompok ) : ?></optgroup><?php endif; ?>
+            <?php endforeach; ?>
           </select>
         <?php endforeach; ?>
 
@@ -234,7 +257,7 @@ function tk_koleksi_render_form( $filter, $total, $url_dasar ) {
  * HTML satu card tradisi.
  *
  * Isi card:
- *   Gambar + badge kategori (kiri atas) + badge "Terpublikasi" (kanan atas),
+ *   Gambar + badge kategori (kiri atas) + badge jenis (kanan atas),
  *   judul, lokasi 2 baris (asal_daerah, wilayah), deskripsi singkat,
  *   2 kata kunci pertama, dan link "Lihat Detail".
  *
@@ -243,6 +266,7 @@ function tk_koleksi_render_form( $filter, $total, $url_dasar ) {
  */
 function tk_koleksi_render_kartu( $id ) {
     $link     = get_permalink( $id );
+    $jenis    = tk_get_jenis( $id );
     $kategori = tk_term_names( $id, 'kategori-tradisi' );
     $wilayah  = tk_term_names( $id, 'wilayah' );
     $tags     = tk_term_names( $id, 'post_tag', '   # ', 2 );
@@ -257,7 +281,7 @@ function tk_koleksi_render_kartu( $id ) {
         <?php if ( $kategori ) : ?>
           <span class="tk-badge-kat"><?php echo esc_html( $kategori ); ?></span>
         <?php endif; ?>
-        <span class="tk-badge-status">Terpublikasi</span>
+        <span class="tk-badge-jenis tk-pill--<?php echo esc_attr( $jenis ); ?>"><?php echo esc_html( TK_JENIS[ $jenis ] ); ?></span>
       </a>
 
       <div class="tk-kartu-isi">

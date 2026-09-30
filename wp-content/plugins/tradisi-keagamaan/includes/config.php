@@ -19,6 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Halaman (slug) — harus sama dengan slug halaman di Pages
  * ========================================================================== */
 
+/**
+ * URL arsip semua koleksi (/koleksi/). Halaman detail memakai slug jenis
+ * (/tradisi/nama/, /budaya-material/nama/); link /koleksi/nama/ dialihkan.
+ * Aturan URL diperbarui otomatis saat nilai ini atau TK_JENIS diubah.
+ */
+define( 'TK_SLUG_KOLEKSI', 'koleksi' );
+
 /** Halaman berisi [tk_form_tradisi]. */
 define( 'TK_SLUG_TAMBAH', 'tambah-tradisi' );
 
@@ -37,6 +44,15 @@ define( 'TK_FORM_GROUP', 'group_tk_form_kontributor' );
 
 /** Grup "Identitas Pengirim" untuk tamu (includes/kontribusi/fields.php). */
 define( 'TK_TAMU_GROUP', 'group_tk_form_tamu' );
+
+/**
+ * Jenis konten (taxonomy "jenis", includes/core/jenis.php): slug term => label.
+ * Slug tersimpan di database, jadi jangan diubah; label boleh diubah.
+ */
+define( 'TK_JENIS', array(
+    'tradisi'         => 'Tradisi',
+    'budaya-material' => 'Budaya Material',
+) );
 
 /** Nama post meta jumlah pembaca. */
 define( 'TK_VIEW_META', 'tk_view_count' );

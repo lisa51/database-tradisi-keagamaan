@@ -3,15 +3,27 @@
  * Field ACF: grup "Detail Tradisi" (tampil di editor post type "tradisi").
  *
  * Field yang tersedia (nama → tipe):
- *   asal_daerah        text         Label "Kabupaten/Kota" (provinsi ada di taxonomy
+ *   jenis_warisan      button_group Tradisi / Budaya Material. Tidak disimpan sebagai meta,
+ *                                   tapi sebagai term taxonomy "jenis" (includes/core/jenis.php).
+ *                                   Field di bawah bertanda [T] hanya tampil untuk Tradisi,
+ *                                   [M] hanya untuk Budaya Material.
+ *   kategori_tradisi   taxonomy     [T] Kategori (term "kategori-tradisi" berjenis tradisi).
+ *   kategori_material  taxonomy     [M] Kategori (term berjenis budaya-material).
+ *                                   Keduanya menyimpan ke taxonomy; lihat includes/core/jenis.php.
+ *   asal_daerah        text       Label "Kabupaten/Kota" (provinsi ada di taxonomy
  *                                   "wilayah"). Dipakai di card, peta & stats.
  *                                   Saran & validasi: includes/core/kabupaten-kota.php.
  *   deskripsi_singkat  textarea     Abstrak. Dipakai di card, hero, single.
- *   sistem_penanggalan select       Kunci dari tk_sistem_penanggalan() (masehi, hijriah, ...).
- *   waktu_pelaksanaan  text         Aturan waktu tetap, mis. "12 Rabiul Awal".
+ *   sistem_penanggalan select       [T] Kunci dari tk_sistem_penanggalan() (masehi, hijriah, ...).
+ *   waktu_pelaksanaan  text         [T] Aturan waktu tetap, mis. "12 Rabiul Awal".
  *                                   Keduanya ditampilkan lewat tk_format_waktu_pelaksanaan().
- *   tanggal_perayaan   date_picker  Label "Tanggal Terdekat" (opsional). Disimpan
+ *   tanggal_perayaan   date_picker  [T] Label "Tanggal Terdekat" (opsional). Disimpan
  *                                   sebagai Ymd; ditampilkan lewat tk_format_tanggal_acf().
+ *   bahan              text         [M] Bahan pembuat.
+ *   lokasi_keberadaan  text         [M] Tempat penyimpanan / alamat bangunan atau situs.
+ *   fungsi             textarea     [M] Fungsi/kegunaan.
+ *   terkait            relationship Tradisi/budaya material lain (dua arah, ACF bidirectional).
+ *                                   Ditampilkan lewat tk_single_get_tautan().
  *   sumber_referensi   url          Link sumber (wajib untuk konten kutipan).
  *   galeri_foto        gallery      Banyak foto (ACF Pro), maks. TK_GALERI_MAKS.
  *                                   Di form depan diganti field "Foto Tambahan"
@@ -67,11 +79,51 @@ function tk_register_acf_fields() {
         return; // ACF belum aktif.
     }
 
+    // Tampil hanya untuk jenis tertentu (field "Jenis" di atas).
+    $untuk = function ( $jenis ) {
+        return array( array( array( 'field' => 'field_tk_jenis', 'operator' => '==', 'value' => $jenis ) ) );
+    };
+
+    $kategori = array(
+        'label'         => 'Kategori',
+        'type'          => 'taxonomy',
+        'taxonomy'      => 'kategori-tradisi',
+        'field_type'    => 'checkbox',
+        'instructions'  => 'Boleh memilih lebih dari satu.',
+        'required'      => 1,
+        'add_term'      => 0,
+        'save_terms'    => 1,
+        'load_terms'    => 1,
+        'return_format' => 'id',
+    );
+
     acf_add_local_field_group( array(
         'key'         => TK_DETAIL_GROUP, // group_6aa0f20d00bc9 (config.php)
         'title'       => 'Detail Tradisi',
         'description' => 'Berisi atribut terkait tradisi',
         'fields'      => array(
+            array(
+                'key'           => 'field_tk_jenis',
+                'label'         => 'Jenis',
+                'name'          => 'jenis_warisan', // Disimpan ke taxonomy "jenis" (includes/core/jenis.php).
+                'type'          => 'button_group',
+                'instructions'  => 'Tradisi = sesuatu yang dilakukan (ritual, upacara, tarian). Budaya Material = sesuatu yang berwujud (benda, bangunan/situs, naskah, makanan).',
+                'choices'       => TK_JENIS,
+                'default_value' => 'tradisi',
+                'required'      => 1,
+                'return_format' => 'value',
+            ),
+            // Kategori: satu field per jenis, pilihan disaring di includes/core/jenis.php.
+            $kategori + array(
+                'key'               => 'field_tk_kategori_tradisi',
+                'name'              => 'kategori_tradisi',
+                'conditional_logic' => $untuk( 'tradisi' ),
+            ),
+            $kategori + array(
+                'key'               => 'field_tk_kategori_material',
+                'name'              => 'kategori_material',
+                'conditional_logic' => $untuk( 'budaya-material' ),
+            ),
             array(
                 'key'          => 'field_6aa0f20e51a52',
                 'label'        => 'Kabupaten/Kota',
@@ -91,12 +143,13 @@ function tk_register_acf_fields() {
                 'label'         => 'Sistem Penanggalan',
                 'name'          => 'sistem_penanggalan',
                 'type'          => 'select',
-                'instructions'  => 'Kalender yang menentukan waktu pelaksanaan. Kosongkan untuk benda atau tempat.',
+                'instructions'  => 'Kalender yang menentukan waktu pelaksanaan.',
                 'choices'       => tk_sistem_penanggalan(),
                 'allow_null'    => 1,
                 'placeholder'   => 'Pilih', // ACF menampilkannya sebagai "- Pilih -".
                 'return_format' => 'value',
                 'wrapper'       => array( 'width' => '50' ),
+                'conditional_logic' => $untuk( 'tradisi' ),
             ),
             array(
                 'key'          => 'field_tk_waktu_pelaksanaan',
@@ -107,6 +160,7 @@ function tk_register_acf_fields() {
                 'placeholder'  => 'Contoh: 12 Rabiul Awal',
                 'maxlength'    => 120,
                 'wrapper'      => array( 'width' => '50' ),
+                'conditional_logic' => $untuk( 'tradisi' ),
             ),
             array(
                 'key'            => 'field_6aa0f26151a55',
@@ -117,6 +171,49 @@ function tk_register_acf_fields() {
                 'display_format' => 'j F Y', // Sama dengan tk_format_tanggal_acf(); bulan mengikuti bahasa situs.
                 'return_format'  => 'd/m/Y',
                 'first_day'      => 1,
+                'conditional_logic' => $untuk( 'tradisi' ),
+            ),
+            array(
+                'key'          => 'field_tk_bahan',
+                'label'        => 'Bahan',
+                'name'         => 'bahan',
+                'type'         => 'text',
+                'placeholder'  => 'Contoh: kayu ulin, kain tenun, daun lontar',
+                'wrapper'      => array( 'width' => '50' ),
+                'conditional_logic' => $untuk( 'budaya-material' ),
+            ),
+            array(
+                'key'          => 'field_tk_lokasi_keberadaan',
+                'label'        => 'Lokasi Penyimpanan/Keberadaan',
+                'name'         => 'lokasi_keberadaan',
+                'type'         => 'text',
+                'instructions' => 'Tempat benda disimpan atau alamat bangunan/situs.',
+                'placeholder'  => 'Contoh: Museum La Galigo, Makassar',
+                'wrapper'      => array( 'width' => '50' ),
+                'conditional_logic' => $untuk( 'budaya-material' ),
+            ),
+            array(
+                'key'          => 'field_tk_fungsi',
+                'label'        => 'Fungsi/Kegunaan',
+                'name'         => 'fungsi',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Untuk apa benda ini digunakan, terutama dalam kehidupan keagamaan.',
+                'conditional_logic' => $untuk( 'budaya-material' ),
+            ),
+            array(
+                'key'           => 'field_tk_terkait',
+                'label'         => 'Terkait dengan',
+                'name'          => 'terkait',
+                'type'          => 'relationship',
+                'instructions'  => 'Opsional. Tradisi atau budaya material lain yang berhubungan, mis. kitab yang dipakai dalam sebuah tradisi. Tautan otomatis tampil di kedua halaman.',
+                'post_type'     => array( 'tradisi' ),
+                'post_status'   => array( 'publish' ), // Hanya yang sudah terbit (juga di form publik).
+                'filters'       => array( 'search' ),
+                'return_format' => 'id',
+                'max'           => 10,
+                'bidirectional' => 1, // A terkait B ⇒ B otomatis terkait A.
+                'bidirectional_target' => array( 'field_tk_terkait' ),
             ),
             array(
                 'key'   => 'field_6aa0f2c151a57',

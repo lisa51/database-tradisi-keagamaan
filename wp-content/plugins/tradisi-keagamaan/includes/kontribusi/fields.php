@@ -3,7 +3,8 @@
  * Field ACF khusus form depan [tk_form_tradisi].
  *
  *   Identitas Pengirim (TK_TAMU_GROUP)   khusus tamu: nama, email, instansi, pernyataan.
- *   Formulir Kontributor (TK_FORM_GROUP) foto utama, agama, wilayah, kategori, kata kunci.
+ *   Formulir Kontributor (TK_FORM_GROUP) foto utama, agama, provinsi, kata kunci.
+ *                                        (Kategori ada di grup Detail Tradisi, setelah Jenis.)
  *
  * Kedua grup sengaja diberi lokasi post type yang tidak ada ("tk_form_only"),
  * sehingga TIDAK tampil di editor wp-admin (di sana taxonomy & featured image
@@ -155,15 +156,7 @@ function tk_form_register_fields() {
                 'required'   => 1,
                 'wrapper'    => array( 'width' => '50' ),
             ),
-            $taxonomy_field + array(
-                'key'          => 'field_tk_form_kategori',
-                'label'        => 'Kategori Tradisi',
-                'name'         => 'tk_form_kategori',
-                'taxonomy'     => 'kategori-tradisi',
-                'field_type'   => 'checkbox',
-                'required'     => 1,
-                'instructions' => 'Boleh memilih lebih dari satu.',
-            ),
+            // Kategori ada di grup Detail Tradisi, setelah "Jenis" (includes/core/acf-fields.php).
             array(
                 'key'          => 'field_tk_form_kata_kunci',
                 'label'        => 'Kata Kunci',
@@ -219,8 +212,8 @@ add_filter( 'acf/prepare_field/name=_post_title', 'tk_form_label_judul' );
 
 /** Label field bawaan ACF "Title" dalam Bahasa Indonesia. */
 function tk_form_label_judul( $field ) {
-    $field['label']        = 'Nama Tradisi';
-    $field['instructions'] = 'Contoh: Ngaben, Tabuik, Pasola.';
+    $field['label']        = 'Nama Tradisi / Budaya Material';
+    $field['instructions'] = 'Contoh tradisi: Ngaben, Tabuik, Pasola. Contoh budaya material: Kitab Kuning Mattuttung, Tenun Toraja.';
     return $field;
 }
 
@@ -229,6 +222,6 @@ add_filter( 'acf/prepare_field/name=_post_content', 'tk_form_label_isi' );
 /** Label field bawaan ACF "Content" dalam Bahasa Indonesia. */
 function tk_form_label_isi( $field ) {
     $field['label']        = 'Isi Artikel';
-    $field['instructions'] = 'Uraikan sejarah, makna, dan tata cara tradisi (minimal ' . TK_MIN_KATA_ISI . ' kata). Sebutkan sumber di field Sumber Referensi.';
+    $field['instructions'] = 'Uraikan sejarah, makna, dan tata cara tradisi, atau asal-usul, wujud, dan makna budaya material (minimal ' . TK_MIN_KATA_ISI . ' kata). Sebutkan sumber di field Sumber Referensi.';
     return $field;
 }

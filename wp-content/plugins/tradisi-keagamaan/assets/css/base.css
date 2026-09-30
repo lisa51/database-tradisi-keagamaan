@@ -271,6 +271,10 @@ button.tk-btn-kecil { cursor: pointer; font-family: inherit; line-height: 1; }
   color: #fff;
 }
 .tk-pill--kat    { background: var(--tk-coklat); }
+
+/* Jenis: Tradisi (oranye) / Budaya Material (emas gelap). Dipakai di detail & card. */
+.tk-pill--tradisi         { background: var(--tk-accent); }
+.tk-pill--budaya-material { background: var(--tk-kuning-teks); }
 .tk-pill--status {
   background: var(--tk-hijau);
   font-size: 10px;

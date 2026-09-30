@@ -2,6 +2,32 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.8.0 (30 September 2026): Kategori per jenis & nama "Koleksi"
+
+**Baru**
+- Kategori per jenis. Setiap kategori punya jenis (field "Untuk Jenis" di halaman edit kategori, term meta `tk_jenis`). Di form dan editor, field Kategori tampil setelah Jenis dan hanya berisi kategori jenis itu (`kategori_tradisi` / `kategori_material`), divalidasi di server.
+- Kategori baru: Penyambutan Tamu, Pernikahan, Tari & Seni Ritual, Tradisi Sosial (Tradisi); Benda & Kerajinan, Naskah & Kitab, Bangunan & Situs, Kuliner Ritual (Budaya Material).
+- Dropdown Kategori di Jelajahi dikelompokkan per jenis dan menyempit sesuai filter Jenis.
+
+**Diubah**
+- Post type tampil sebagai **Koleksi** di wp-admin.
+- URL halaman detail mengikuti jenis: `/tradisi/nama/` atau `/budaya-material/nama/` (aturan per jenis di `tk_rewrite_jenis()`, permalink di `tk_permalink_jenis()`). Awalan yang tidak sesuai jenis (mis. setelah jenis diganti) dan `/koleksi/nama/` dialihkan 301; `/tradisi/` dan `/budaya-material/` diarahkan ke Jelajahi dengan filter jenis; arsip semua koleksi di `/koleksi/`. Aturan URL diperbarui otomatis.
+- Panel taxonomy "Kategori Tradisi" bawaan di editor disembunyikan (diganti field per jenis); label taxonomy menjadi "Kategori".
+
+## 2.7.0 (30 September 2026): Budaya Material Keagamaan
+
+**Baru**
+- Jenis konten **Tradisi** (yang dilakukan) dan **Budaya Material** (yang berwujud: benda, bangunan/situs, naskah, makanan), dalam post type `tradisi` yang sama. Disimpan di taxonomy baru `jenis` (`includes/core/jenis.php`, daftar di `TK_JENIS`), diisi lewat field ACF "Jenis".
+- Field khusus Budaya Material: **Bahan**, **Lokasi Penyimpanan/Keberadaan**, **Fungsi/Kegunaan**. Field waktu (Sistem Penanggalan, Waktu Pelaksanaan, Tanggal Terdekat) hanya tampil untuk Tradisi.
+- Field **Terkait dengan** (relationship dua arah): halaman detail menampilkan "Digunakan dalam Tradisi" / "Budaya Material Terkait".
+- Filter **Jenis** di panel Jelajahi (`?tipe=`), badge jenis di card dan halaman detail, kotak **Budaya Material** di `[tk_stats]`, ikon `benda`.
+
+**Diubah**
+- Card: badge "Terpublikasi" diganti badge jenis.
+- Panel Jelajahi: "Jelajahi Warisan Religi", "Koleksi Warisan Religi", "Menampilkan N koleksi".
+- Halaman detail: "Tradisi Terkait" otomatis menjadi "Lihat Juga" (tanpa mengulang tautan pilihan).
+- Form: label "Nama Tradisi / Budaya Material" dan "Kategori".
+
 ## 2.6.0 (30 September 2026): Lokasi seragam & waktu pelaksanaan
 
 **Baru**

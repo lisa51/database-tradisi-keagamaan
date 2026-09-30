@@ -63,16 +63,23 @@ Peran **Kontributor**, **Kontributor Tamu**, dan **Kurator**, serta akun sistem 
 
 | Jenis | Nama | Keterangan |
 |---|---|---|
-| Post type | `tradisi` | URL `/tradisi/nama-tradisi/`. Revisi aktif. |
+| Post type | `tradisi` | Label **Koleksi**. URL mengikuti jenis: `/tradisi/nama/` atau `/budaya-material/nama/`; arsip `/koleksi/` (`TK_SLUG_KOLEKSI`). Awalan yang salah, jenis yang baru diganti, dan `/koleksi/nama/` dialihkan 301; `/tradisi/` & `/budaya-material/` ke Jelajahi dengan filter jenis. Revisi aktif |
+| Taxonomy | `jenis` | `tradisi` (yang dilakukan: ritual, upacara, tarian) / `budaya-material` (yang berwujud: benda, bangunan/situs, naskah, makanan). Diisi lewat field ACF "Jenis"; panel taxonomy disembunyikan. Daftar di `TK_JENIS` |
 | Taxonomy | `agama` | Hierarkis. 6 agama resmi + "Kepercayaan terhadap Tuhan Yang Maha Esa" (sub-term: kepercayaan lokal) |
 | Taxonomy | `wilayah` | Label **Provinsi**. Hierarkis. Level teratas = 38 provinsi (dipakai stats & filter) |
-| Taxonomy | `kategori-tradisi` | Hierarkis. Boleh lebih dari satu per tradisi |
+| Taxonomy | `kategori-tradisi` | Label **Kategori**. Boleh lebih dari satu. Setiap kategori punya jenis (term meta `tk_jenis`, diatur di Koleksi → Kategori → edit). Dipilih lewat field ACF per jenis; panel bawaan di editor disembunyikan |
 | Taxonomy | `post_tag` | Tags bawaan WP sebagai "kata kunci" |
 | ACF | `asal_daerah` | Label **Kabupaten/Kota**. Text dengan saran & validasi dari daftar resmi (`includes/core/kabupaten-kota.php`) |
 | ACF | `deskripsi_singkat` | Textarea: abstrak |
-| ACF | `sistem_penanggalan` | Select: Masehi, Hijriah, Saka (Bali), Jawa, Imlek, Kalender adat/musim, Mengikuti peristiwa. Pilihan di `tk_sistem_penanggalan()` |
-| ACF | `waktu_pelaksanaan` | Text: aturan waktu tetap, mis. "12 Rabiul Awal" |
-| ACF | `tanggal_perayaan` | Label **Tanggal Terdekat**. Date picker, opsional |
+| ACF | `jenis_warisan` | Button group "Jenis". Tidak disimpan sebagai meta, tapi sebagai term `jenis`. Field di bawah bertanda (T) hanya tampil untuk Tradisi, (M) untuk Budaya Material |
+| ACF | `kategori_tradisi` / `kategori_material` | (T)/(M) Checkbox kategori, hanya berisi kategori jenis tersebut. Menyimpan ke taxonomy `kategori-tradisi` |
+| ACF | `sistem_penanggalan` | (T) Select: Masehi, Hijriah, Saka (Bali), Jawa, Imlek, Kalender adat/musim, Mengikuti peristiwa. Pilihan di `tk_sistem_penanggalan()` |
+| ACF | `waktu_pelaksanaan` | (T) Text: aturan waktu tetap, mis. "12 Rabiul Awal" |
+| ACF | `tanggal_perayaan` | (T) Label **Tanggal Terdekat**. Date picker, opsional |
+| ACF | `bahan` | (M) Text |
+| ACF | `lokasi_keberadaan` | (M) Text: tempat penyimpanan / alamat bangunan atau situs |
+| ACF | `fungsi` | (M) Textarea: fungsi/kegunaan |
+| ACF | `terkait` | Relationship dua arah (ACF bidirectional): "Digunakan dalam Tradisi" / "Budaya Material Terkait" di halaman detail |
 | ACF | `sumber_referensi` | URL |
 | ACF | `galeri_foto` | Gallery (ACF Pro), maks. 12 foto. Diatur kurator di wp-admin; dari form depan lewat "Foto Tambahan" |
 | ACF | `latitude`, `longitude` | Number: titik peta. Kosong = tidak tampil di peta |
@@ -101,9 +108,9 @@ Tulis shortcode di block **Shortcode** (bukan Paragraph), dengan tanda kutip lur
 | `deskripsi` | WARISI adalah ruang digital ... | Paragraf |
 | `id` | otomatis | ID tradisi unggulan. Kosong = pembaca terbanyak |
 
-### `[tk_stats]`: tiga kotak angka
+### `[tk_stats]`: empat kotak angka
 
-Tanpa atribut. Menghitung tradisi terbit, provinsi (term `wilayah` level teratas), dan kabupaten/kota (nilai unik `asal_daerah`).
+Tanpa atribut. Menghitung tradisi terbit, budaya material terbit (term `jenis`), provinsi (term `wilayah` level teratas), dan kabupaten/kota (nilai unik `asal_daerah`).
 
 ### `[tk_koleksi]`: panel Jelajahi + grid card
 
@@ -112,8 +119,8 @@ Tanpa atribut. Menghitung tradisi terbit, provinsi (term `wilayah` level teratas
 [tk_koleksi per_halaman="12"]
 ```
 
-- Pencarian nama + dropdown **Provinsi** dan **Kategori** (bisa dikombinasikan).
-- Parameter URL: `?cari=`, `?provinsi=`, `?kategori=`, `?hal=`.
+- Pencarian nama + dropdown **Jenis**, **Provinsi**, dan **Kategori** (bisa dikombinasikan). Pilihan Kategori dikelompokkan per jenis, dan menyempit bila Jenis dipilih. Card menampilkan badge jenis di kanan atas.
+- Parameter URL: `?cari=`, `?tipe=` (slug jenis), `?provinsi=`, `?kategori=`, `?hal=`.
 - Panel punya `id="jelajahi"`, sehingga menu `/#jelajahi` langsung menggulir ke sana.
 - Menambah dropdown filter (misalnya Agama): lihat [PANDUAN-PENGEMBANG.md](PANDUAN-PENGEMBANG.md#menambah-filter-di-panel-jelajahi).
 
@@ -213,7 +220,7 @@ Riwayat juga tampil di kotak **Pengirim & Riwayat Kurasi** di sidebar editor wp-
 
 ## 6. Halaman detail tradisi
 
-Urutan: Panel Kurator (khusus kurator) → link kembali → badge kategori & status → judul → meta (penulis, kabupaten/kota, provinsi, pembaca) → gambar utama → abstrak → info (waktu pelaksanaan, tanggal terdekat, agama) → isi → galeri → peta lokasi → kata kunci & sumber → tradisi terkait.
+Urutan: Panel Kurator (khusus kurator) → link kembali → badge jenis, kategori & status → judul → meta (penulis, kabupaten/kota, provinsi, pembaca) → gambar utama → abstrak → info (Tradisi: waktu pelaksanaan, tanggal terdekat, agama; Budaya Material: bahan, lokasi, agama, lalu fungsi) → isi → galeri → peta lokasi → kata kunci & sumber → tautan "Terkait dengan" ("Digunakan dalam Tradisi" / "Budaya Material Terkait") → Lihat Juga.
 
 **Galeri Foto:** klik foto untuk membuka lightbox. Navigasi dengan tombol ‹ ›, panah keyboard, atau geser di HP; tutup dengan ×, Esc, atau klik latar. Keterangan foto diambil dari **Caption** di Media Library.
 
