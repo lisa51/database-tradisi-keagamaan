@@ -1,0 +1,79 @@
+/**
+ * WARISI — dialog.css
+ * Jendela konfirmasi (.tk-dialog), mis. konfirmasi Keluar di assets/js/akun.js.
+ *
+ * Dimuat di halaman depan (setelah base.css) DAN di wp-admin, tempat base.css
+ * tidak dimuat. Karena itu file ini berdiri sendiri: tombol punya gaya sendiri
+ * (.tk-dialog__btn) dan setiap token warna diberi nilai cadangan yang sama
+ * dengan :root di base.css.
+ */
+
+.tk-dialog {
+  width: calc(100% - 32px);
+  max-width: 400px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--tk-radius, 12px);
+  background: #fff;
+  box-shadow: var(--tk-bayangan-besar, 0 20px 40px rgba(59, 35, 20, .10));
+  font-family: var(--tk-font-teks, "DM Sans", system-ui, sans-serif);
+  color: var(--tk-teks, #2b2622);
+}
+.tk-dialog::backdrop { background: rgba(43, 38, 34, .55); }
+
+/* Padding di sini, supaya klik di luarnya terhitung klik latar (lihat akun.js) */
+.tk-dialog__isi { padding: 28px 28px 24px; }
+
+.tk-dialog__judul {
+  margin: 0 0 8px;
+  padding: 0;
+  font-family: var(--tk-font-judul, "DM Serif Display", Georgia, serif);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--tk-coklat, #3b2314);
+}
+.tk-dialog__pesan {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--tk-abu, #6f6760);
+}
+.tk-dialog__tombol { display: flex; justify-content: flex-end; gap: 10px; }
+
+.tk-dialog__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--tk-garis, #eadfd3);
+  border-radius: 10px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tk-teks, #2b2622);
+  cursor: pointer;
+}
+.tk-dialog__btn:hover,
+.tk-dialog__btn:focus-visible { border-color: var(--tk-accent, #c4552d); color: var(--tk-accent, #c4552d); }
+
+.tk-dialog__btn--utama {
+  border-color: var(--tk-accent, #c4552d);
+  background: var(--tk-accent, #c4552d);
+  color: #fff;
+}
+.tk-dialog__btn--utama:hover,
+.tk-dialog__btn--utama:focus-visible {
+  border-color: var(--tk-accent-gelap, #a8431f);
+  background: var(--tk-accent-gelap, #a8431f);
+  color: #fff;
+}
+
+.tk-dialog__btn:focus-visible { outline: 2px solid var(--tk-accent, #c4552d); outline-offset: 2px; }
+
+@media (max-width: 480px) {
+  .tk-dialog__tombol { flex-direction: column-reverse; }
+}

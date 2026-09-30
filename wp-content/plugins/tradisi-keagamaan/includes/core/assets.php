@@ -13,6 +13,7 @@
  *   kurasi.css      [tk_kurasi], Panel Kurator
  *   kontak.css      [tk_kontak] (memakai gaya .tk-form dari kontribusi.css)
  *   (login.css dimuat di halaman login, lihat includes/akun/login.php)
+ *   (dialog.css dimuat saat login, juga di wp-admin, lihat tk_enqueue_akun())
  *
  * Untuk menambah file CSS baru: buat file di assets/css/, lalu tambahkan
  * namanya ke tk_css_files(). Versi file memakai waktu ubah (filemtime), jadi
@@ -81,6 +82,28 @@ function tk_enqueue_assets() {
         $js = 'assets/js/galeri.js';
         wp_enqueue_script( 'tk-galeri', TK_URL . $js, array(), filemtime( TK_PATH . $js ), true );
     }
+
+    // Konfirmasi sebelum logout, hanya untuk pengguna yang sedang login.
+    if ( is_user_logged_in() ) {
+        tk_enqueue_akun( array( $base ) );
+    }
+}
+
+add_action( 'admin_enqueue_scripts', 'tk_enqueue_akun' );
+
+/**
+ * Muat konfirmasi logout (assets/js/akun.js + assets/css/dialog.css).
+ * Dipanggil di halaman depan dan di wp-admin. dialog.css berdiri sendiri,
+ * jadi aman dimuat di wp-admin tanpa base.css.
+ *
+ * @param string[]|string $css_deps Dependensi CSS. Di wp-admin berisi nama
+ *                                  hook halaman (string), jadi diabaikan.
+ */
+function tk_enqueue_akun( $css_deps = array() ) {
+    tk_enqueue_css( 'dialog', is_array( $css_deps ) ? $css_deps : array() );
+
+    $js = 'assets/js/akun.js';
+    wp_enqueue_script( 'tk-akun', TK_URL . $js, array(), filemtime( TK_PATH . $js ), true );
 }
 
 /**

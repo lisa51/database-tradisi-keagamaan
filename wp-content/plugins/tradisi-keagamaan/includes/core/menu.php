@@ -16,7 +16,8 @@
  *                     belum login → "Masuk" (ke halaman login),
  *                     sudah login → "Keluar" (logout, kembali ke Beranda).
  *                     Buat sebagai Custom Link dengan URL "#" dan teks bebas.
- *                     Ikon masuk/keluar dipasang otomatis.
+ *                     Ikon masuk/keluar dipasang otomatis. Klik "Keluar"
+ *                     memunculkan jendela konfirmasi (assets/js/akun.js).
  *
  * 3. Ikon menu lewat CSS Class tk-ikon-<nama>, mis. "tk-ikon-rumah".
  *    Nama ikon: rumah, cari, peta, kurasi, info, surat, tambah, masuk,

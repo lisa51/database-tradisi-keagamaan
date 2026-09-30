@@ -2,6 +2,11 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.5.0 (29 September 2026): Konfirmasi keluar
+
+**Baru**
+- Jendela konfirmasi sebelum logout (`assets/js/akun.js`, gaya di `assets/css/dialog.css`). Berlaku untuk menu "Keluar" dan "Log Out" di admin bar, baik di halaman depan maupun di wp-admin. Fokus awal di tombol "Batal"; Esc atau klik latar menutup. Di halaman depan dimuat hanya saat login; tanpa JavaScript, logout berjalan langsung.
+
 ## 2.4.1 (29 September 2026): Perbaikan paging koleksi
 
 **Diperbaiki**
