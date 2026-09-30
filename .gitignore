@@ -37,6 +37,7 @@ wp-content/plugins/fluent-smtp/
 wp-content/plugins/wordfence/
 wp-content/plugins/seo-by-rank-math/
 wp-content/plugins/simple-cloudflare-turnstile/
+wp-content/plugins/wordpress-importer/
 
 # ACF Pro (berlisensi): pasang dari zip di akun advancedcustomfields.com,
 # lalu isi license key di ACF → Updates. License key tersimpan di database.
