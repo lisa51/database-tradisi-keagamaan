@@ -148,7 +148,7 @@ function tk_form_register_fields() {
             ),
             $taxonomy_field + array(
                 'key'        => 'field_tk_form_wilayah',
-                'label'      => 'Provinsi / Wilayah',
+                'label'      => 'Provinsi',
                 'name'       => 'tk_form_wilayah',
                 'taxonomy'   => 'wilayah',
                 'field_type' => 'select',

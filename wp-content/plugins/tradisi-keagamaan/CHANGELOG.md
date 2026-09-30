@@ -2,6 +2,23 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.6.0 (30 September 2026): Lokasi seragam & waktu pelaksanaan
+
+**Baru**
+- Field **Sistem Penanggalan** (Masehi, Hijriah, Saka (Bali), Jawa, Imlek, Kalender adat/musim, Mengikuti peristiwa) dan **Waktu Pelaksanaan** (teks, mis. "12 Rabiul Awal"), untuk tradisi yang tanggal Masehinya berubah setiap tahun atau tidak terikat kalender.
+- Halaman detail: kotak info menampilkan "Waktu Pelaksanaan", mis. "12 Rabiul Awal (kalender Hijriah)", lewat `tk_format_waktu_pelaksanaan()`.
+- Saran isian **Kabupaten/Kota** saat mengetik (`assets/js/kabkota.js`, datalist bawaan browser), disaring sesuai Provinsi yang dipilih: di form depan, editor blok, dan editor klasik.
+- Daftar resmi 514 kabupaten/kota di 38 provinsi (`includes/data/kabupaten-kota.php`, Kepmendagri No. 300.2.2-2138 Tahun 2025).
+- `includes/core/kabupaten-kota.php`: isian harus ada di daftar (dan di provinsi yang dipilih, bila diketahui); penulisan diseragamkan saat disimpan, mis. "kab. tana toraja" → "Kabupaten Tana Toraja". "Simpan Draf" tetap boleh berisi teks bebas.
+- Tanggal Perayaan: ikon kalender di form depan dan petunjuk isian.
+
+**Diubah**
+- "Tanggal Perayaan" menjadi **Tanggal Terdekat** (opsional, tetap field `tanggal_perayaan`); di halaman detail tampil dengan label yang sama.
+- Format tampilan date picker Tanggal Terdekat menjadi `j F Y` (mis. "30 September 2026"), sama dengan halaman detail. Nama bulan mengikuti bahasa situs.
+- Label taxonomy `wilayah` menjadi **Provinsi** dan field `asal_daerah` menjadi **Kabupaten/Kota** (wp-admin, form depan, daftar kelengkapan kurasi). Slug dan nama field tidak berubah, jadi data dan URL tetap.
+- Field Kabupaten/Kota diberi petunjuk dan contoh isian.
+- Halaman detail: provinsi tidak lagi tampil dua kali (dihapus dari kotak info, tetap di baris meta). Baris meta diberi tooltip "Kabupaten/Kota" dan "Provinsi".
+
 ## 2.5.0 (29 September 2026): Konfirmasi keluar
 
 **Baru**

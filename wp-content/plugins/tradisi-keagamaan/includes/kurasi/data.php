@@ -121,8 +121,8 @@ function tk_kelengkapan( $post_id ) {
         'Abstrak'                             => '' !== trim( (string) get_post_meta( $post_id, 'deskripsi_singkat', true ) ),
         'Isi ≥' . TK_MIN_KATA_ISI . ' kata'   => count( preg_split( '/\s+/u', trim( $isi ), -1, PREG_SPLIT_NO_EMPTY ) ) >= TK_MIN_KATA_ISI,
         'Sumber'                              => '' !== trim( (string) get_post_meta( $post_id, 'sumber_referensi', true ) ),
-        'Asal daerah'                         => '' !== trim( (string) get_post_meta( $post_id, 'asal_daerah', true ) ),
-        'Wilayah'                             => '' !== tk_term_names( $post_id, 'wilayah' ),
+        'Kabupaten/kota'                      => '' !== trim( (string) get_post_meta( $post_id, 'asal_daerah', true ) ),
+        'Provinsi'                            => '' !== tk_term_names( $post_id, 'wilayah' ),
         'Kategori'                            => '' !== tk_term_names( $post_id, 'kategori-tradisi' ),
         'Koordinat'                           => function_exists( 'tk_peta_get_koordinat' ) && null !== tk_peta_get_koordinat( $post_id ),
     );

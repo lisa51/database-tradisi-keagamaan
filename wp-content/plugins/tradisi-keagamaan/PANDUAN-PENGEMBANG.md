@@ -253,7 +253,7 @@ Ubah daftar di `tk_setup_roles()` (`akun/peran.php`), lalu **naikkan `TK_ROLES_V
 
 | Meta | Isi | Ditulis oleh |
 |---|---|---|
-| `asal_daerah`, `deskripsi_singkat`, `tanggal_perayaan`, `sumber_referensi`, `galeri_foto`, `latitude`, `longitude` | Field Detail Tradisi | ACF |
+| `asal_daerah`, `deskripsi_singkat`, `sistem_penanggalan`, `waktu_pelaksanaan`, `tanggal_perayaan`, `sumber_referensi`, `galeri_foto`, `latitude`, `longitude` | Field Detail Tradisi | ACF |
 | `foto_utama`, `kata_kunci`, `tk_form_*` | Field form (diubah menjadi featured image, Tags, dan term) | ACF (form) |
 | `tk_tamu_nama`, `tk_tamu_email`, `tk_tamu_instansi`, `tk_tamu_setuju` | Identitas kontributor tamu | ACF (form tamu) |
 | `tk_view_count` | Jumlah pembaca | `core/view-counter.php` |

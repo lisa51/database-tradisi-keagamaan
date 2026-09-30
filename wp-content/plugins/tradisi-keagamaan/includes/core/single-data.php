@@ -8,6 +8,7 @@
  *
  *   tk_single_get_data()     Kumpulkan semua data satu tradisi.
  *   tk_get_galeri_ids()      Isi field galeri → daftar ID gambar (Image maupun Gallery ACF Pro).
+ *   tk_format_waktu_pelaksanaan()  "12 Rabiul Awal (kalender Hijriah)".
  *   tk_format_tanggal_acf()  Tanggal ACF (Ymd) → "17 Agustus 2026".
  *   tk_single_get_terkait()  Tradisi terkait (kategori ATAU wilayah sama).
  *
@@ -28,7 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     @type string   $agama     Nama agama, dipisah koma.
  *     @type string   $asal      Asal daerah (kabupaten/kota).
  *     @type string   $abstrak   Deskripsi singkat.
- *     @type string   $tanggal   Tanggal perayaan terformat, atau ''.
+ *     @type string   $waktu     Waktu pelaksanaan + sistem penanggalan, atau ''.
+ *     @type string   $tanggal   Tanggal terdekat terformat, atau ''.
  *     @type string   $sumber    URL sumber referensi.
  *     @type int[]    $galeri    Daftar ID gambar galeri.
  *     @type WP_Term[] $tags     Kata kunci.
@@ -44,6 +46,7 @@ function tk_single_get_data( $id ) {
         'agama'    => tk_term_names( $id, 'agama' ),
         'asal'     => get_post_meta( $id, 'asal_daerah', true ),
         'abstrak'  => get_post_meta( $id, 'deskripsi_singkat', true ),
+        'waktu'    => tk_format_waktu_pelaksanaan( $id ),
         'tanggal'  => tk_format_tanggal_acf( get_post_meta( $id, 'tanggal_perayaan', true ) ),
         'sumber'   => get_post_meta( $id, 'sumber_referensi', true ),
         'galeri'   => tk_get_galeri_ids( get_post_meta( $id, 'galeri_foto', true ) ),
@@ -89,6 +92,34 @@ function tk_get_galeri_ids( $value ) {
     }
 
     return array_values( array_unique( array_filter( $ids ) ) );
+}
+
+/**
+ * Gabungkan Waktu Pelaksanaan dan Sistem Penanggalan menjadi satu teks.
+ *
+ *   keduanya diisi   "12 Rabiul Awal (kalender Hijriah)"
+ *                    "Saat pernikahan" (sistem "Mengikuti peristiwa" tidak ditulis ulang)
+ *   hanya waktu      "Setelah panen"
+ *   hanya sistem     "Kalender Hijriah" / "Mengikuti peristiwa"
+ *
+ * @param int $id ID tradisi.
+ * @return string Teks, atau '' kalau keduanya kosong.
+ */
+function tk_format_waktu_pelaksanaan( $id ) {
+    $pilihan = tk_sistem_penanggalan();
+    $kunci   = (string) get_post_meta( $id, 'sistem_penanggalan', true );
+    $waktu   = trim( (string) get_post_meta( $id, 'waktu_pelaksanaan', true ) );
+
+    if ( ! isset( $pilihan[ $kunci ] ) ) {
+        return $waktu;
+    }
+
+    if ( 'peristiwa' === $kunci ) {
+        return $waktu ? $waktu : $pilihan[ $kunci ];
+    }
+
+    $kalender = 'adat' === $kunci ? 'kalender adat/musim' : 'kalender ' . $pilihan[ $kunci ];
+    return $waktu ? $waktu . ' (' . $kalender . ')' : ucfirst( $kalender );
 }
 
 /**

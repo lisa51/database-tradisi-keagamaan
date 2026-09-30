@@ -43,9 +43,10 @@ function tk_register_data_types() {
     ) );
 
     // --- Taxonomy: slug => array( nama jamak, nama tunggal ) ---------------
+    // "wilayah" berisi provinsi; slug tetap "wilayah" agar data & URL tidak berubah.
     $taxonomies = array(
         'agama'            => array( 'Agama', 'Agama' ),
-        'wilayah'          => array( 'Wilayah', 'Wilayah' ),
+        'wilayah'          => array( 'Provinsi', 'Provinsi' ),
         'kategori-tradisi' => array( 'Kategori Tradisi', 'Kategori' ),
     );
 

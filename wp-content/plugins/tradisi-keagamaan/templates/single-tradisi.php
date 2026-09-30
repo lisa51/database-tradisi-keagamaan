@@ -10,10 +10,10 @@
  *   0. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *   1. Link kembali
  *   2. Badge kategori + status, judul, tanggal terbit
- *   3. Baris meta: penulis, asal daerah, wilayah, pembaca
+ *   3. Baris meta: penulis, kabupaten/kota, provinsi, pembaca
  *   4. Gambar utama
  *   5. Abstrak (deskripsi_singkat)
- *   6. Kotak info: tanggal perayaan, agama, wilayah
+ *   6. Kotak info: waktu pelaksanaan, tanggal terdekat, agama
  *   7. Isi artikel
  *   8. Galeri foto
  *   9. Lokasi di peta (kalau koordinat diisi)
@@ -38,10 +38,11 @@ while ( have_posts() ) :
     $d  = tk_single_get_data( $id );
 
     // Kotak info (label => nilai). Baris kosong dilewati.
+    // Kabupaten/kota & provinsi tidak di sini: sudah tampil di baris meta.
     $info = array_filter( array(
-        'Tanggal Perayaan' => $d['tanggal'],
-        'Agama'            => $d['agama'],
-        'Wilayah'          => $d['wilayah'],
+        'Waktu Pelaksanaan' => $d['waktu'],
+        'Tanggal Terdekat'  => $d['tanggal'],
+        'Agama'             => $d['agama'],
     ) );
     ?>
 
@@ -70,10 +71,10 @@ while ( have_posts() ) :
       <ul class="tk-single__meta">
         <li><?php echo tk_icon( 'user' ); ?><?php the_author(); ?></li>
         <?php if ( $d['asal'] ) : ?>
-          <li><?php echo tk_icon( 'pin' ); ?><?php echo esc_html( $d['asal'] ); ?></li>
+          <li title="Kabupaten/Kota"><?php echo tk_icon( 'pin' ); ?><?php echo esc_html( $d['asal'] ); ?></li>
         <?php endif; ?>
         <?php if ( $d['wilayah'] ) : ?>
-          <li><?php echo tk_icon( 'gedung' ); ?><?php echo esc_html( $d['wilayah'] ); ?></li>
+          <li title="Provinsi"><?php echo tk_icon( 'gedung' ); ?><?php echo esc_html( $d['wilayah'] ); ?></li>
         <?php endif; ?>
         <li><?php echo tk_icon( 'mata' ); ?><?php echo esc_html( number_format_i18n( $d['pembaca'] ) ); ?> pembaca</li>
       </ul>

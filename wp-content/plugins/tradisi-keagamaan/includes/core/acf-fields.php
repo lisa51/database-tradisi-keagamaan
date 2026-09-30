@@ -3,9 +3,15 @@
  * Field ACF: grup "Detail Tradisi" (tampil di editor post type "tradisi").
  *
  * Field yang tersedia (nama → tipe):
- *   asal_daerah        text         Kabupaten/kota. Dipakai di card & stats.
+ *   asal_daerah        text         Label "Kabupaten/Kota" (provinsi ada di taxonomy
+ *                                   "wilayah"). Dipakai di card, peta & stats.
+ *                                   Saran & validasi: includes/core/kabupaten-kota.php.
  *   deskripsi_singkat  textarea     Abstrak. Dipakai di card, hero, single.
- *   tanggal_perayaan   date_picker  Disimpan sebagai Ymd; ditampilkan lewat tk_format_tanggal_acf().
+ *   sistem_penanggalan select       Kunci dari tk_sistem_penanggalan() (masehi, hijriah, ...).
+ *   waktu_pelaksanaan  text         Aturan waktu tetap, mis. "12 Rabiul Awal".
+ *                                   Keduanya ditampilkan lewat tk_format_waktu_pelaksanaan().
+ *   tanggal_perayaan   date_picker  Label "Tanggal Terdekat" (opsional). Disimpan
+ *                                   sebagai Ymd; ditampilkan lewat tk_format_tanggal_acf().
  *   sumber_referensi   url          Link sumber (wajib untuk konten kutipan).
  *   galeri_foto        gallery      Banyak foto (ACF Pro), maks. TK_GALERI_MAKS.
  *                                   Di form depan diganti field "Foto Tambahan"
@@ -33,6 +39,24 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Pilihan field Sistem Penanggalan (kunci => label).
+ * Kunci tersimpan di database, jadi jangan diubah; label boleh diubah.
+ *
+ * @return string[]
+ */
+function tk_sistem_penanggalan() {
+    return array(
+        'masehi'    => 'Masehi',
+        'hijriah'   => 'Hijriah',
+        'saka'      => 'Saka (Bali)',
+        'jawa'      => 'Jawa',
+        'imlek'     => 'Imlek',
+        'adat'      => 'Kalender adat/musim',
+        'peristiwa' => 'Mengikuti peristiwa',
+    );
+}
+
 add_action( 'acf/include_fields', 'tk_register_acf_fields' );
 
 /**
@@ -49,10 +73,12 @@ function tk_register_acf_fields() {
         'description' => 'Berisi atribut terkait tradisi',
         'fields'      => array(
             array(
-                'key'   => 'field_6aa0f20e51a52',
-                'label' => 'Asal Daerah',
-                'name'  => 'asal_daerah',
-                'type'  => 'text',
+                'key'          => 'field_6aa0f20e51a52',
+                'label'        => 'Kabupaten/Kota',
+                'name'         => 'asal_daerah',
+                'type'         => 'text',
+                'instructions' => 'Ketik sebagian nama, lalu pilih dari saran. Saran mengikuti Provinsi yang dipilih.',
+                'placeholder'  => 'Contoh: Kabupaten Tana Toraja', // Diganti kabkota.js sesuai provinsi.
             ),
             array(
                 'key'   => 'field_6aa0f24e51a54',
@@ -61,11 +87,34 @@ function tk_register_acf_fields() {
                 'type'  => 'textarea',
             ),
             array(
+                'key'           => 'field_tk_sistem_penanggalan',
+                'label'         => 'Sistem Penanggalan',
+                'name'          => 'sistem_penanggalan',
+                'type'          => 'select',
+                'instructions'  => 'Kalender yang menentukan waktu pelaksanaan. Kosongkan untuk benda atau tempat.',
+                'choices'       => tk_sistem_penanggalan(),
+                'allow_null'    => 1,
+                'placeholder'   => 'Pilih', // ACF menampilkannya sebagai "- Pilih -".
+                'return_format' => 'value',
+                'wrapper'       => array( 'width' => '50' ),
+            ),
+            array(
+                'key'          => 'field_tk_waktu_pelaksanaan',
+                'label'        => 'Waktu Pelaksanaan',
+                'name'         => 'waktu_pelaksanaan',
+                'type'         => 'text',
+                'instructions' => 'Aturan waktu yang tetap setiap kali dilaksanakan.',
+                'placeholder'  => 'Contoh: 12 Rabiul Awal',
+                'maxlength'    => 120,
+                'wrapper'      => array( 'width' => '50' ),
+            ),
+            array(
                 'key'            => 'field_6aa0f26151a55',
-                'label'          => 'Tanggal Perayaan',
+                'label'          => 'Tanggal Terdekat',
                 'name'           => 'tanggal_perayaan',
                 'type'           => 'date_picker',
-                'display_format' => 'F j, Y',
+                'instructions'   => 'Opsional. Tanggal Masehi pelaksanaan berikutnya (atau yang terakhir), untuk tradisi yang tanggalnya berubah setiap tahun. Klik kotak untuk memilih dari kalender.',
+                'display_format' => 'j F Y', // Sama dengan tk_format_tanggal_acf(); bulan mengikuti bahasa situs.
                 'return_format'  => 'd/m/Y',
                 'first_day'      => 1,
             ),

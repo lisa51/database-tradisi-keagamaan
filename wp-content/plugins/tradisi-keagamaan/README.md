@@ -64,13 +64,15 @@ Peran **Kontributor**, **Kontributor Tamu**, dan **Kurator**, serta akun sistem 
 | Jenis | Nama | Keterangan |
 |---|---|---|
 | Post type | `tradisi` | URL `/tradisi/nama-tradisi/`. Revisi aktif. |
-| Taxonomy | `agama` | Hierarkis |
-| Taxonomy | `wilayah` | Hierarkis. Level teratas = provinsi (dipakai stats & filter) |
+| Taxonomy | `agama` | Hierarkis. 6 agama resmi + "Kepercayaan terhadap Tuhan Yang Maha Esa" (sub-term: kepercayaan lokal) |
+| Taxonomy | `wilayah` | Label **Provinsi**. Hierarkis. Level teratas = 38 provinsi (dipakai stats & filter) |
 | Taxonomy | `kategori-tradisi` | Hierarkis. Boleh lebih dari satu per tradisi |
 | Taxonomy | `post_tag` | Tags bawaan WP sebagai "kata kunci" |
-| ACF | `asal_daerah` | Text: kabupaten/kota |
+| ACF | `asal_daerah` | Label **Kabupaten/Kota**. Text dengan saran & validasi dari daftar resmi (`includes/core/kabupaten-kota.php`) |
 | ACF | `deskripsi_singkat` | Textarea: abstrak |
-| ACF | `tanggal_perayaan` | Date picker |
+| ACF | `sistem_penanggalan` | Select: Masehi, Hijriah, Saka (Bali), Jawa, Imlek, Kalender adat/musim, Mengikuti peristiwa. Pilihan di `tk_sistem_penanggalan()` |
+| ACF | `waktu_pelaksanaan` | Text: aturan waktu tetap, mis. "12 Rabiul Awal" |
+| ACF | `tanggal_perayaan` | Label **Tanggal Terdekat**. Date picker, opsional |
 | ACF | `sumber_referensi` | URL |
 | ACF | `galeri_foto` | Gallery (ACF Pro), maks. 12 foto. Diatur kurator di wp-admin; dari form depan lewat "Foto Tambahan" |
 | ACF | `latitude`, `longitude` | Number: titik peta. Kosong = tidak tampil di peta |
@@ -159,7 +161,7 @@ Kiriman tamu tercatat atas nama akun sistem "Kontributor Tamu", tetapi di situs 
 
 ### Isi form
 
-Nama tradisi, isi artikel (≥150 kata disarankan), foto utama (wajib → featured image), **Foto Tambahan** (opsional → Galeri Foto), agama, provinsi/wilayah (wajib), kategori (wajib), kata kunci (→ Tags), lalu field Detail Tradisi lainnya.
+Nama tradisi, isi artikel (≥150 kata disarankan), foto utama (wajib → featured image), **Foto Tambahan** (opsional → Galeri Foto), agama, provinsi (wajib), kategori (wajib), kata kunci (→ Tags), lalu field Detail Tradisi lainnya.
 
 **Foto Tambahan:** klik **Tambah Foto** untuk setiap foto (JPG/PNG/WebP, maks. 5 MB per foto, total galeri maks. 12). Setelah form disimpan, foto dipindah ke Galeri Foto. Saat melanjutkan draf/revisi, foto baru ditambahkan di belakang foto yang sudah ada. Menghapus atau mengurutkan foto galeri dilakukan kurator di wp-admin.
 
@@ -211,7 +213,7 @@ Riwayat juga tampil di kotak **Pengirim & Riwayat Kurasi** di sidebar editor wp-
 
 ## 6. Halaman detail tradisi
 
-Urutan: Panel Kurator (khusus kurator) → link kembali → badge kategori & status → judul → meta (penulis, asal daerah, wilayah, pembaca) → gambar utama → abstrak → info (tanggal perayaan, agama, wilayah) → isi → galeri → peta lokasi → kata kunci & sumber → tradisi terkait.
+Urutan: Panel Kurator (khusus kurator) → link kembali → badge kategori & status → judul → meta (penulis, kabupaten/kota, provinsi, pembaca) → gambar utama → abstrak → info (waktu pelaksanaan, tanggal terdekat, agama) → isi → galeri → peta lokasi → kata kunci & sumber → tradisi terkait.
 
 **Galeri Foto:** klik foto untuk membuka lightbox. Navigasi dengan tombol ‹ ›, panah keyboard, atau geser di HP; tutup dengan ×, Esc, atau klik latar. Keterangan foto diambil dari **Caption** di Media Library.
 
