@@ -40,7 +40,9 @@ tradisi-keagamaan/
 │   │   ├── assets.php             Font, CSS per fitur, registrasi script peta
 │   │   ├── menu.php               Menu: anchor, item kurator, Masuk/Keluar, ikon
 │   │   ├── turnstile.php          Anti-bot Turnstile untuk form WARISI (opsional)
-│   │   └── footer.php             Footer: lembaga pengelola, tautan, hak cipta
+│   │   ├── footer.php             Footer: lembaga pengelola, tautan, hak cipta
+│   │   ├── bagikan.php            Tombol Bagikan di halaman detail (tk_bagikan_render)
+│   │   └── ikon-situs.php         Favicon (tag <link rel=icon>, /favicon.ico)
 │   │
 │   ├── akun/                      Pengguna
 │   │   ├── peran.php              Peran & akun sistem "Kontributor Tamu"
@@ -80,10 +82,12 @@ tradisi-keagamaan/
 └── assets/
     ├── css/                       Satu file per fitur (lihat bagian 5)
     ├── img/logo-brin.png          Logo BRIN untuk footer (latar transparan, tulisan putih)
+    ├── img/favicon.svg            Ikon situs (sumber); favicon-*.png & apple-touch-icon.png hasil render
     ├── js/
     │   ├── peta.js                Peta Leaflet, pin gabungan, panel detail
     │   ├── form.js                Tombol "Simpan Draf" (matikan validasi ACF)
     │   ├── galeri.js              Lightbox Galeri Foto di halaman detail
+    │   ├── bagikan.js             Tombol Salin tautan & Instagram (Web Share API)
     │   └── kontak.js              Cek ukuran lampiran Hubungi Kami di browser
     └── vendor/leaflet/            (opsional) salinan lokal Leaflet
 ```
@@ -161,7 +165,7 @@ function tk_nama_fungsi( $post_id ) { ... }
 | Kebutuhan | Fungsi | File |
 |---|---|---|
 | Nama term sebuah post | `tk_term_names( $id, $tax, $sep, $limit )` | core/helpers.php |
-| Ikon SVG | `tk_icon( 'pin'\|'gedung'\|'buku'\|'benda'\|'kamera'\|'user'\|'mata'\|'link', $size )` | core/helpers.php |
+| Ikon SVG | `tk_icon( 'pin'\|'gedung'\|'buku'\|'benda'\|'kamera'\|'instagram'\|'centang'\|'bagikan'\|'user'\|'mata'\|'link', $size )` | core/helpers.php |
 | Jenis sebuah post | `tk_get_jenis( $id )` (slug); label: `TK_JENIS[ tk_get_jenis( $id ) ]` | core/jenis.php |
 | URL halaman form / dashboard | `tk_url_tambah()`, `tk_url_kurasi()` | core/helpers.php |
 | URL tradisi untuk kurator | `tk_url_tinjau( $id )` (publik atau pratinjau) | core/helpers.php |

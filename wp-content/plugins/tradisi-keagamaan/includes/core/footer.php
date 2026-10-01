@@ -36,7 +36,7 @@ function tk_footer_render() {
           <div class="tk-footer__lembaga-isi">
             <?php if ( TK_LOGO_LEMBAGA && file_exists( TK_PATH . TK_LOGO_LEMBAGA ) ) : ?>
               <?php $ukuran = getimagesize( TK_PATH . TK_LOGO_LEMBAGA ); ?>
-              <img class="tk-footer__logo" src="<?php echo esc_url( TK_URL . TK_LOGO_LEMBAGA ); ?>"
+              <img class="tk-footer__logo" src="<?php echo esc_url( add_query_arg( 'ver', filemtime( TK_PATH . TK_LOGO_LEMBAGA ), TK_URL . TK_LOGO_LEMBAGA ) ); ?>"
                    alt="<?php echo esc_attr( TK_LOGO_LEMBAGA_ALT ); ?>"
                    width="<?php echo (int) $ukuran[0]; ?>" height="<?php echo (int) $ukuran[1]; ?>" loading="lazy">
             <?php endif; ?>

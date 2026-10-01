@@ -2,6 +2,13 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.14.0 (2 Oktober 2026): Tombol Bagikan & ikon situs
+
+**Baru**
+- **Ikon situs (favicon)** WARISI: huruf W putih di kotak oranye dengan titik emas (`assets/img/favicon.svg` + PNG 32, 180, 192, 512 px), dipasang lewat `includes/core/ikon-situs.php` di halaman depan, login, dan wp-admin; `/favicon.ico` diarahkan ke ikon ini. Tidak aktif bila Site Icon WordPress diatur.
+- Bilah **Bagikan** di halaman detail koleksi, di bawah bagian Lokasi (peta) (`includes/core/bagikan.php`, `assets/js/bagikan.js`, gaya di `single.css`): tombol ikon bulat berwarna merek untuk WhatsApp, Facebook, X, Instagram, Email, Salin tautan, dan Lainnya (menu bagikan bawaan; hanya tampil bila didukung) (nama tombol di tooltip & aria-label). Instagram memakai menu bagikan bawaan ponsel (Web Share API); di komputer tautan disalin dengan petunjuk. Salin tautan berubah menjadi centang.
+- Ikon baru `instagram`, `centang`, `bagikan`; logo WhatsApp & X (Simple Icons, CC0) dan Facebook di `tk_bagikan_ikon()`; token warna merek `--tk-wa`, `--tk-fb`, `--tk-x`, `--tk-ig-*`.
+
 ## 2.13.0 (2 Oktober 2026): Panduan Kontribusi & footer lembaga
 
 **Baru**
@@ -10,7 +17,7 @@ Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dik
 - Panduan: bagian **Hak cipta & lisensi foto** (boleh/jangan diunggah, contoh kredit, penurunan foto atas keberatan pemilik hak cipta).
 - Field **Kredit Foto** (`kredit_foto`, textarea, grup Detail Koleksi): pembuat & lisensi tiap foto, tampil di bawah halaman koleksi (ikon `kamera`) dan masuk checklist kelengkapan kurator.
 - Pernyataan tamu kini juga menyatakan foto milik pengirim atau bebas digunakan; petunjuk Foto Utama merujuk ke Kredit Foto.
-- **Footer** (`includes/core/footer.php`, bagian 6 `base.css`): nama & slogan, lembaga pengelola (Pusat Riset Khazanah Keagamaan dan Peradaban · OR Arbastra · BRIN), kolom tautan Jelajahi & Berkontribusi, baris hak cipta menggantikan "Built with GeneratePress". Logo BRIN versi latar gelap (`assets/img/logo-brin.png`: latar transparan, tulisan putih, lambang merah tetap). Diatur lewat `TK_LEMBAGA`, `TK_LOGO_LEMBAGA`, `TK_SLOGAN`, `TK_FOOTER_TAUTAN`.
+- **Footer** (`includes/core/footer.php`, bagian 6 `base.css`): nama & slogan, lembaga pengelola (Pusat Riset Khazanah Keagamaan dan Peradaban · OR Arbastra · BRIN), kolom tautan Jelajahi & Berkontribusi, baris hak cipta menggantikan "Built with GeneratePress". Logo BRIN versi latar gelap (`assets/img/logo-brin.png`: latar & bintang transparan, tulisan putih, lambang merah tetap). Diatur lewat `TK_LEMBAGA`, `TK_LOGO_LEMBAGA`, `TK_SLOGAN`, `TK_FOOTER_TAUTAN`.
 
 ## 2.12.0 (2 Oktober 2026): Istilah Khazanah · Koleksi · Kontribusi
 

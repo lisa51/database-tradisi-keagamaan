@@ -77,10 +77,12 @@ function tk_enqueue_assets() {
 
     tk_register_peta_assets();
 
-    // Lightbox Galeri Foto, hanya di halaman detail tradisi.
+    // Lightbox Galeri Foto & tombol Bagikan, hanya di halaman detail koleksi.
     if ( is_singular( 'tradisi' ) ) {
         $js = 'assets/js/galeri.js';
         wp_enqueue_script( 'tk-galeri', TK_URL . $js, array(), filemtime( TK_PATH . $js ), true );
+        $js = 'assets/js/bagikan.js';
+        wp_enqueue_script( 'tk-bagikan', TK_URL . $js, array(), filemtime( TK_PATH . $js ), true );
     }
 
     // Konfirmasi sebelum logout, hanya untuk pengguna yang sedang login.

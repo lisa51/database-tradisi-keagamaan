@@ -267,3 +267,68 @@
   .tk-lightbox        { padding: 56px 12px; }
   .tk-lightbox__nav   { top: auto; bottom: 16px; transform: none; }
 }
+
+
+/* =============================================================================
+   Bagikan (includes/core/bagikan.php, assets/js/bagikan.js)
+   Tombol ikon bulat berwarna merek; nama tombol di title & aria-label.
+   ============================================================================= */
+.tk-bagikan {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 32px;
+}
+.tk-bagikan__label {
+  margin-right: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tk-abu);
+}
+.tk-bagikan__tombol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.tk-bagikan__tombol:hover,
+.tk-bagikan__tombol:focus-visible {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: var(--tk-bayangan);
+}
+.tk-bagikan__tombol:focus-visible { outline: 2px solid var(--tk-accent); outline-offset: 2px; }
+.tk-bagikan__tombol--wa    { background: var(--tk-wa); }
+.tk-bagikan__tombol--fb    { background: var(--tk-fb); }
+.tk-bagikan__tombol--x     { background: var(--tk-x); }
+.tk-bagikan__tombol--ig    { background: linear-gradient(45deg, var(--tk-ig-1), var(--tk-ig-2) 55%, var(--tk-ig-3)); }
+.tk-bagikan__tombol--email { background: var(--tk-accent); }
+.tk-bagikan__tombol--salin { background: var(--tk-coklat); }
+.tk-bagikan__tombol--lainnya { background: var(--tk-abu); }
+.tk-bagikan__tombol[hidden] { display: none; }
+
+/* Salin tautan: ikon rantai → centang hijau sebentar */
+.tk-bagikan__ikon { display: inline-flex; }
+.tk-bagikan__ikon--ok { display: none; }
+.tk-bagikan__tombol.is-aktif { background: var(--tk-hijau); }
+.tk-bagikan__tombol.is-aktif .tk-bagikan__ikon { display: none; }
+.tk-bagikan__tombol.is-aktif .tk-bagikan__ikon--ok { display: inline-flex; }
+
+.tk-bagikan__pesan {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 13px;
+  color: var(--tk-coklat);
+}
+.tk-bagikan__pesan:empty { display: none; }

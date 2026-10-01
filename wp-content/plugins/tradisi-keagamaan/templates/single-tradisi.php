@@ -18,7 +18,8 @@
  *        Budaya Material  bahan, lokasi penyimpanan, agama; lalu 6b. fungsi
  *   7. Isi artikel
  *   8. Galeri foto
- *   9. Lokasi di peta (kalau koordinat diisi)
+ *   9. Lokasi di peta (kalau koordinat diisi), lalu tombol Bagikan
+ *      (WhatsApp, Instagram, Email, Salin tautan)
  *  10. Kata kunci + sumber referensi + kredit foto
  *  10b. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *  11. Tautan "Terkait dengan": "Digunakan dalam Tradisi" / "Budaya Material Terkait"
@@ -92,6 +93,7 @@ while ( have_posts() ) :
         <li><?php echo tk_icon( 'mata' ); ?><?php echo esc_html( number_format_i18n( $d['pembaca'] ) ); ?> pembaca</li>
       </ul>
 
+
       <?php /* Pemilik (kontributor) bisa mengusulkan perubahan; kurator memakai Panel Kurator. */ ?>
       <?php if ( tk_form_boleh_usul( $id ) ) : ?>
         <a class="tk-btn-kecil tk-single__ubah" href="<?php echo esc_url( tk_url_ubah( $id ) ); ?>">Usulkan perubahan</a>
@@ -158,6 +160,9 @@ while ( have_posts() ) :
         <?php echo tk_peta_render( $titik, array( 'tinggi' => 320, 'panel' => false ) ); ?>
       </section>
     <?php endif; ?>
+
+    <?php /* 9b. Bagikan (includes/core/bagikan.php) */ ?>
+    <?php echo tk_bagikan_render( $id ); // phpcs:ignore WordPress.Security.EscapeOutput -- di-escape di dalam fungsi. ?>
 
     <?php /* 10. Kata kunci + sumber + kredit foto */ ?>
     <?php if ( $d['tags'] || $d['sumber'] || $d['kredit'] ) : ?>

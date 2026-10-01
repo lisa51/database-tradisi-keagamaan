@@ -59,6 +59,14 @@
   --tk-merah-bg:      #fbe9e6;
   --tk-merah-garis:   #e2a497;
 
+  /* Warna merek media sosial (tombol Bagikan, single.css) */
+  --tk-wa:            #25d366;
+  --tk-fb:            #1877f2;
+  --tk-x:             #000000;
+  --tk-ig-1:          #f58529;
+  --tk-ig-2:          #dd2a7b;
+  --tk-ig-3:          #8134af;
+
   /* Footer (latar coklat tua) */
   --tk-footer-teks:   #e9dccf; /* teks utama footer                    */
   --tk-footer-redup:  #b9a593; /* teks sekunder & judul kolom          */

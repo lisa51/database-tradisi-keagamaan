@@ -157,6 +157,10 @@ Tanpa atribut. Menghitung tradisi terbit, budaya material terbit (term `jenis`),
 
 Tanpa atribut. Isi: jenis koleksi, cara berkontribusi (tamu/akun), langkah mengirim, tabel isian (wajib/dianjurkan/opsional), ketentuan foto, proses kurasi, mengubah koleksi terbit, dan etika. Angka aturan (minimal kata, ukuran & jumlah foto) dibaca dari `config.php`, jadi selalu sama dengan form. Form kiriman baru menautkan ke halaman ini.
 
+### Ikon situs (favicon)
+
+Ikon WARISI di tab browser dan layar utama ponsel dipasang otomatis oleh plugin (`includes/core/ikon-situs.php`, berkas di `assets/img/`). Untuk menggantinya, ubah `favicon.svg` lalu render ulang PNG-nya, atau atur **Settings → General → Site Icon** (bila diisi, ikon WordPress itu yang dipakai).
+
 ### Footer
 
 Dipasang otomatis lewat hook GeneratePress (`includes/core/footer.php`), tanpa widget: nama & slogan, lembaga pengelola, dua kolom tautan, dan baris hak cipta (menggantikan "Built with GeneratePress"). Isi diatur di `config.php`: `TK_LEMBAGA`, `TK_LOGO_LEMBAGA`, `TK_SLOGAN`, `TK_FOOTER_TAUTAN` (halaman yang belum dibuat dilewati). Logo BRIN (`assets/img/logo-brin.png`) adalah versi untuk latar gelap: latar transparan, tulisan putih.
@@ -232,7 +236,9 @@ Riwayat juga tampil di kotak **Pengirim & Riwayat Kurasi** di sidebar editor wp-
 
 ## 6. Halaman detail tradisi
 
-Urutan: Panel Kurator (khusus kurator) → link kembali → badge jenis, kategori & status → judul → meta (penulis, kabupaten/kota, provinsi, pembaca) → gambar utama → abstrak → info (Tradisi: waktu pelaksanaan, tanggal terdekat, agama; Budaya Material: bahan, lokasi, agama, lalu fungsi) → isi → galeri → peta lokasi → kata kunci & sumber → tautan "Terkait dengan" ("Digunakan dalam Tradisi" / "Budaya Material Terkait") → Lihat Juga.
+Urutan: link kembali → badge jenis, kategori & status → judul → meta (penulis, kabupaten/kota, provinsi, pembaca) → gambar utama → abstrak → info (Tradisi: waktu pelaksanaan, tanggal terdekat, agama; Budaya Material: bahan, lokasi, agama, lalu fungsi) → isi → galeri → peta lokasi → **Bagikan** → kata kunci, sumber & kredit foto → Panel Kurator (khusus kurator) → tautan "Terkait dengan" ("Digunakan dalam Tradisi" / "Budaya Material Terkait") → Lihat Juga.
+
+**Bagikan:** tombol ikon (tanpa tulisan; nama tombol muncul sebagai tooltip) untuk WhatsApp (wa.me), Facebook, X, Instagram, Email (mailto), Salin tautan, dan **Lainnya** (menu bagikan bawaan perangkat: Telegram, Line, dll.; hanya muncul bila browser mendukung, umumnya di ponsel). Instagram tidak menyediakan tautan berbagi untuk web: di ponsel tombolnya membuka menu bagikan bawaan (Instagram ada di dalamnya); di komputer tautan disalin disertai petunjuk menempelkannya di Instagram. Judul & gambar pratinjau di WhatsApp diambil dari tag Open Graph Rank Math.
 
 **Galeri Foto:** klik foto untuk membuka lightbox. Navigasi dengan tombol ‹ ›, panah keyboard, atau geser di HP; tutup dengan ×, Esc, atau klik latar. Keterangan foto diambil dari **Caption** di Media Library.
 
