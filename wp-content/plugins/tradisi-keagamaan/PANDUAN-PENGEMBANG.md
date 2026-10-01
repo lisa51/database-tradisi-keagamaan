@@ -54,14 +54,14 @@ tradisi-keagamaan/
 │   │   ├── data.php               Pengirim, status, kelengkapan, aturan aksi
 │   │   ├── riwayat.php            Riwayat (_tk_log) & pencatatan otomatis
 │   │   ├── token.php              Link revisi rahasia untuk tamu
-│   │   ├── email.php              Email ke kurator & pengirim
+│   │   ├── email.php              Email ke kurator & pengirim; tk_kirim_email() untuk semua email
 │   │   ├── aksi.php               Pemroses tombol kurasi (admin-post.php)
 │   │   ├── komponen.php           HTML bersama dashboard & panel
 │   │   ├── admin.php              Kotak riwayat di editor wp-admin
 │   │   └── panel-kurator.php      Panel Kurator di halaman tradisi
 │   │
 │   ├── kontak/                    Form Hubungi Kami
-│   │   └── proses.php             Validasi, lampiran, honeypot, batas per IP, email ke admin
+│   │   └── proses.php             Validasi, lampiran, honeypot, batas per IP, email ke tim & konfirmasi
 │   │
 │   └── shortcodes/                TAMPILAN halaman depan (satu file per shortcode)
 │       ├── hero.php               [tk_hero]
@@ -173,7 +173,9 @@ function tk_nama_fungsi( $post_id ) { ... }
 | Checklist kelengkapan | `tk_kelengkapan( $id )` | kurasi/data.php |
 | Aksi yang boleh per status | `tk_aksi_diizinkan( $status )` | kurasi/data.php |
 | Catat riwayat | `tk_log_tambah( $id, $aksi, $catatan )` | kurasi/riwayat.php |
-| Kirim email alur | `tk_email_ke_kurator()`, `tk_email_ke_pengirim()` | kurasi/email.php |
+| Kirim email alur | `tk_email_ke_kurator()`, `tk_email_ke_pengirim( $id, $jenis, $catatan )` | kurasi/email.php |
+| Kirim email apa pun (awalan nama situs + Reply-To tim) | `tk_kirim_email( $ke, $judul, $isi, $headers, $lampiran )` | kurasi/email.php |
+| Kotak masuk tim (penerima Hubungi Kami & Reply-To) | `tk_email_tim()` | kurasi/email.php |
 
 ---
 
@@ -248,6 +250,36 @@ Tambahkan satu baris `'Label' => kondisi_boolean` di `tk_kelengkapan()` (`kurasi
 3. Tambahkan `case` di `tk_kurasi_handle()` (`kurasi/aksi.php`).
 4. Tambahkan label tombol di `tk_panel_tombol_aksi()` (`kurasi/panel-kurator.php`) dan pesan di `tk_kurasi_render_pesan()` (`kurasi/komponen.php`).
 
+### Email pemberitahuan
+Semua email plugin berupa teks biasa dan dikirim lewat `tk_kirim_email()` (`kurasi/email.php`), yang:
+- menambahkan awalan nama situs di subjek, mis. `[WARISI] Kiriman baru: ...`;
+- menambahkan **Reply-To ke kotak masuk tim** (`tk_email_tim()` = `TK_KONTAK_EMAIL`, atau email admin bila kosong), kecuali `$headers` sudah berisi Reply-To. Dengan begitu balasan pengguna tetap sampai walau alamat pengirim di FluentSMTP `noreply@`.
+
+Alamat & nama **pengirim** (From) tidak diatur plugin, melainkan di **Settings → FluentSMTP**.
+
+**Daftar email**
+
+| Kejadian | Penerima | Dipanggil dari |
+|---|---|---|
+| Kiriman baru / kiriman ulang / usulan perubahan masuk antrean | Semua Kurator (admin bila belum ada) | `tk_email_ke_kurator( $id, $ulang )` di `tk_form_after_save()` (`kontribusi/proses.php`) |
+| Sama seperti di atas: konfirmasi | Pengirim | `tk_email_ke_pengirim( $id, 'diterima' \| 'diterima_ulang' )` di `tk_form_after_save()` |
+| Terbitkan | Pengirim | `'terbitkan'` di `tk_kurasi_jalankan()` (`kurasi/aksi.php`), juga `tk_catat_terbit_dari_editor()` (`kurasi/riwayat.php`) bila diterbitkan dari editor wp-admin |
+| Usulan perubahan disetujui | Pengirim | `'terapkan'` di `tk_kurasi_jalankan()` |
+| Minta Revisi (berisi link revisi; token untuk tamu) | Pengirim | `'revisi'` di `tk_kurasi_jalankan()` |
+| Tolak (berisi alasan) | Pengirim | `'tolak'` di `tk_kurasi_jalankan()` |
+| Pesan Hubungi Kami (Reply-To = pengunjung, lampiran ikut) | Tim (`tk_email_tim()`) | `tk_kontak_kirim()` (`kontak/proses.php`) |
+| Konfirmasi Hubungi Kami | Pengunjung | `tk_kontak_kirim_konfirmasi()` (`kontak/proses.php`) |
+
+Kembalikan ke Antrean tidak mengirim email. Untuk usulan perubahan (`tk_usulan_asal()` terisi), `tk_email_ke_pengirim()` memakai teks khusus usulan; `'terbitkan'` tidak berlaku di sana (usulan diterapkan, bukan terbit).
+
+**Menambah email baru**
+1. Untuk alur kurasi: tambahkan `case '<jenis>'` di `tk_email_ke_pengirim()` (pada kedua `switch`: usulan & kiriman biasa bila perlu), lalu panggil dari tempat kejadiannya. Untuk email lain: panggil `tk_kirim_email()` langsung.
+2. Jangan memanggil `wp_mail()` langsung, supaya awalan subjek & Reply-To konsisten.
+3. **Email ke alamat yang diketik pengunjung** (mis. konfirmasi Hubungi Kami): jangan sertakan teks bebas dari pengunjung (nama, pesan, nama file). Alamat tujuan tidak terverifikasi, jadi teks itu bisa dipakai menitipkan spam ke alamat orang lain atas nama situs. Pakai hanya nilai dari daftar tetap (mis. perihal). Email ke pengirim kiriman tradisi aman memuat judul & catatan kurator karena alamatnya tersimpan bersama kiriman.
+4. Nilai yang masuk ke header (nama di Reply-To) bersihkan dari `"`, `<`, `>`, `,`, dan baris baru.
+5. Uji di LocalWP: email tertangkap di tab **Mailpit** (FluentSMTP lokal diarahkan ke sana). Periksa subjek, isi, dan header Reply-To.
+6. Tambahkan barisnya di tabel di atas dan di tabel email README.
+
 ### Mengubah hak akses peran
 Ubah daftar di `tk_setup_roles()` (`akun/peran.php`), lalu **naikkan `TK_ROLES_VERSION`** di `config.php` supaya peran dibuat ulang.
 
@@ -282,6 +314,7 @@ Option WordPress: `tk_roles_version`, `tk_user_tamu`, `tk_penanda_kurator_v1`.
 | Output | Semua di-escape; peta memakai `textContent` di JS |
 | wp-admin | Kontributor diarahkan keluar; admin bar disembunyikan |
 | Email tamu | Tidak pernah ditampilkan ke publik |
+| Email keluar | Hanya lewat `tk_kirim_email()`; konfirmasi ke alamat ketikan pengunjung tanpa teks bebas pengunjung (anti-relay spam); nama di header dibersihkan; Hubungi Kami dilindungi Turnstile + batas per IP |
 
 ---
 
@@ -290,10 +323,12 @@ Option WordPress: `tk_roles_version`, `tk_user_tamu`, `tk_penanda_kurator_v1`.
 1. **Beranda:** hero, stats, pencarian + filter provinsi & kategori, pagination.
 2. **Halaman detail:** sebagai pengunjung (tanpa Panel Kurator) dan sebagai kurator (dengan panel).
 3. **Peta:** pin tampil, pin gabungan, panel detail, peta kecil di halaman detail.
-4. **Form tamu** (jendela Incognito): kirim, lalu cek email di Mailpit.
-5. **Form akun:** Simpan Draf → Lanjutkan → Kirim.
-6. **Dashboard:** Minta Revisi → revisi lewat link → kirim ulang → Terbitkan; coba Tolak → Pulihkan.
-7. Pastikan **tidak ada** peringatan PHP di halaman. Aktifkan `WP_DEBUG` di `wp-config.php` saat menguji.
+4. **Form tamu** (jendela Incognito): kirim, lalu cek email di Mailpit (ke kurator + konfirmasi ke tamu).
+5. **Form akun:** Simpan Draf → Lanjutkan → Kirim (konfirmasi ke pengirim tetap terkirim).
+6. **Dashboard:** Minta Revisi → revisi lewat link → kirim ulang (email "Revisi Anda kami terima") → Terbitkan; coba Tolak → Pulihkan.
+7. **Usulan perubahan:** kontributor ubah koleksi terbit miliknya → kirim → cek email kurator & konfirmasi → Setujui.
+8. **Hubungi Kami:** kirim pesan; di Mailpit ada pesan ke tim (Reply-To pengunjung) dan konfirmasi singkat ke pengunjung (tanpa isi pesan, Reply-To tim).
+9. Pastikan **tidak ada** peringatan PHP di halaman. Aktifkan `WP_DEBUG` di `wp-config.php` saat menguji.
 
 Cek sintaks cepat (Site Shell LocalWP):
 

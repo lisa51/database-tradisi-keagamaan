@@ -92,7 +92,7 @@ define( 'TK_RIWAYAT_PER_HALAMAN', 15 );
  * Form Hubungi Kami [tk_kontak]
  * ========================================================================== */
 
-/** Penerima pesan. Kosong = email admin (Settings → General → Administration Email Address). */
+/** Penerima pesan Hubungi Kami & alamat Reply-To semua email plugin. Kosong = email admin (Settings → General → Administration Email Address). */
 define( 'TK_KONTAK_EMAIL', '' );
 
 /** Batas pesan per jam per alamat IP (anti-spam). */

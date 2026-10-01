@@ -2,6 +2,13 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.11.0 (1 Oktober 2026): Email konfirmasi untuk pengirim
+
+**Baru**
+- Pengirim menerima email konfirmasi setiap kali kirimannya masuk antrean kurasi: kiriman baru (termasuk draf yang baru dikirim), kiriman ulang setelah revisi (`diterima_ulang`), dan usulan perubahan beserta revisinya. Sebelumnya hanya kiriman baru langsung dari form yang dikonfirmasi.
+- Form Hubungi Kami mengirim konfirmasi singkat ke pengirim setelah pesan sampai ke admin (`tk_kontak_kirim_konfirmasi()`). Hanya menyebut perihal; isi pesan, nama, dan lampiran sengaja tidak disertakan agar form tidak bisa dipakai mengirim spam ke alamat orang lain.
+- Semua email plugin kini ber-Reply-To ke kotak masuk tim (`tk_email_tim()`: `TK_KONTAK_EMAIL` atau email admin), sehingga balasan pengguna tetap sampai walau alamat pengirim di FluentSMTP noreply@. Email "pesan baru" Hubungi Kami tetap ber-Reply-To ke pengunjung.
+
 ## 2.10.2 (1 Oktober 2026): Batas per IP di belakang Cloudflare
 
 **Diperbaiki**

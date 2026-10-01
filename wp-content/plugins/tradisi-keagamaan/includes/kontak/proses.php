@@ -4,7 +4,8 @@
  *
  * Alur:
  *   template_redirect  tk_kontak_proses()  nonce, honeypot, batas per IP,
- *                                          validasi, kirim email ke admin
+ *                                          validasi, kirim email ke admin,
+ *                                          lalu konfirmasi ke pengirim
  *   Berhasil  → redirect ke ?kontak=terkirim (mencegah kirim ganda saat refresh).
  *   Gagal     → form tampil lagi dengan pesan & isian sebelumnya
  *               (disimpan di $GLOBALS['tk_kontak'], dibaca shortcodes/kontak.php).
@@ -100,6 +101,7 @@ function tk_kontak_proses() {
         $GLOBALS['tk_kontak']['galat'] = $galat;
         return;
     }
+    tk_kontak_kirim_konfirmasi( $data );
     tk_kontak_selesai();
 }
 
@@ -191,7 +193,7 @@ function tk_kontak_validasi( $data ) {
  * @return bool
  */
 function tk_kontak_kirim( $data, $lampiran = null ) {
-    $ke      = TK_KONTAK_EMAIL ? TK_KONTAK_EMAIL : get_option( 'admin_email' );
+    $ke      = tk_email_tim();
     $perihal = tk_kontak_perihal()[ $data['perihal'] ];
     $nama    = str_replace( array( '"', '<', '>', ',', "\r", "\n" ), '', $data['nama'] ); // Aman untuk header.
 
@@ -230,6 +232,27 @@ function tk_kontak_kirim( $data, $lampiran = null ) {
         rmdir( $folder );
     }
     return $terkirim;
+}
+
+/**
+ * Kirim konfirmasi singkat ke pengirim. Kegagalan di sini tidak membatalkan
+ * pesan ke admin.
+ *
+ * Sengaja tanpa isian pengunjung (nama, pesan, nama lampiran): alamat tujuan
+ * diketik pengunjung, jadi teks bebas di sini bisa dipakai mengirim spam ke
+ * alamat orang lain atas nama situs. Perihal aman karena dari daftar tetap.
+ *
+ * @param array $data
+ */
+function tk_kontak_kirim_konfirmasi( $data ) {
+    tk_kirim_email(
+        $data['email'],
+        'Pesan Anda sudah kami terima',
+        sprintf(
+            "Halo,\n\nTerima kasih telah menghubungi kami. Pesan Anda dengan perihal \"%s\" sudah kami terima dan akan kami balas melalui email ini.\n\n--\nEmail ini dikirim otomatis. Bila Anda tidak merasa mengirim pesan, abaikan saja.\n",
+            tk_kontak_perihal()[ $data['perihal'] ]
+        )
+    );
 }
 
 /**

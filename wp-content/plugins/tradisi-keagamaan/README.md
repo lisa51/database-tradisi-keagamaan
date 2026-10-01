@@ -147,6 +147,7 @@ Tanpa atribut. Menghitung tradisi terbit, budaya material terbit (term `jenis`),
 
 - Isian: Nama, Email, Perihal (Pertanyaan umum / Koreksi data tradisi / Bantuan kontribusi / Kerja sama / Lainnya), Pesan. Nama & email terisi otomatis bila pengunjung sudah login.
 - Pesan dikirim ke email admin (atau `TK_KONTAK_EMAIL`). Tekan **Balas** di email untuk menjawab langsung ke pengirim.
+- Pengirim menerima **email konfirmasi** singkat (hanya perihal, tanpa isi pesan agar form tidak bisa dipakai mengirim spam).
 - **Lampiran** opsional: satu file JPG, PNG, PDF, atau DOCX, maks. 5 MB. Isi file dicek (bukan hanya nama), lalu file dikirim sebagai lampiran email dan langsung dihapus dari server, tidak masuk Media Library.
 - Anti-spam: honeypot + maks. 3 pesan/jam/IP (`TK_KONTAK_BATAS_PER_JAM`).
 - Pesan tidak disimpan di database, hanya dikirim lewat email. Pastikan SMTP berfungsi di server dan batas ukuran email penyedia SMTP ≥ ukuran lampiran.
@@ -192,8 +193,8 @@ Tamu / Kontributor ── Kirim ──▶ Menunggu Kurasi ──┬── Terbit
 
 | Kejadian | Email |
 |---|---|
-| Kiriman baru / kiriman ulang | ke kurator (atau admin bila belum ada kurator) |
-| Kiriman baru | konfirmasi ke pengirim |
+| Kiriman baru / kiriman ulang / usulan perubahan | ke kurator (atau admin bila belum ada kurator) |
+| Kiriman baru / kiriman ulang / usulan perubahan | konfirmasi ke pengirim |
 | Terbitkan | ke pengirim, dengan link |
 | Minta Revisi | ke pengirim, dengan catatan & link revisi |
 | Tolak | ke pengirim, dengan alasan |
@@ -272,7 +273,7 @@ Semua ada di **`includes/config.php`**:
 | `TK_FOTO_MAKS_MB` | `5` | Ukuran maksimum per foto (foto utama & galeri) |
 | `TK_KURASI_HARI_PERINGATAN` | `7` | Batas hari sebelum antrean ditandai merah |
 | `TK_RIWAYAT_PER_HALAMAN` | `15` | Baris per halaman "Riwayat Kurasi Saya" |
-| `TK_KONTAK_EMAIL` | kosong (= email admin) | Penerima pesan Hubungi Kami |
+| `TK_KONTAK_EMAIL` | kosong (= email admin) | Penerima pesan Hubungi Kami, sekaligus alamat Reply-To semua email |
 | `TK_KONTAK_BATAS_PER_JAM` | `3` | Batas pesan Hubungi Kami per jam per IP |
 | `TK_KONTAK_LAMPIRAN_MAKS_MB` | `5` | Ukuran maksimum lampiran Hubungi Kami |
 | `TK_KONTAK_LAMPIRAN_TIPE` | jpg, png, pdf, docx | Format lampiran yang diizinkan |

@@ -3,11 +3,12 @@
  * Email pemberitahuan alur kurasi (lewat wp_mail()).
  *
  *   Ke kurator   kiriman baru, kiriman ulang setelah revisi, usulan perubahan.
- *   Ke pengirim  diterima, terbit, diminta revisi (dengan link), ditolak (dengan alasan);
- *                untuk usulan perubahan: disetujui, diminta revisi, ditolak.
+ *   Ke pengirim  diterima / revisi diterima, terbit, diminta revisi (dengan link),
+ *                ditolak (dengan alasan); untuk usulan perubahan: diterima /
+ *                revisi diterima, disetujui, diminta revisi, ditolak.
  *
  * Di LocalWP email tidak terkirim sungguhan; lihat tab "Mailpit".
- * Di server, pastikan SMTP berfungsi (mis. plugin WP Mail SMTP).
+ * Di server, pastikan SMTP berfungsi (plugin FluentSMTP).
  *
  * @package TradisiKeagamaan
  */
@@ -17,7 +18,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Kotak masuk tim WARISI: penerima pesan Hubungi Kami dan tujuan balasan
+ * semua email. TK_KONTAK_EMAIL, atau email admin bila kosong.
+ *
+ * @return string
+ */
+function tk_email_tim() {
+    return TK_KONTAK_EMAIL ? TK_KONTAK_EMAIL : get_option( 'admin_email' );
+}
+
+/**
  * Kirim email sederhana berawalan nama situs.
+ *
+ * Bila $headers belum berisi Reply-To, balasan diarahkan ke tk_email_tim(),
+ * sehingga tetap sampai ke tim walau alamat pengirim (FluentSMTP) noreply@.
  *
  * @param string|string[] $ke
  * @param string          $judul
@@ -29,6 +43,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 function tk_kirim_email( $ke, $judul, $isi, $headers = array(), $lampiran = array() ) {
     if ( ! $ke ) {
         return false;
+    }
+    if ( ! preg_grep( '/^\s*reply-to\s*:/i', $headers ) ) {
+        $nama      = str_replace( array( '"', '<', '>', ',', "\r", "\n" ), '', get_bloginfo( 'name' ) ); // Aman untuk header.
+        $headers[] = sprintf( 'Reply-To: %s <%s>', $nama, tk_email_tim() );
     }
     return wp_mail( $ke, sprintf( '[%s] %s', get_bloginfo( 'name' ), $judul ), $isi, $headers, $lampiran );
 }
@@ -73,7 +91,7 @@ function tk_email_ke_kurator( $post_id, $ulang = false ) {
  * Beri tahu pengirim tentang hasil kurasi atau penerimaan kiriman.
  *
  * @param int    $post_id
- * @param string $jenis   'diterima' | 'terbitkan' | 'terapkan' | 'revisi' | 'tolak'
+ * @param string $jenis   'diterima' | 'diterima_ulang' | 'terbitkan' | 'terapkan' | 'revisi' | 'tolak'
  * @param string $catatan Catatan kurator (untuk revisi/tolak).
  */
 function tk_email_ke_pengirim( $post_id, $jenis, $catatan = '' ) {
@@ -84,6 +102,14 @@ function tk_email_ke_pengirim( $post_id, $jenis, $catatan = '' ) {
     $asal = tk_usulan_asal( $post_id );
     if ( $asal ) {
         switch ( $jenis ) {
+            case 'diterima':
+                $subjek = 'Usulan perubahan kami terima: ' . $judul;
+                $isi    = $halo . "Terima kasih. Usulan perubahan Anda untuk \"$judul\" sudah kami terima dan akan ditinjau kurator. Versi yang terbit tetap tampil sampai usulan disetujui.\n";
+                break;
+            case 'diterima_ulang':
+                $subjek = 'Revisi usulan kami terima: ' . $judul;
+                $isi    = $halo . "Terima kasih. Revisi usulan perubahan untuk \"$judul\" sudah kami terima dan akan ditinjau kembali oleh kurator.\n";
+                break;
             case 'terapkan':
                 $subjek = 'Usulan perubahan disetujui: ' . $judul;
                 $isi    = $halo . "Usulan perubahan Anda untuk \"$judul\" sudah disetujui kurator dan kini tampil di:\n" . get_permalink( $asal ) . "\n\nTerima kasih atas kontribusi Anda.\n";
@@ -108,6 +134,11 @@ function tk_email_ke_pengirim( $post_id, $jenis, $catatan = '' ) {
         case 'diterima':
             $subjek = 'Kiriman Anda kami terima: ' . $judul;
             $isi    = $halo . "Terima kasih. Tradisi \"$judul\" sudah kami terima dan akan ditinjau kurator. Kami akan mengabari Anda lewat email ini.\n";
+            break;
+
+        case 'diterima_ulang':
+            $subjek = 'Revisi Anda kami terima: ' . $judul;
+            $isi    = $halo . "Terima kasih. Revisi tradisi \"$judul\" sudah kami terima dan akan ditinjau kembali oleh kurator. Kami akan mengabari Anda lewat email ini.\n";
             break;
 
         case 'terbitkan':

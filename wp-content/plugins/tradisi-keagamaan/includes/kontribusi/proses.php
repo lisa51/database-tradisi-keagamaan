@@ -299,10 +299,7 @@ function tk_form_after_save( $post_id ) {
 
         tk_log_tambah( $post_id, $ulang ? 'kirim_ulang' : 'kirim', '', tk_nama_pengirim( $post_id ) );
         tk_email_ke_kurator( $post_id, $ulang );
-
-        if ( $baru ) {
-            tk_email_ke_pengirim( $post_id, 'diterima' );
-        }
+        tk_email_ke_pengirim( $post_id, $ulang ? 'diterima_ulang' : 'diterima' ); // Salinan untuk pengirim.
     }
 }
 
