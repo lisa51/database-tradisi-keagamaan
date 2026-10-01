@@ -37,9 +37,9 @@ add_shortcode( 'tk_hero', 'tk_hero_shortcode' );
  */
 function tk_hero_shortcode( $atts ) {
     $atts = shortcode_atts( array(
-        'label'     => 'Database Digital Tradisi Keagamaan Indonesia',
-        'judul'     => 'Mengenal, Mendokumentasikan, dan Merawat Tradisi Keagamaan Indonesia',
-        'deskripsi' => 'WARISI adalah ruang digital untuk mendokumentasikan kekayaan tradisi keagamaan yang tumbuh dan berkembang di berbagai daerah Indonesia.',
+        'label'     => 'Database Digital Khazanah Keagamaan Indonesia',
+        'judul'     => 'Merawat Khazanah Keagamaan Nusantara',
+        'deskripsi' => 'Telusuri tradisi dan benda budaya keagamaan dari berbagai daerah, atau bagikan yang Anda kenal.',
         'id'        => 0,
     ), $atts, 'tk_hero' );
 
@@ -61,8 +61,8 @@ function tk_hero_shortcode( $atts ) {
         <p class="tk-hero-desk"><?php echo esc_html( $atts['deskripsi'] ); ?></p>
 
         <div class="tk-hero-tombol">
-          <a class="tk-btn tk-btn-utama" href="<?php echo esc_url( tk_url_jelajahi() ); ?>">Jelajahi Tradisi</a>
-          <a class="tk-btn tk-btn-garis" href="<?php echo esc_url( tk_url_tambah() ); ?>">+ Tambah Tradisi</a>
+          <a class="tk-btn tk-btn-utama" href="<?php echo esc_url( tk_url_jelajahi() ); ?>">Jelajahi Khazanah</a>
+          <a class="tk-btn tk-btn-garis" href="<?php echo esc_url( tk_url_tambah() ); ?>">+ Berkontribusi</a>
         </div>
 
         <ul class="tk-hero-poin">
@@ -127,7 +127,7 @@ function tk_hero_render_kartu( $id ) {
         <?php echo get_the_post_thumbnail( $id, 'large' ); ?>
         <div class="tk-hero-overlay">
           <?php if ( $wilayah ) : ?>
-            <span class="tk-hero-lokasi">Tradisi <?php echo esc_html( $wilayah ); ?></span>
+            <span class="tk-hero-lokasi"><?php echo esc_html( TK_JENIS[ tk_get_jenis( $id ) ] . ' ' . $wilayah ); ?></span>
           <?php endif; ?>
           <strong class="tk-hero-kartu-judul"><?php echo esc_html( get_the_title( $id ) ); ?></strong>
           <?php if ( $desk ) : ?>

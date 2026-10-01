@@ -42,7 +42,7 @@ function tk_panel_tombol_aksi( $post_id = 0 ) {
         'terbitkan' => array( 'Terbitkan', 'terbit', '' ),
         'revisi'    => array( 'Minta Revisi', 'revisi', '' ),
         'antrean'   => array( 'Kembalikan ke Antrean', 'revisi', '' ),
-        'tolak'     => array( 'Tolak', 'tolak', 'Tolak tradisi ini dan pindahkan ke Trash? Pengirim akan menerima alasan Anda.' ),
+        'tolak'     => array( 'Tolak', 'tolak', 'Tolak koleksi ini dan pindahkan ke Trash? Pengirim akan menerima alasan Anda.' ),
     );
     if ( $post_id && tk_usulan_asal( $post_id ) ) {
         $tombol['terbitkan'] = array( 'Setujui & Terapkan', 'terbit', 'Terapkan usulan ini ke versi terbit? Isi halaman yang terbit akan diganti.' );

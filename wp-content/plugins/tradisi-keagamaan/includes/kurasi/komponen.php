@@ -39,14 +39,14 @@ function tk_kurasi_render_pesan() {
 
     $pesan = array(
         'massal_kosong' => array( 'gagal', 'Pilih minimal satu koleksi dan satu aksi massal.' ),
-        'terbitkan'     => array( 'sukses', 'Tradisi diterbitkan dan pengirim sudah diberi tahu.' ),
+        'terbitkan'     => array( 'sukses', 'Koleksi diterbitkan dan pengirim sudah diberi tahu.' ),
         'revisi'        => array( 'info', 'Kiriman dikembalikan untuk revisi. Pengirim sudah menerima catatan Anda.' ),
         'tolak'         => array( 'info', 'Kiriman ditolak dan dipindah ke Trash (bisa dipulihkan dalam 30 hari). Pengirim sudah menerima alasannya.' ),
-        'antrean'       => array( 'info', 'Tradisi dikembalikan ke antrean kurasi (status Menunggu Kurasi).' ),
+        'antrean'       => array( 'info', 'Koleksi dikembalikan ke antrean kurasi (status Menunggu Kurasi).' ),
         'terapkan'      => array( 'sukses', 'Usulan perubahan diterapkan ke versi terbit, dan pengirim sudah diberi tahu.' ),
         'ubah'          => array( 'sukses', 'Perubahan tersimpan.' ),
         'catatan_kosong'=> array( 'gagal', 'Catatan wajib diisi untuk Minta Revisi, Tolak, atau Kembalikan ke Antrean.' ),
-        'gagal'         => array( 'gagal', 'Aksi gagal atau tidak berlaku untuk status tradisi saat ini. Muat ulang halaman lalu coba lagi.' ),
+        'gagal'         => array( 'gagal', 'Aksi gagal atau tidak berlaku untuk status koleksi saat ini. Muat ulang halaman lalu coba lagi.' ),
     );
 
     if ( ! isset( $pesan[ $hasil ] ) ) {

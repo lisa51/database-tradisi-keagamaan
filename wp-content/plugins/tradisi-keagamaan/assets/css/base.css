@@ -13,6 +13,7 @@
      4. Tata letak halaman
      5. Komponen bersama: tombol, label, pill, status, pesan, kosong,
         judul bagian, nomor halaman
+     6. Footer (includes/core/footer.php)
 
    KONVENSI
      .tk-*                      komponen plugin
@@ -57,6 +58,11 @@
   --tk-merah:         #9a2f1b; /* ditolak, gagal, lewat batas          */
   --tk-merah-bg:      #fbe9e6;
   --tk-merah-garis:   #e2a497;
+
+  /* Footer (latar coklat tua) */
+  --tk-footer-teks:   #e9dccf; /* teks utama footer                    */
+  --tk-footer-redup:  #b9a593; /* teks sekunder & judul kolom          */
+  --tk-footer-garis:  rgba(255, 255, 255, .12);
 
   /* Bayangan */
   --tk-bayangan:      0 8px 24px rgba(59, 35, 20, .12);
@@ -366,4 +372,98 @@ button.tk-btn-kecil { cursor: pointer; font-family: inherit; line-height: 1; }
   border-color: var(--tk-accent);
   background: var(--tk-accent);
   color: #fff;
+}
+
+
+/* =============================================================================
+   6. Footer (includes/core/footer.php)
+   Kolom .tk-footer di atas baris hak cipta GeneratePress (.site-info).
+   ============================================================================= */
+.site-footer {
+  margin-top: 48px;
+  background: var(--tk-coklat);
+  color: var(--tk-footer-teks);
+}
+.tk-footer__isi {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 40px;
+  max-width: var(--tk-lebar);
+  margin: 0 auto;
+  padding: 56px 24px 40px;
+}
+.tk-footer a { color: var(--tk-footer-teks); text-decoration: none; }
+.tk-footer a:hover { color: #fff; text-decoration: underline; }
+
+.tk-footer__nama {
+  font-family: var(--tk-font-judul);
+  font-size: 30px;
+  line-height: 1;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+.tk-footer__slogan {
+  margin: 8px 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tk-emas);
+}
+.tk-footer__desk { margin: 0; font-size: 14px; line-height: 1.6; color: var(--tk-footer-redup); }
+
+.tk-footer__judul {
+  margin: 0 0 14px;
+  font-family: var(--tk-font-teks);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--tk-footer-redup);
+}
+.tk-footer__lembaga-isi { display: flex; align-items: flex-start; gap: 18px; }
+.tk-footer__logo { flex-shrink: 0; width: 76px; height: auto; }
+.tk-footer__lembaga-utama {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+}
+.tk-footer__lembaga-induk {
+  margin: 0 0 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--tk-footer-teks);
+}
+.tk-footer__tautan ul { margin: 0; padding: 0; list-style: none; }
+.tk-footer__tautan li { margin: 0 0 10px; font-size: 14px; }
+
+/* Baris hak cipta (bawaan GeneratePress, isinya dari tk_footer_hak_cipta()) */
+.site-footer .site-info {
+  border-top: 1px solid var(--tk-footer-garis);
+  background: transparent;
+  color: var(--tk-footer-redup);
+}
+.site-footer .inside-site-info {
+  max-width: var(--tk-lebar);
+  padding: 18px 24px;
+}
+.site-footer .copyright-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 24px;
+  width: 100%;
+  font-size: 13px;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .tk-footer__isi { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+}
+@media (max-width: 600px) {
+  .tk-footer__isi { grid-template-columns: 1fr; padding: 40px 20px 28px; }
+  .site-footer .copyright-bar { flex-direction: column; }
 }

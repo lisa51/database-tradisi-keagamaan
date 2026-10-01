@@ -35,7 +35,7 @@ Plugin custom untuk situs **WARISI (Warisan Religi Indonesia)**, database tradis
 | FluentSMTP | Pengiriman email + log | Wajib di server; tanpa SMTP email kurasi & Hubungi Kami bisa tidak sampai |
 | Wordfence | Firewall, scan, batas login, 2FA | Pakai satu plugin keamanan saja |
 | Simple Cloudflare Turnstile | Anti-bot di login, daftar, lupa password, **dan** form WARISI | Otomatis dipakai oleh `[tk_kontak]` dan kiriman tamu `[tk_form_tradisi]` (lihat `includes/core/turnstile.php`) |
-| Rank Math SEO | Meta, Open Graph, schema, sitemap | Deskripsi tradisi = `%customfield(deskripsi_singkat)%`; Tambah Tradisi & Dashboard Kurasi = noindex |
+| Rank Math SEO | Meta, Open Graph, schema, sitemap | Deskripsi tradisi = `%customfield(deskripsi_singkat)%`; Kontribusi Koleksi & Dashboard Kurasi = noindex |
 
 1. Salin folder `tradisi-keagamaan/` ke `wp-content/plugins/`, lalu aktifkan di **Plugins**.
 2. **Appearance → Customize → Additional CSS** harus **kosong**. Semua CSS ada di plugin.
@@ -46,13 +46,14 @@ Plugin custom untuk situs **WARISI (Warisan Religi Indonesia)**, database tradis
 | Halaman | Slug | Isi |
 |---|---|---|
 | Beranda (jadikan Homepage) | bebas | `[tk_hero]` `[tk_stats]` `[tk_koleksi]` |
-| Peta Tradisi | bebas | `[tk_peta]` |
-| Tambah Tradisi | `tambah-tradisi` | `[tk_form_tradisi]` |
-| Ubah Tradisi (tidak perlu di menu) | `ubah-tradisi` | `[tk_form_tradisi]` |
+| Peta Koleksi | bebas | `[tk_peta]` |
+| Kontribusi Koleksi | `tambah-tradisi` | `[tk_form_tradisi]` |
+| Ubah Koleksi (tidak perlu di menu) | `ubah-tradisi` | `[tk_form_tradisi]` |
 | Dashboard Kurasi | `dashboard-kurasi` | `[tk_kurasi]` |
 | Riwayat Suntingan (tidak perlu di menu) | `riwayat-suntingan` | `[tk_riwayat_suntingan]` |
 | Tentang | bebas | teks biasa |
-| Hubungi Kami (sub-menu Tentang) | bebas | `[tk_kontak]` |
+| Hubungi Kami (sub-menu Tentang) | `hubungi-kami` | `[tk_kontak]` |
+| Panduan Kontribusi | `panduan-kontribusi` | `[tk_panduan_kontribusi]` |
 
 6. Atur menu (lihat [bagian 7](#7-menu)).
 7. Jadikan akun tim kurasi sebagai Kurator: **Users → Edit → Role: Kurator**.
@@ -105,10 +106,10 @@ Tulis shortcode di block **Shortcode** (bukan Paragraph), dengan tanda kutip lur
 
 | Atribut | Default | Fungsi |
 |---|---|---|
-| `label` | Database Digital Tradisi Keagamaan Indonesia | Teks kecil di atas judul |
-| `judul` | Mengenal, Mendokumentasikan, ... | Judul besar |
-| `deskripsi` | WARISI adalah ruang digital ... | Paragraf |
-| `id` | otomatis | ID tradisi unggulan. Kosong = pembaca terbanyak |
+| `label` | Database Digital Khazanah Keagamaan Indonesia | Teks kecil di atas judul |
+| `judul` | Merawat Khazanah Keagamaan Nusantara | Judul besar |
+| `deskripsi` | Telusuri tradisi dan benda budaya keagamaan ... | Paragraf |
+| `id` | otomatis | ID koleksi unggulan. Kosong = pembaca terbanyak |
 
 ### `[tk_stats]`: empat kotak angka
 
@@ -145,12 +146,20 @@ Tanpa atribut. Menghitung tradisi terbit, budaya material terbit (term `jenis`),
 [tk_kontak judul="Hubungi Kami" deskripsi="..."]
 ```
 
-- Isian: Nama, Email, Perihal (Pertanyaan umum / Koreksi data tradisi / Bantuan kontribusi / Kerja sama / Lainnya), Pesan. Nama & email terisi otomatis bila pengunjung sudah login.
+- Isian: Nama, Email, Perihal (Pertanyaan umum / Koreksi data koleksi / Bantuan kontribusi / Kerja sama / Lainnya), Pesan. Nama & email terisi otomatis bila pengunjung sudah login.
 - Pesan dikirim ke email admin (atau `TK_KONTAK_EMAIL`). Tekan **Balas** di email untuk menjawab langsung ke pengirim.
 - Pengirim menerima **email konfirmasi** singkat (hanya perihal, tanpa isi pesan agar form tidak bisa dipakai mengirim spam).
 - **Lampiran** opsional: satu file JPG, PNG, PDF, atau DOCX, maks. 5 MB. Isi file dicek (bukan hanya nama), lalu file dikirim sebagai lampiran email dan langsung dihapus dari server, tidak masuk Media Library.
 - Anti-spam: honeypot + maks. 3 pesan/jam/IP (`TK_KONTAK_BATAS_PER_JAM`).
 - Pesan tidak disimpan di database, hanya dikirim lewat email. Pastikan SMTP berfungsi di server dan batas ukuran email penyedia SMTP ≥ ukuran lampiran.
+
+### `[tk_panduan_kontribusi]`: halaman Panduan Kontribusi
+
+Tanpa atribut. Isi: jenis koleksi, cara berkontribusi (tamu/akun), langkah mengirim, tabel isian (wajib/dianjurkan/opsional), ketentuan foto, proses kurasi, mengubah koleksi terbit, dan etika. Angka aturan (minimal kata, ukuran & jumlah foto) dibaca dari `config.php`, jadi selalu sama dengan form. Form kiriman baru menautkan ke halaman ini.
+
+### Footer
+
+Dipasang otomatis lewat hook GeneratePress (`includes/core/footer.php`), tanpa widget: nama & slogan, lembaga pengelola, dua kolom tautan, dan baris hak cipta (menggantikan "Built with GeneratePress"). Isi diatur di `config.php`: `TK_LEMBAGA`, `TK_LOGO_LEMBAGA`, `TK_SLOGAN`, `TK_FOOTER_TAUTAN` (halaman yang belum dibuat dilewati). Logo BRIN (`assets/img/logo-brin.png`) adalah versi untuk latar gelap: latar transparan, tulisan putih.
 
 ### `[tk_form_tradisi]` dan `[tk_kurasi]`
 
@@ -171,7 +180,7 @@ Kiriman tamu tercatat atas nama akun sistem "Kontributor Tamu", tetapi di situs 
 
 ### Isi form
 
-Nama tradisi, isi artikel (≥150 kata disarankan), foto utama (wajib → featured image), **Foto Tambahan** (opsional → Galeri Foto), agama, provinsi (wajib), kategori (wajib), kata kunci (→ Tags), lalu field Detail Tradisi lainnya.
+Nama tradisi, isi artikel (≥150 kata disarankan), foto utama (wajib → featured image), **Foto Tambahan** (opsional → Galeri Foto), agama, provinsi (wajib), kategori (wajib), kata kunci (→ Tags), lalu field Detail Koleksi lainnya, termasuk **Kredit Foto** (pembuat & lisensi tiap foto; tampil di halaman koleksi). Foto wajib milik sendiri atau bebas digunakan, lihat halaman Panduan Kontribusi.
 
 **Foto Tambahan:** klik **Tambah Foto** untuk setiap foto (JPG/PNG/WebP, maks. 5 MB per foto, total galeri maks. 12). Setelah form disimpan, foto dipindah ke Galeri Foto. Saat melanjutkan draf/revisi, foto baru ditambahkan di belakang foto yang sudah ada. Menghapus atau mengurutkan foto galeri dilakukan kurator di wp-admin.
 
@@ -237,8 +246,8 @@ Bagian yang datanya kosong tidak ditampilkan. Halaman tetap tampil walaupun ACF 
 
 | Item | Cara | CSS Class |
 |---|---|---|
-| Jelajahi Tradisi | Custom Link `/#jelajahi` | – |
-| + Tambah Tradisi (tombol oranye) | Halaman Tambah Tradisi | `tk-menu-cta` |
+| Jelajahi Khazanah | Custom Link `/#jelajahi` | – |
+| + Berkontribusi (tombol oranye) | Halaman Kontribusi Koleksi | `tk-menu-cta` |
 | Dashboard Kurasi (hanya kurator/admin) | Halaman Dashboard Kurasi | `tk-menu-kurator` |
 | Masuk / Keluar (otomatis) | Custom Link URL `#` | `tk-menu-akun` |
 | Hubungi Kami (sub-menu) | Halaman Hubungi Kami, geser ke kanan di bawah **Tentang** | – |
@@ -248,12 +257,12 @@ Bagian yang datanya kosong tidak ditampilkan. Halaman tetap tampil walaupun ACF 
 | Item | CSS Class ikon |
 |---|---|
 | Beranda | `tk-ikon-rumah` |
-| Jelajahi Tradisi | `tk-ikon-cari` |
-| Peta Tradisi | `tk-ikon-peta` |
+| Jelajahi Khazanah | `tk-ikon-cari` |
+| Peta Koleksi | `tk-ikon-peta` |
 | Dashboard Kurasi | `tk-menu-kurator tk-ikon-kurasi` |
 | Tentang | `tk-ikon-info` |
 | Hubungi Kami | `tk-ikon-surat` |
-| Tambah Tradisi | `tk-menu-cta tk-ikon-tambah` (tulis teksnya tanpa "+") |
+| Berkontribusi | `tk-menu-cta tk-ikon-tambah` (tulis teksnya tanpa "+") |
 
 Ikon lain yang tersedia: `pin`, `gedung`, `buku`, `user`, `mata`, `link`, `masuk`, `keluar`.
 
@@ -267,6 +276,11 @@ Semua ada di **`includes/config.php`**:
 |---|---|---|
 | `TK_SLUG_TAMBAH` | `tambah-tradisi` | Slug halaman form |
 | `TK_SLUG_KURASI` | `dashboard-kurasi` | Slug halaman dashboard |
+| `TK_SLUG_PANDUAN` | `panduan-kontribusi` | Slug halaman Panduan Kontribusi |
+| `TK_LEMBAGA` | Pusat Riset … BRIN | Lembaga pengelola di footer (unit terkecil → induk) |
+| `TK_LOGO_LEMBAGA` | `assets/img/logo-brin.png` | Logo lembaga di footer (kosong = disembunyikan); teks alt di `TK_LOGO_LEMBAGA_ALT` |
+| `TK_SLOGAN` | Warisan Religi Indonesia | Slogan di footer |
+| `TK_FOOTER_TAUTAN` | Jelajahi, Berkontribusi | Kolom & tautan footer (slug halaman => label) |
 | `TK_TAMU_BATAS_PER_JAM` | `5` | Batas kiriman tamu per jam per IP |
 | `TK_MIN_KATA_ISI` | `150` | Minimum kata untuk checklist "Isi" |
 | `TK_GALERI_MAKS` | `12` | Jumlah foto maksimum di Galeri Foto |
@@ -292,7 +306,7 @@ Warna situs diubah di bagian **Token** pada `assets/css/base.css`.
 - **Peta:** Leaflet dari CDN, kecuali `assets/vendor/leaflet/` berisi `leaflet.js` & `leaflet.css` (salin folder `dist` dari https://leafletjs.com/download.html). Gambar peta (tile) tetap dari OpenStreetMap: pengunjung butuh internet, dan OpenStreetMap membatasi pemakaian berat.
 - **Email:** atur FluentSMTP (**Settings → FluentSMTP**) dengan layanan pengirim asli (mis. Brevo atau Google Workspace), lalu kirim email uji. Di LocalWP, FluentSMTP diarahkan ke Mailpit (`127.0.0.1:10001`); email bisa dilihat di tab **Mailpit**.
 - **Turnstile:** di lokal memakai **kunci uji** Cloudflare (selalu lolos). Di server, buat kunci asli di dash.cloudflare.com → Turnstile, lalu isi di **Settings → Turnstile**.
-- **Rank Math:** pengaturan tidak ikut git. Di server atur ulang: deskripsi tradisi `%customfield(deskripsi_singkat)%`, schema Article, noindex untuk Tambah Tradisi & Dashboard Kurasi, sitemap Post & Category dimatikan.
+- **Rank Math:** pengaturan tidak ikut git. Di server atur ulang: deskripsi tradisi `%customfield(deskripsi_singkat)%`, schema Article, noindex untuk Kontribusi Koleksi & Dashboard Kurasi, sitemap Post & Category dimatikan.
 - **Wordfence:** selesaikan onboarding (email notifikasi), aktifkan 2FA untuk admin & kurator, lalu **Optimize Firewall**. Folder `wp-content/wflogs/` tidak di-commit.
 - **Permalink:** setelah pindah server atau mengubah slug, buka **Settings → Permalinks → Save**.
 - **Cache halaman:** plugin cache bisa membuat penghitung pembaca tidak bertambah, dan halaman form/dashboard **harus dikecualikan** dari cache.

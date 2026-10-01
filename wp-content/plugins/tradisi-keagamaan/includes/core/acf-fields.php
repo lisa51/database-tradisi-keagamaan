@@ -1,6 +1,6 @@
 <?php
 /**
- * Field ACF: grup "Detail Tradisi" (tampil di editor post type "tradisi").
+ * Field ACF: grup "Detail Koleksi" (tampil di editor post type "tradisi").
  *
  * Field yang tersedia (nama → tipe):
  *   jenis_warisan      button_group Tradisi / Budaya Material. Tidak disimpan sebagai meta,
@@ -28,7 +28,9 @@
  *   galeri_foto        gallery      Banyak foto (ACF Pro), maks. TK_GALERI_MAKS.
  *                                   Di form depan diganti field "Foto Tambahan"
  *                                   (includes/kontribusi/fields.php).
- *   latitude           number       Garis lintang titik peta (Indonesia: ±-11 s.d. 6).
+ *   kredit_foto        textarea     Pembuat & lisensi foto, satu baris per foto.
+ *                                   Tampil di bagian bawah halaman single.
+ *   latitude          number       Garis lintang titik peta (Indonesia: ±-11 s.d. 6).
  *   longitude          number       Garis bujur titik peta (Indonesia: ±95 s.d. 141).
  *                                   Keduanya dipakai [tk_peta] dan peta di
  *                                   halaman single. Kosong = tidak tampil di peta.
@@ -72,7 +74,7 @@ function tk_sistem_penanggalan() {
 add_action( 'acf/include_fields', 'tk_register_acf_fields' );
 
 /**
- * Daftarkan field group "Detail Tradisi".
+ * Daftarkan field group "Detail Koleksi".
  */
 function tk_register_acf_fields() {
     if ( ! function_exists( 'acf_add_local_field_group' ) ) {
@@ -99,8 +101,8 @@ function tk_register_acf_fields() {
 
     acf_add_local_field_group( array(
         'key'         => TK_DETAIL_GROUP, // group_6aa0f20d00bc9 (config.php)
-        'title'       => 'Detail Tradisi',
-        'description' => 'Berisi atribut terkait tradisi',
+        'title'       => 'Detail Koleksi',
+        'description' => 'Berisi atribut terkait koleksi',
         'fields'      => array(
             array(
                 'key'           => 'field_tk_jenis',
@@ -234,6 +236,15 @@ function tk_register_acf_fields() {
                 'max'           => TK_GALERI_MAKS,
                 'mime_types'    => 'jpg,jpeg,png,webp',
                 'max_size'      => TK_FOTO_MAKS_MB,
+            ),
+            array(
+                'key'          => 'field_tk_kredit_foto',
+                'label'        => 'Kredit Foto',
+                'name'         => 'kredit_foto',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'new_lines'    => '',
+                'instructions' => 'Pembuat dan lisensi setiap foto, satu baris per foto. Contoh: "Foto utama: dokumentasi pribadi, Siti Aminah, 2024" atau "Foto 2: Budi Santoso, Wikimedia Commons, CC BY-SA 4.0". Tampil di halaman koleksi.',
             ),
             array(
                 'key'          => 'field_tk_latitude',

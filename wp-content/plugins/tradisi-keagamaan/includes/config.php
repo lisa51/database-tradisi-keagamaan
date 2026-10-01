@@ -38,11 +38,53 @@ define( 'TK_SLUG_RIWAYAT', 'riwayat-suntingan' );
 /** Halaman berisi [tk_kurasi]. */
 define( 'TK_SLUG_KURASI', 'dashboard-kurasi' );
 
+/** Halaman "Panduan Kontribusi", berisi [tk_panduan_kontribusi]. */
+define( 'TK_SLUG_PANDUAN', 'panduan-kontribusi' );
+
+/* =============================================================================
+ * Lembaga & footer (includes/core/footer.php)
+ * ========================================================================== */
+
+/** Lembaga pengelola, dari unit terkecil ke induk. Tampil di footer. */
+define( 'TK_LEMBAGA', array(
+    'Pusat Riset Khazanah Keagamaan dan Peradaban',
+    'Organisasi Riset Arkeologi, Bahasa, dan Sastra (OR Arbastra)',
+    'Badan Riset dan Inovasi Nasional (BRIN)',
+) );
+
+/**
+ * Logo lembaga induk di footer (path relatif folder plugin) & teks alternatifnya.
+ * Versi untuk latar gelap: latar transparan, tulisan putih. Kosongkan untuk menyembunyikan.
+ */
+define( 'TK_LOGO_LEMBAGA', 'assets/img/logo-brin.png' );
+define( 'TK_LOGO_LEMBAGA_ALT', 'Logo Badan Riset dan Inovasi Nasional (BRIN)' );
+
+/** Slogan di bawah nama situs pada footer. */
+define( 'TK_SLOGAN', 'Warisan Religi Indonesia' );
+
+/**
+ * Tautan footer per kolom: slug halaman => label. Halaman yang belum dibuat
+ * dilewati. Awali dengan "/" untuk tautan langsung (mis. "/#jelajahi").
+ */
+define( 'TK_FOOTER_TAUTAN', array(
+    'Jelajahi'      => array(
+        '/'            => 'Beranda',
+        '/#jelajahi'   => 'Jelajahi Khazanah',
+        'peta-tradisi' => 'Peta Koleksi',
+        'tentang'      => 'Tentang WARISI',
+    ),
+    'Berkontribusi' => array(
+        TK_SLUG_PANDUAN => 'Panduan Kontribusi',
+        TK_SLUG_TAMBAH  => 'Kirim Koleksi',
+        'hubungi-kami'  => 'Hubungi Kami',
+    ),
+) );
+
 /* =============================================================================
  * Field ACF — JANGAN diubah setelah ada data, karena data terikat pada key ini
  * ========================================================================== */
 
-/** Grup "Detail Tradisi" (includes/core/acf-fields.php). */
+/** Grup "Detail Koleksi" (includes/core/acf-fields.php). */
 define( 'TK_DETAIL_GROUP', 'group_6aa0f20d00bc9' );
 
 /** Grup "Formulir Kontributor" (includes/kontribusi/fields.php). */

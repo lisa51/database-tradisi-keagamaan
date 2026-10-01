@@ -1,0 +1,227 @@
+/* =============================================================================
+   WARISI — panduan.css
+   Halaman Panduan Kontribusi [tk_panduan_kontribusi], blok BEM .tk-panduan.
+
+   DAFTAR ISI
+     1. Kerangka & pembuka
+     2. Kartu, langkah, tabel, alur kurasi
+     3. Penutup
+     4. Responsif
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. Kerangka & pembuka
+   ============================================================================= */
+.tk-panduan {
+  max-width: 820px;
+  color: var(--tk-teks);
+  font-size: 16px;
+  line-height: 1.7;
+}
+.tk-panduan h2 {
+  margin: 0 0 14px;
+  font-family: var(--tk-font-judul);
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--tk-coklat);
+}
+.tk-panduan h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-family: var(--tk-font-teks);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--tk-coklat);
+}
+.tk-panduan h3 svg { color: var(--tk-accent); }
+.tk-panduan ul,
+.tk-panduan ol { margin: 0 0 0 20px; }
+.tk-panduan li { margin-bottom: 6px; }
+.tk-panduan p { margin: 0 0 12px; }
+
+.tk-panduan__lead {
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--tk-abu);
+}
+.tk-panduan__aksi { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 0; }
+
+.tk-panduan__daftar {
+  margin: 32px 0 8px;
+  padding: 18px 22px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: var(--tk-krem);
+}
+.tk-panduan__daftar .tk-label { /* h2 kecil; lawan gaya .tk-panduan h2 */
+  margin: 0 0 8px;
+  font-family: var(--tk-font-teks);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tk-abu);
+}
+.tk-panduan__daftar ol {
+  columns: 2;
+  column-gap: 28px;
+  margin: 0 0 0 18px;
+  font-size: 15px;
+}
+.tk-panduan__daftar a { color: var(--tk-teks); text-decoration: none; }
+.tk-panduan__daftar a:hover { color: var(--tk-accent); text-decoration: underline; }
+
+.tk-panduan__bagian {
+  padding: 32px 0 4px;
+  border-bottom: 1px solid var(--tk-garis);
+  scroll-margin-top: 24px; /* Jarak dari atas layar saat daftar isi diklik */
+}
+
+
+/* =============================================================================
+   2. Kartu, langkah, tabel, alur kurasi
+   ============================================================================= */
+.tk-panduan__kartu-grup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.tk-panduan__kartu {
+  padding: 18px 20px;
+  border: 1px solid var(--tk-garis);
+  border-radius: var(--tk-radius);
+  background: #fff;
+}
+.tk-panduan__kartu p:last-child { margin-bottom: 0; }
+.tk-panduan__contoh { font-size: 14px; color: var(--tk-abu); }
+
+/* Hak cipta: kartu boleh (hijau) & jangan (merah) */
+.tk-panduan__kartu--boleh  { border-top: 4px solid var(--tk-hijau); }
+.tk-panduan__kartu--larang { border-top: 4px solid var(--tk-merah); }
+.tk-panduan__kartu--boleh h3  { color: var(--tk-hijau-gelap); }
+.tk-panduan__kartu--larang h3 { color: var(--tk-merah); }
+.tk-panduan__kartu--boleh h3::before  { content: "✓"; }
+.tk-panduan__kartu--larang h3::before { content: "✕"; }
+.tk-panduan__kartu--boleh ul,
+.tk-panduan__kartu--larang ul { font-size: 15px; }
+
+/* Contoh penulisan sumber foto */
+.tk-panduan__contoh-kutip {
+  margin: 0 0 16px !important;
+  padding: 12px 16px 12px 34px;
+  border-left: 3px solid var(--tk-emas);
+  border-radius: 0 var(--tk-radius-kecil) var(--tk-radius-kecil) 0;
+  background: var(--tk-krem);
+  font-size: 14px;
+  color: var(--tk-coklat);
+}
+.tk-panduan__contoh-kutip li:last-child { margin-bottom: 0; }
+
+/* Langkah bernomor dalam lingkaran */
+.tk-panduan__langkah {
+  margin: 0 0 16px !important; /* GeneratePress memberi margin kiri pada ol */
+  padding: 0;
+  list-style: none;
+  counter-reset: langkah;
+}
+.tk-panduan__langkah li {
+  position: relative;
+  margin-bottom: 14px;
+  padding-left: 44px;
+  counter-increment: langkah;
+}
+.tk-panduan__langkah li::before {
+  content: counter(langkah);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--tk-accent-muda);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tk-accent-gelap);
+}
+
+/* Tabel isian */
+.tk-panduan__tabel { overflow-x: auto; margin-bottom: 16px; }
+.tk-panduan__tabel table {
+  width: 100%;
+  margin: 0;
+  border: 1px solid var(--tk-garis);
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.tk-panduan__tabel th,
+.tk-panduan__tabel td {
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--tk-garis);
+  text-align: left;
+  vertical-align: top;
+}
+.tk-panduan__tabel th {
+  background: var(--tk-krem-tua);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tk-coklat);
+}
+.tk-panduan__tabel td:first-child { font-weight: 600; white-space: nowrap; }
+.tk-panduan__wajib {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tk-panduan__wajib--wajib      { background: var(--tk-accent-muda); color: var(--tk-accent-gelap); }
+.tk-panduan__wajib--dianjurkan { background: var(--tk-kuning-bg);   color: var(--tk-kuning-teks); }
+.tk-panduan__wajib--opsional   { background: var(--tk-netral-bg);   color: var(--tk-abu); }
+
+/* Alur kurasi: label status + keterangan */
+.tk-panduan__alur {
+  margin: 0 0 16px !important;
+  padding: 0;
+  list-style: none;
+}
+.tk-panduan__alur li {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+.tk-panduan__alur .tk-status { justify-self: start; margin-top: 3px; }
+
+
+/* =============================================================================
+   3. Penutup
+   ============================================================================= */
+.tk-panduan__penutup {
+  margin-top: 36px;
+  padding: 28px;
+  border: 1px solid var(--tk-accent-garis);
+  border-radius: var(--tk-radius);
+  background: var(--tk-accent-muda);
+}
+.tk-panduan__penutup p { margin-bottom: 0; }
+
+
+/* =============================================================================
+   4. Responsif
+   ============================================================================= */
+@media (max-width: 600px) {
+  .tk-panduan__lead { font-size: 16px; }
+  .tk-panduan__daftar ol { columns: 1; }
+  .tk-panduan__kartu-grup { grid-template-columns: 1fr; }
+  .tk-panduan__alur li { grid-template-columns: 1fr; gap: 4px; }
+  .tk-panduan__tabel td:first-child { white-space: normal; }
+  .tk-panduan__penutup { padding: 20px; }
+}

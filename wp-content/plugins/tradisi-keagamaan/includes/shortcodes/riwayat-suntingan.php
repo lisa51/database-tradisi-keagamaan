@@ -9,7 +9,7 @@
  * Isi: daftar revisi WordPress (terbaru di atas). Tiap revisi dibandingkan
  * dengan revisi sebelumnya:
  *   - Judul, Ringkasan, Isi artikel.
- *   - Field ACF grup Detail Tradisi, bila revisi menyimpannya (ACF menyalin
+ *   - Field ACF grup Detail Koleksi, bila revisi menyimpannya (ACF menyalin
  *     nilai field ke revisi). Revisi tanpa data field ditandai.
  * Taxonomy (Jenis, Agama, Provinsi, Kategori, Kata kunci) TIDAK tersimpan di
  * revisi WordPress, jadi tidak ikut dibandingkan.

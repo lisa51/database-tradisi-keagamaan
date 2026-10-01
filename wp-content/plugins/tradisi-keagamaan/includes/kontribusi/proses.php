@@ -192,10 +192,10 @@ function tk_form_guard( $post_id ) {
 
     if ( is_user_logged_in() ) {
         if ( ! current_user_can( 'tk_kirim' ) ) {
-            wp_die( 'Akun Anda tidak memiliki izin untuk mengirim tradisi.', 403 );
+            wp_die( 'Akun Anda tidak memiliki izin untuk berkontribusi.', 403 );
         }
         if ( ! $baru && ! tk_form_boleh_edit( $post_id ) ) {
-            wp_die( 'Anda tidak berhak mengubah tradisi ini.', 403 );
+            wp_die( 'Anda tidak berhak mengubah koleksi ini.', 403 );
         }
         if ( 'tetap' === tk_form_status_diminta() && ( $baru || ! tk_form_ubah_langsung( $post_id ) ) ) {
             wp_die( 'Aksi simpan ini hanya untuk kurator.', 403 );

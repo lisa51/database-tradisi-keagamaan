@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function tk_kontak_perihal() {
     return array(
         'umum'       => 'Pertanyaan umum',
-        'koreksi'    => 'Koreksi data tradisi',
+        'koreksi'    => 'Koreksi data koleksi',
         'kontribusi' => 'Bantuan kontribusi',
         'kerja_sama' => 'Kerja sama',
         'lainnya'    => 'Lainnya',

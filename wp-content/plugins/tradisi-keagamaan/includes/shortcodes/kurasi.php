@@ -486,7 +486,7 @@ function tk_kurasi_render_riwayat_saya() {
       </nav>
 
       <?php if ( ! $tampil ) : ?>
-        <p class="tk-kosong">Belum ada tradisi yang Anda kurasi<?php echo $filter ? ' dengan keputusan ini' : ''; ?>.</p>
+        <p class="tk-kosong">Belum ada koleksi yang Anda kurasi<?php echo $filter ? ' dengan keputusan ini' : ''; ?>.</p>
       <?php else : ?>
         <ul class="tk-riwayat-daftar">
           <?php foreach ( $tampil as $r ) :
@@ -550,7 +550,7 @@ function tk_kurasi_tombol_lihat( $post ) {
             }
             $url = wp_nonce_url( admin_url( 'post.php?post=' . $post->ID . '&action=untrash' ), 'untrash-post_' . $post->ID );
             return sprintf(
-                '<a class="tk-btn-kecil" href="%s" onclick="return confirm(\'Pulihkan tradisi ini dari Trash? Statusnya akan menjadi Draf.\');">Pulihkan</a>',
+                '<a class="tk-btn-kecil" href="%s" onclick="return confirm(\'Pulihkan koleksi ini dari Trash? Statusnya akan menjadi Draf.\');">Pulihkan</a>',
                 esc_url( $url )
             );
 

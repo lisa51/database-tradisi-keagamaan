@@ -119,7 +119,7 @@
   function isiDaftar(grup, onPilih) {
     var frag = document.createDocumentFragment();
 
-    frag.appendChild(el('span', 'tk-label', grup.length + ' tradisi di lokasi ini'));
+    frag.appendChild(el('span', 'tk-label', grup.length + ' koleksi di lokasi ini'));
     if (grup[0].lokasi) frag.appendChild(el('p', 'tk-peta-panel-lokasi', grup[0].lokasi));
 
     var ul = el('ul', 'tk-peta-daftar');
@@ -204,7 +204,7 @@
 
     kelompokkan(titik).forEach(function (grup) {
       var posisi = [grup[0].lat, grup[0].lng];
-      var judul = grup.length === 1 ? grup[0].judul : grup.length + ' tradisi';
+      var judul = grup.length === 1 ? grup[0].judul : grup.length + ' koleksi';
       var marker = L.marker(posisi, { icon: ikonPin(grup.length), title: judul }).addTo(peta);
 
       batas.push(posisi);

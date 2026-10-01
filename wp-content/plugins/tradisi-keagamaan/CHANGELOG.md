@@ -2,6 +2,25 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.13.0 (2 Oktober 2026): Panduan Kontribusi & footer lembaga
+
+**Baru**
+- Halaman **Panduan Kontribusi** (`[tk_panduan_kontribusi]`, `includes/shortcodes/panduan.php`, `assets/css/panduan.css`): jenis koleksi, tamu vs akun, langkah mengirim, tabel isian, ketentuan foto, proses kurasi, usulan perubahan, etika. Angka aturan dibaca dari `config.php`. Slug `TK_SLUG_PANDUAN`, URL `tk_url_panduan()`.
+- Form kiriman baru menautkan ke Panduan Kontribusi ("Baru pertama kali? …").
+- Panduan: bagian **Hak cipta & lisensi foto** (boleh/jangan diunggah, contoh kredit, penurunan foto atas keberatan pemilik hak cipta).
+- Field **Kredit Foto** (`kredit_foto`, textarea, grup Detail Koleksi): pembuat & lisensi tiap foto, tampil di bawah halaman koleksi (ikon `kamera`) dan masuk checklist kelengkapan kurator.
+- Pernyataan tamu kini juga menyatakan foto milik pengirim atau bebas digunakan; petunjuk Foto Utama merujuk ke Kredit Foto.
+- **Footer** (`includes/core/footer.php`, bagian 6 `base.css`): nama & slogan, lembaga pengelola (Pusat Riset Khazanah Keagamaan dan Peradaban · OR Arbastra · BRIN), kolom tautan Jelajahi & Berkontribusi, baris hak cipta menggantikan "Built with GeneratePress". Logo BRIN versi latar gelap (`assets/img/logo-brin.png`: latar transparan, tulisan putih, lambang merah tetap). Diatur lewat `TK_LEMBAGA`, `TK_LOGO_LEMBAGA`, `TK_SLOGAN`, `TK_FOOTER_TAUTAN`.
+
+## 2.12.0 (2 Oktober 2026): Istilah Khazanah · Koleksi · Kontribusi
+
+**Diubah**
+- Teks situs memakai tiga istilah: **khazanah** untuk keseluruhan isi (judul hero "Merawat Khazanah Keagamaan Nusantara", "Jelajahi Khazanah", judul daftar), **koleksi** untuk tiap entri & hitungan (peta, dashboard, pesan kurasi, konfirmasi), dan **kontribusi** untuk aksi pengguna (tombol "+ Berkontribusi", ucapan terima kasih, email). "Tradisi" & "Budaya Material" tetap sebagai label jenis.
+- Email ke pengirim: subjek "Terima kasih atas kontribusi Anda" dan "Kontribusi Anda sudah terbit"; isi tidak lagi menyebut "tradisi" untuk budaya material.
+- Kartu unggulan di hero menampilkan jenis + provinsi (mis. "Budaya Material Nusa Tenggara Timur"), sebelumnya selalu "Tradisi ...".
+- Grup field ACF "Detail Tradisi" → "Detail Koleksi"; pilihan Hubungi Kami "Koreksi data koleksi".
+- Slug halaman (`tambah-tradisi`, `ubah-tradisi`) tidak berubah.
+
 ## 2.11.0 (1 Oktober 2026): Email konfirmasi untuk pengirim
 
 **Baru**

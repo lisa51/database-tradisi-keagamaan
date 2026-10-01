@@ -42,7 +42,7 @@ function tk_form_shortcode() {
     $k = tk_form_konteks();
 
     if ( 'tanpa_izin' === $k['mode'] ) {
-        return '<p class="tk-kosong">Akun Anda belum memiliki izin untuk mengirim tradisi. Hubungi admin WARISI.</p>';
+        return '<p class="tk-kosong">Akun Anda belum memiliki izin untuk berkontribusi. Hubungi admin WARISI.</p>';
     }
 
     $tamu    = ( 'tamu' === $k['mode'] );
@@ -92,6 +92,8 @@ function tk_form_shortcode() {
         echo tk_form_render_info_edit( $edit_id, $tamu, $mode_tombol );
     } elseif ( $tamu ) {
         echo tk_form_render_info_tamu();
+    } else {
+        echo '<div class="tk-notice tk-notice--info">' . tk_form_teks_panduan() . '</div>';
     }
 
     echo '<div class="tk-form">';
@@ -207,7 +209,7 @@ function tk_form_render_ubah_kosong( $tamu ) {
             . '.</div>';
 
     $daftar = tk_form_render_kiriman_saya();
-    return $html . ( $daftar ? $daftar : '<p class="tk-kosong">Anda belum punya kiriman. <a href="' . esc_url( tk_url_tambah() ) . '">Tambah tradisi</a></p>' );
+    return $html . ( $daftar ? $daftar : '<p class="tk-kosong">Anda belum punya kiriman. <a href="' . esc_url( tk_url_tambah() ) . '">Mulai berkontribusi</a></p>' );
 }
 
 /**
@@ -220,7 +222,7 @@ function tk_form_render_ubah_kosong( $tamu ) {
 function tk_form_render_pesan() {
     // phpcs:disable WordPress.Security.NonceVerification -- hanya menampilkan pesan.
     if ( isset( $_GET['terkirim'] ) && 'tamu' === $_GET['terkirim'] ) {
-        return '<div class="tk-notice tk-notice--sukses"><strong>Terima kasih!</strong> Kiriman Anda sudah kami terima dan akan ditinjau kurator. Kabar selanjutnya kami kirim ke email Anda.</div>';
+        return '<div class="tk-notice tk-notice--sukses"><strong>Terima kasih atas kontribusi Anda!</strong> Kiriman Anda sudah kami terima dan akan ditinjau kurator. Kabar selanjutnya kami kirim ke email Anda.</div>';
     }
 
     $id = isset( $_GET['tersimpan'] ) ? absint( $_GET['tersimpan'] ) : 0;
@@ -249,7 +251,7 @@ function tk_form_render_pesan() {
         return '<div class="tk-notice tk-notice--sukses"><strong>Perubahan tersimpan.</strong> Kiriman Anda masih menunggu kurasi.</div>';
     }
 
-    return '<div class="tk-notice tk-notice--sukses"><strong>Terima kasih!</strong> Tradisi Anda sudah terkirim dan sedang menunggu kurasi. Statusnya bisa dipantau di bagian "Kiriman Saya".</div>';
+    return '<div class="tk-notice tk-notice--sukses"><strong>Terima kasih atas kontribusi Anda!</strong> Kiriman Anda sudah terkirim dan sedang menunggu kurasi. Statusnya bisa dipantau di bagian "Kiriman Saya".</div>';
 }
 
 /**
@@ -263,10 +265,20 @@ function tk_form_render_info_tamu() {
         : '';
 
     return sprintf(
-        '<div class="tk-notice tk-notice--info">Anda mengirim sebagai <strong>tamu</strong>: cukup isi nama dan email. Ingin menyimpan draf dan memantau status kiriman? <a href="%s">Masuk</a>%s.</div>',
+        '<div class="tk-notice tk-notice--info">Anda mengirim sebagai <strong>tamu</strong>: cukup isi nama dan email. Ingin menyimpan draf dan memantau status kiriman? <a href="%s">Masuk</a>%s. %s</div>',
         esc_url( wp_login_url( get_permalink() ) ),
-        $daftar
+        $daftar,
+        tk_form_teks_panduan()
     );
+}
+
+/**
+ * Kalimat ajakan membaca Panduan Kontribusi (di atas form kiriman baru).
+ *
+ * @return string HTML.
+ */
+function tk_form_teks_panduan() {
+    return sprintf( 'Baru pertama kali? Baca <a href="%s">Panduan Kontribusi</a>.', esc_url( tk_url_panduan() ) );
 }
 
 /**

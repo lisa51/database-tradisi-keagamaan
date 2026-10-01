@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string[] Nama file di assets/css/ (tanpa .css).
  */
 function tk_css_files() {
-    return array( 'base', 'beranda', 'koleksi', 'single', 'peta', 'kontribusi', 'kurasi', 'kontak' );
+    return array( 'base', 'beranda', 'koleksi', 'single', 'peta', 'kontribusi', 'kurasi', 'kontak', 'panduan' );
 }
 
 /**

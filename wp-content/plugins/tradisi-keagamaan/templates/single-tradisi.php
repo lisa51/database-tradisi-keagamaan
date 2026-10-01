@@ -19,7 +19,7 @@
  *   7. Isi artikel
  *   8. Galeri foto
  *   9. Lokasi di peta (kalau koordinat diisi)
- *  10. Kata kunci + sumber referensi
+ *  10. Kata kunci + sumber referensi + kredit foto
  *  10b. Panel Kurator (khusus kurator/admin, lihat includes/kurasi/panel-kurator.php)
  *  11. Tautan "Terkait dengan": "Digunakan dalam Tradisi" / "Budaya Material Terkait"
  *  12. Lihat Juga (otomatis: kategori/provinsi sama)
@@ -159,8 +159,8 @@ while ( have_posts() ) :
       </section>
     <?php endif; ?>
 
-    <?php /* 10. Kata kunci + sumber */ ?>
-    <?php if ( $d['tags'] || $d['sumber'] ) : ?>
+    <?php /* 10. Kata kunci + sumber + kredit foto */ ?>
+    <?php if ( $d['tags'] || $d['sumber'] || $d['kredit'] ) : ?>
       <footer class="tk-single__kaki">
         <?php if ( $d['tags'] ) : ?>
           <div class="tk-single__tags">
@@ -175,6 +175,13 @@ while ( have_posts() ) :
           <p class="tk-single__sumber">
             <?php echo tk_icon( 'link' ); ?>
             <span>Sumber: <a href="<?php echo esc_url( $d['sumber'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $d['sumber'] ); ?></a></span>
+          </p>
+        <?php endif; ?>
+
+        <?php if ( $d['kredit'] ) : ?>
+          <p class="tk-single__sumber">
+            <?php echo tk_icon( 'kamera' ); ?>
+            <span>Kredit foto:<br><?php echo nl2br( esc_html( $d['kredit'] ) ); ?></span>
           </p>
         <?php endif; ?>
       </footer>

@@ -61,7 +61,7 @@ function tk_stats_shortcode() {
         array(
             'angka' => tk_stats_count_provinsi(),
             'label' => 'Provinsi',
-            'ket'   => 'Persebaran tradisi di Indonesia',
+            'ket'   => 'Persebaran koleksi di Indonesia',
             'ikon'  => 'pin',
             'warna' => 'abu',
         ),

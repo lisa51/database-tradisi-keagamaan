@@ -146,7 +146,7 @@ function tk_peta_render( $titik, $opsi = array() ) {
     $opsi = wp_parse_args( $opsi, array( 'tinggi' => 520, 'panel' => true ) );
 
     if ( ! $titik ) {
-        return '<p class="tk-kosong">Belum ada tradisi dengan koordinat peta.</p>';
+        return '<p class="tk-kosong">Belum ada koleksi dengan koordinat peta.</p>';
     }
 
     tk_peta_enqueue();
@@ -157,13 +157,13 @@ function tk_peta_render( $titik, $opsi = array() ) {
       <div class="tk-peta"
            style="height: <?php echo absint( $opsi['tinggi'] ); ?>px"
            data-titik="<?php echo esc_attr( wp_json_encode( $titik ) ); ?>"
-           role="region" aria-label="Peta sebaran tradisi"></div>
+           role="region" aria-label="Peta sebaran koleksi"></div>
 
       <?php if ( $opsi['panel'] ) : ?>
         <aside class="tk-peta-panel" aria-live="polite">
           <span class="tk-label">Peta Digital</span>
-          <h3 class="tk-peta-panel-judul"><?php echo esc_html( number_format_i18n( count( $titik ) ) ); ?> tradisi di peta</h3>
-          <p class="tk-peta-panel-desk">Klik salah satu pin untuk melihat detail tradisi.</p>
+          <h3 class="tk-peta-panel-judul"><?php echo esc_html( number_format_i18n( count( $titik ) ) ); ?> koleksi di peta</h3>
+          <p class="tk-peta-panel-desk">Klik salah satu pin untuk melihat detail koleksi.</p>
         </aside>
       <?php endif; ?>
     </div>

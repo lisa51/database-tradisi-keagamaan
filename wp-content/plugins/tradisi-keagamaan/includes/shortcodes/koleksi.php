@@ -58,7 +58,7 @@ function tk_koleksi_shortcode( $atts ) {
     ?>
     <section class="tk-koleksi" id="koleksi">
       <div class="tk-koleksi-head">
-        <h2>Koleksi Warisan Religi</h2>
+        <h2>Khazanah Keagamaan Nusantara</h2>
         <span class="tk-jumlah-kecil"><?php echo esc_html( $q->post_count ); ?> item tampil</span>
       </div>
 
@@ -195,7 +195,7 @@ function tk_koleksi_render_form( $filter, $total, $url_dasar ) {
       <div class="tk-jelajah-head">
         <div>
           <span class="tk-label">Pencarian Arsip</span>
-          <h2 class="tk-jelajah-judul">Jelajahi Warisan Religi</h2>
+          <h2 class="tk-jelajah-judul">Jelajahi Khazanah</h2>
         </div>
         <span class="tk-jumlah">Menampilkan <?php echo esc_html( number_format_i18n( $total ) ); ?> koleksi</span>
       </div>

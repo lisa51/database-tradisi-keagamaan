@@ -37,6 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     @type string   $fungsi    Fungsi/kegunaan (budaya material).
  *     @type string   $lokasi    Lokasi penyimpanan/keberadaan (budaya material).
  *     @type string   $sumber    URL sumber referensi.
+ *     @type string   $kredit    Kredit foto (pembuat & lisensi), satu baris per foto.
  *     @type int[]    $galeri    Daftar ID gambar galeri.
  *     @type WP_Term[] $tags     Kata kunci.
  *     @type int      $pembaca   Jumlah pembaca.
@@ -58,6 +59,7 @@ function tk_single_get_data( $id ) {
         'lokasi'   => get_post_meta( $id, 'lokasi_keberadaan', true ),
         'tanggal'  => tk_format_tanggal_acf( get_post_meta( $id, 'tanggal_perayaan', true ) ),
         'sumber'   => get_post_meta( $id, 'sumber_referensi', true ),
+        'kredit'   => trim( (string) get_post_meta( $id, 'kredit_foto', true ) ),
         'galeri'   => tk_get_galeri_ids( get_post_meta( $id, 'galeri_foto', true ) ),
         'tags'     => ( $tags && ! is_wp_error( $tags ) ) ? $tags : array(),
         'pembaca'  => tk_get_view_count( $id ),

@@ -4,7 +4,7 @@
  *
  *   Identitas Pengirim (TK_TAMU_GROUP)   khusus tamu: nama, email, instansi, pernyataan.
  *   Formulir Kontributor (TK_FORM_GROUP) foto utama, agama, provinsi, kata kunci.
- *                                        (Kategori ada di grup Detail Tradisi, setelah Jenis.)
+ *                                        (Kategori ada di grup Detail Koleksi, setelah Jenis.)
  *
  * Kedua grup sengaja diberi lokasi post type yang tidak ada ("tk_form_only"),
  * sehingga TIDAK tampil di editor wp-admin (di sana taxonomy & featured image
@@ -79,7 +79,7 @@ function tk_form_register_fields() {
                 'name'     => 'tk_tamu_setuju',
                 'type'     => 'true_false',
                 'required' => 1,
-                'message'  => 'Saya menyatakan informasi yang saya kirim benar, dan bersedia kiriman ini ditinjau serta diterbitkan oleh kurator WARISI.',
+                'message'  => 'Saya menyatakan informasi yang saya kirim benar, foto yang saya unggah milik saya atau bebas digunakan, dan saya bersedia kiriman ini ditinjau serta diterbitkan oleh kurator WARISI.',
             ),
         ),
         'location' => $lokasi_form,
@@ -105,7 +105,7 @@ function tk_form_register_fields() {
                 'name'          => 'foto_utama',
                 'type'          => 'image',
                 'required'      => 1,
-                'instructions'  => 'Foto yang tampil di card dan bagian atas artikel. Gunakan foto milik sendiri atau yang boleh dipakai ulang.',
+                'instructions'  => 'Foto yang tampil di card dan bagian atas artikel. Gunakan foto milik sendiri atau yang bebas digunakan, lalu tulis pembuat & lisensinya di Kredit Foto.',
                 'return_format' => 'id',
                 'library'       => 'uploadedTo',
                 'mime_types'    => 'jpg,jpeg,png,webp',
@@ -157,7 +157,7 @@ function tk_form_register_fields() {
                 'required'   => 1,
                 'wrapper'    => array( 'width' => '50' ),
             ),
-            // Kategori ada di grup Detail Tradisi, setelah "Jenis" (includes/core/acf-fields.php).
+            // Kategori ada di grup Detail Koleksi, setelah "Jenis" (includes/core/acf-fields.php).
             array(
                 'key'          => 'field_tk_form_kata_kunci',
                 'label'        => 'Kata Kunci',

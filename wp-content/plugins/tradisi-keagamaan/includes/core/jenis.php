@@ -7,7 +7,7 @@
  *
  * Keduanya memakai post type "tradisi" yang sama (form, kurasi, peta, filter
  * ikut berlaku). Jenis disimpan di taxonomy "jenis" (untuk filter & hitungan),
- * dan diisi lewat field ACF "Jenis" (jenis_warisan) di grup Detail Tradisi,
+ * dan diisi lewat field ACF "Jenis" (jenis_warisan) di grup Detail Koleksi,
  * supaya field lain bisa tampil/sembunyi mengikuti pilihan (conditional logic).
  * Field itu tidak menyimpan nilainya sendiri: dibaca dari & ditulis ke taxonomy.
  *
@@ -15,7 +15,7 @@
  *
  * KATEGORI PER JENIS
  *   Setiap term "kategori-tradisi" punya jenis (term meta tk_jenis, diisi di
- *   Koleksi → Kategori Tradisi → edit kategori). Di grup Detail Tradisi ada
+ *   Koleksi → Kategori Tradisi → edit kategori). Di grup Detail Koleksi ada
  *   dua field Kategori (satu per jenis) yang tampil mengikuti field "Jenis"
  *   dan hanya berisi kategori jenis itu. Field yang tersembunyi tidak terkirim,
  *   jadi saat jenis diganti, kategori jenis lama ikut terhapus.

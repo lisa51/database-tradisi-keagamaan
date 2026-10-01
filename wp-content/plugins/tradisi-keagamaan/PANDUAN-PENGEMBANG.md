@@ -33,13 +33,14 @@ tradisi-keagamaan/
 │   │   ├── helpers.php            tk_term_names, tk_icon, tk_url_* (URL halaman)
 │   │   ├── post-types.php         Post type "tradisi", taxonomy, template single
 │   │   ├── jenis.php              Jenis: Tradisi / Budaya Material (taxonomy + field ACF)
-│   │   ├── acf-fields.php         Field ACF "Detail Tradisi"
+│   │   ├── acf-fields.php         Field ACF "Detail Koleksi"
 │   │   ├── kabupaten-kota.php     Saran, validasi & penyeragaman Kabupaten/Kota
 │   │   ├── single-data.php        Data untuk templates/single-tradisi.php
 │   │   ├── view-counter.php       Penghitung pembaca
 │   │   ├── assets.php             Font, CSS per fitur, registrasi script peta
 │   │   ├── menu.php               Menu: anchor, item kurator, Masuk/Keluar, ikon
-│   │   └── turnstile.php          Anti-bot Turnstile untuk form WARISI (opsional)
+│   │   ├── turnstile.php          Anti-bot Turnstile untuk form WARISI (opsional)
+│   │   └── footer.php             Footer: lembaga pengelola, tautan, hak cipta
 │   │
 │   ├── akun/                      Pengguna
 │   │   ├── peran.php              Peran & akun sistem "Kontributor Tamu"
@@ -70,13 +71,15 @@ tradisi-keagamaan/
 │       ├── peta.php               [tk_peta]
 │       ├── form-tradisi.php       [tk_form_tradisi]
 │       ├── kurasi.php             [tk_kurasi]
-│       └── kontak.php             [tk_kontak]
+│       ├── kontak.php             [tk_kontak]
+│       └── panduan.php            [tk_panduan_kontribusi]
 │
 ├── templates/
 │   └── single-tradisi.php         Halaman detail tradisi (HTML saja)
 │
 └── assets/
     ├── css/                       Satu file per fitur (lihat bagian 5)
+    ├── img/logo-brin.png          Logo BRIN untuk footer (latar transparan, tulisan putih)
     ├── js/
     │   ├── peta.js                Peta Leaflet, pin gabungan, panel detail
     │   ├── form.js                Tombol "Simpan Draf" (matikan validasi ACF)
@@ -158,7 +161,7 @@ function tk_nama_fungsi( $post_id ) { ... }
 | Kebutuhan | Fungsi | File |
 |---|---|---|
 | Nama term sebuah post | `tk_term_names( $id, $tax, $sep, $limit )` | core/helpers.php |
-| Ikon SVG | `tk_icon( 'pin'\|'gedung'\|'buku'\|'benda'\|'user'\|'mata'\|'link', $size )` | core/helpers.php |
+| Ikon SVG | `tk_icon( 'pin'\|'gedung'\|'buku'\|'benda'\|'kamera'\|'user'\|'mata'\|'link', $size )` | core/helpers.php |
 | Jenis sebuah post | `tk_get_jenis( $id )` (slug); label: `TK_JENIS[ tk_get_jenis( $id ) ]` | core/jenis.php |
 | URL halaman form / dashboard | `tk_url_tambah()`, `tk_url_kurasi()` | core/helpers.php |
 | URL tradisi untuk kurator | `tk_url_tinjau( $id )` (publik atau pratinjau) | core/helpers.php |
@@ -185,7 +188,7 @@ CSS dimuat oleh `core/assets.php` dalam urutan berikut. Semua file bergantung pa
 
 | File | Isi |
 |---|---|
-| `base.css` | **Token** (warna, font, ukuran), dasar, header & menu, komponen bersama: `.tk-btn`, `.tk-btn-kecil`, `.tk-label`, `.tk-pill`, `.tag-pill`, `.tk-status`, `.tk-notice`, `.tk-kosong`, `.tk-koleksi-head`, `.tk-halaman` |
+| `base.css` | **Token** (warna, font, ukuran), dasar, header & menu, footer, komponen bersama: `.tk-btn`, `.tk-btn-kecil`, `.tk-label`, `.tk-pill`, `.tag-pill`, `.tk-status`, `.tk-notice`, `.tk-kosong`, `.tk-koleksi-head`, `.tk-halaman` |
 | `beranda.css` | `[tk_hero]`, `[tk_stats]` |
 | `koleksi.css` | `[tk_koleksi]`: panel Jelajahi, grid, card |
 | `single.css` | Halaman detail tradisi (`.tk-single__*`) |
@@ -193,6 +196,7 @@ CSS dimuat oleh `core/assets.php` dalam urutan berikut. Semua file bergantung pa
 | `kontribusi.css` | `[tk_form_tradisi]`, Kiriman Saya |
 | `kurasi.css` | `[tk_kurasi]`, Panel Kurator, riwayat, checklist |
 | `kontak.css` | `[tk_kontak]` (kotak & input memakai `.tk-form` dari `kontribusi.css`) |
+| `panduan.css` | `[tk_panduan_kontribusi]` |
 | `login.css` | Halaman wp-login.php (dimuat terpisah) |
 
 **Aturan:**
@@ -227,7 +231,7 @@ Dropdown, query, pagination, tombol hapus pencarian, dan lebar kolom menyesuaika
 
 > **Jangan** memakai nama kunci yang sama dengan nama taxonomy (`agama`, `wilayah`, `kategori-tradisi`) atau parameter bawaan WordPress (`s`, `p`, `cat`, `tag`, `page`, `paged`, `name`, `author`, `year`, `m`). WordPress membaca nama itu sendiri, dan Beranda akan berubah menjadi halaman arsip.
 
-### Menambah / mengubah field "Detail Tradisi"
+### Menambah / mengubah field "Detail Koleksi"
 1. Ubah di **ACF → Field Groups**, lalu **ACF → Tools → Generate PHP**.
 2. Ganti isi `acf_add_local_field_group()` di `core/acf-fields.php`, dan pastikan `'key' => TK_DETAIL_GROUP`.
 3. **Jangan** ubah `key` field yang sudah ada.
@@ -290,7 +294,7 @@ Ubah daftar di `tk_setup_roles()` (`akun/peran.php`), lalu **naikkan `TK_ROLES_V
 
 | Meta | Isi | Ditulis oleh |
 |---|---|---|
-| `asal_daerah`, `deskripsi_singkat`, `sistem_penanggalan`, `waktu_pelaksanaan`, `tanggal_perayaan`, `bahan`, `lokasi_keberadaan`, `fungsi`, `terkait`, `sumber_referensi`, `galeri_foto`, `latitude`, `longitude` | Field Detail Tradisi | ACF |
+| `asal_daerah`, `deskripsi_singkat`, `sistem_penanggalan`, `waktu_pelaksanaan`, `tanggal_perayaan`, `bahan`, `lokasi_keberadaan`, `fungsi`, `terkait`, `sumber_referensi`, `galeri_foto`, `kredit_foto`, `latitude`, `longitude` | Field Detail Koleksi | ACF |
 | `foto_utama`, `kata_kunci`, `tk_form_*` | Field form (diubah menjadi featured image, Tags, dan term) | ACF (form) |
 | `tk_tamu_nama`, `tk_tamu_email`, `tk_tamu_instansi`, `tk_tamu_setuju` | Identitas kontributor tamu | ACF (form tamu) |
 | `tk_view_count` | Jumlah pembaca | `core/view-counter.php` |

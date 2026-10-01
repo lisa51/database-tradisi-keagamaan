@@ -66,11 +66,11 @@ function tk_email_ke_kurator( $post_id, $ulang = false ) {
     $usulan = tk_usulan_asal( $post_id );
     if ( $usulan ) {
         $subjek  = ( $ulang ? 'Revisi usulan masuk: ' : 'Usulan perubahan: ' ) . get_the_title( $post_id );
-        $pembuka = 'Kontributor mengusulkan perubahan untuk tradisi yang sudah terbit. Versi terbit tetap tampil sampai usulan disetujui.'
+        $pembuka = 'Kontributor mengusulkan perubahan untuk koleksi yang sudah terbit. Versi terbit tetap tampil sampai usulan disetujui.'
             . "\nVersi terbit: " . get_permalink( $usulan );
     } else {
         $subjek  = ( $ulang ? 'Revisi masuk: ' : 'Kiriman baru: ' ) . get_the_title( $post_id );
-        $pembuka = $ulang ? 'Kontributor sudah mengirim ulang tradisi yang diminta revisi.' : 'Ada tradisi baru yang menunggu kurasi.';
+        $pembuka = $ulang ? 'Kontributor sudah mengirim ulang koleksi yang diminta revisi.' : 'Ada kiriman baru yang menunggu kurasi.';
     }
 
     tk_kirim_email(
@@ -132,30 +132,30 @@ function tk_email_ke_pengirim( $post_id, $jenis, $catatan = '' ) {
 
     switch ( $jenis ) {
         case 'diterima':
-            $subjek = 'Kiriman Anda kami terima: ' . $judul;
-            $isi    = $halo . "Terima kasih. Tradisi \"$judul\" sudah kami terima dan akan ditinjau kurator. Kami akan mengabari Anda lewat email ini.\n";
+            $subjek = 'Terima kasih atas kontribusi Anda: ' . $judul;
+            $isi    = $halo . "Terima kasih atas kontribusi Anda. \"$judul\" sudah kami terima dan akan ditinjau kurator. Kami akan mengabari Anda lewat email ini.\n";
             break;
 
         case 'diterima_ulang':
             $subjek = 'Revisi Anda kami terima: ' . $judul;
-            $isi    = $halo . "Terima kasih. Revisi tradisi \"$judul\" sudah kami terima dan akan ditinjau kembali oleh kurator. Kami akan mengabari Anda lewat email ini.\n";
+            $isi    = $halo . "Terima kasih. Revisi untuk \"$judul\" sudah kami terima dan akan ditinjau kembali oleh kurator. Kami akan mengabari Anda lewat email ini.\n";
             break;
 
         case 'terbitkan':
-            $subjek = 'Tradisi Anda sudah terbit: ' . $judul;
-            $isi    = $halo . "Tradisi \"$judul\" sudah ditinjau kurator dan kini terbit di:\n" . get_permalink( $post_id ) . "\n\nTerima kasih atas kontribusi Anda.\n";
+            $subjek = 'Kontribusi Anda sudah terbit: ' . $judul;
+            $isi    = $halo . "\"$judul\" sudah ditinjau kurator dan kini terbit di:\n" . get_permalink( $post_id ) . "\n\nTerima kasih telah memperkaya khazanah keagamaan Nusantara.\n";
             break;
 
         case 'revisi':
             $subjek = 'Mohon revisi: ' . $judul;
-            $isi    = $halo . "Kurator meminta beberapa perbaikan untuk tradisi \"$judul\":\n\n$catatan\n\n"
+            $isi    = $halo . "Kurator meminta beberapa perbaikan untuk \"$judul\":\n\n$catatan\n\n"
                 . "Silakan perbaiki lalu kirim ulang melalui link berikut:\n" . tk_url_revisi( $post_id ) . "\n"
                 . ( tk_is_kiriman_tamu( $post_id ) ? "\nLink ini bersifat pribadi, jangan dibagikan.\n" : '' );
             break;
 
         case 'tolak':
             $subjek = 'Hasil kurasi: ' . $judul;
-            $isi    = $halo . "Mohon maaf, tradisi \"$judul\" belum dapat kami terbitkan.\n\nAlasan kurator:\n$catatan\n\nTerima kasih atas partisipasi Anda.\n";
+            $isi    = $halo . "Mohon maaf, \"$judul\" belum dapat kami terbitkan.\n\nAlasan kurator:\n$catatan\n\nTerima kasih atas partisipasi Anda.\n";
             break;
 
         default:

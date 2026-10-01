@@ -6,6 +6,7 @@
  *   tk_icon()          Ikon SVG garis (pin, gedung, buku, user, mata, link).
  *   tk_url_tambah()    URL halaman Tambah Tradisi.
  *   tk_url_kurasi()    URL halaman Dashboard Kurasi.
+ *   tk_url_panduan()   URL halaman Panduan Kontribusi.
  *   tk_url_jelajahi()  URL panel pencarian di Beranda (#jelajahi).
  *   tk_url_tinjau()    URL tradisi untuk kurator (publik bila terbit, pratinjau bila belum).
  *   tk_ip_pengunjung() IP pengunjung, juga di belakang proxy Cloudflare.
@@ -64,6 +65,7 @@ function tk_icon( $name, $size = 14 ) {
         'link'   => '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
         'buku'   => '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
         'benda'  => '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/>', // Kotak: budaya material.
+        'kamera' => '<path d="M4 7h3l2-3h6l2 3h3v13H4z"/><circle cx="12" cy="13" r="3.5"/>', // Kredit foto.
 
         // Menu (lihat includes/core/menu.php).
         'rumah'  => '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
@@ -110,6 +112,11 @@ function tk_url_tambah() {
 function tk_url_ubah( $post_id = 0 ) {
     $url = tk_url_halaman( TK_SLUG_UBAH );
     return $post_id ? add_query_arg( 'edit', absint( $post_id ), $url ) : $url;
+}
+
+/** URL halaman "Panduan Kontribusi". */
+function tk_url_panduan() {
+    return tk_url_halaman( TK_SLUG_PANDUAN );
 }
 
 /** URL halaman "Dashboard Kurasi". */

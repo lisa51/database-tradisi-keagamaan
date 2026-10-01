@@ -124,6 +124,7 @@ function tk_kelengkapan( $post_id ) {
         'Kabupaten/kota'                      => '' !== trim( (string) get_post_meta( $post_id, 'asal_daerah', true ) ),
         'Provinsi'                            => '' !== tk_term_names( $post_id, 'wilayah' ),
         'Kategori'                            => '' !== tk_term_names( $post_id, 'kategori-tradisi' ),
+        'Kredit foto'                         => '' !== trim( (string) get_post_meta( $post_id, 'kredit_foto', true ) ),
         'Koordinat'                           => function_exists( 'tk_peta_get_koordinat' ) && null !== tk_peta_get_koordinat( $post_id ),
     );
 }
