@@ -221,14 +221,9 @@ function tk_form_guard( $post_id ) {
  * Batasi jumlah kiriman tamu per jam per alamat IP.
  */
 function tk_form_batasi_tamu() {
-    $ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-    $kunci = 'tk_tamu_' . md5( $ip );
-    $hitung = (int) get_transient( $kunci );
-
-    if ( $hitung >= TK_TAMU_BATAS_PER_JAM ) {
+    if ( ! tk_batas_per_ip( 'tk_tamu', TK_TAMU_BATAS_PER_JAM ) ) {
         wp_die( 'Terlalu banyak kiriman dari jaringan Anda. Silakan coba lagi dalam satu jam.', 429 );
     }
-    set_transient( $kunci, $hitung + 1, HOUR_IN_SECONDS );
 }
 
 add_filter( 'acf/validate_value', 'tk_form_validasi_draf', 20, 3 );

@@ -86,7 +86,7 @@ function tk_kontak_proses() {
         $galat[]  = $lampiran;
         $lampiran = null;
     }
-    if ( ! $galat && ! tk_kontak_cek_batas() ) {
+    if ( ! $galat && ! tk_batas_per_ip( 'tk_kontak', TK_KONTAK_BATAS_PER_JAM ) ) {
         $galat[] = 'Terlalu banyak pesan dari jaringan Anda. Silakan coba lagi dalam satu jam.';
     }
     if ( ! $galat && ! tk_kontak_kirim( $data, $lampiran ) ) {
@@ -178,23 +178,6 @@ function tk_kontak_validasi( $data ) {
         $galat[] = 'Pesan terlalu pendek (minimal 10 karakter).';
     }
     return $galat;
-}
-
-/**
- * Batasi jumlah pesan per jam per alamat IP.
- *
- * @return bool false bila batas terlampaui.
- */
-function tk_kontak_cek_batas() {
-    $ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-    $kunci  = 'tk_kontak_' . md5( $ip );
-    $hitung = (int) get_transient( $kunci );
-
-    if ( $hitung >= TK_KONTAK_BATAS_PER_JAM ) {
-        return false;
-    }
-    set_transient( $kunci, $hitung + 1, HOUR_IN_SECONDS );
-    return true;
 }
 
 /**

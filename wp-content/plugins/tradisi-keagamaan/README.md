@@ -276,6 +276,7 @@ Semua ada di **`includes/config.php`**:
 | `TK_KONTAK_BATAS_PER_JAM` | `3` | Batas pesan Hubungi Kami per jam per IP |
 | `TK_KONTAK_LAMPIRAN_MAKS_MB` | `5` | Ukuran maksimum lampiran Hubungi Kami |
 | `TK_KONTAK_LAMPIRAN_TIPE` | jpg, png, pdf, docx | Format lampiran yang diizinkan |
+| `TK_CLOUDFLARE_IP` | daftar IP Cloudflare | Proxy yang dipercaya untuk membaca IP asli pengunjung (batas per IP) |
 | `TK_ROLES_VERSION` | `2` | Naikkan bila hak akses peran diubah |
 | `TK_FONTS_URL` | Google Fonts | Sumber font |
 | `TK_LEAFLET_VERSI` | `1.9.4` | Versi Leaflet dari CDN |

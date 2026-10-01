@@ -8,6 +8,8 @@
  *   tk_url_kurasi()    URL halaman Dashboard Kurasi.
  *   tk_url_jelajahi()  URL panel pencarian di Beranda (#jelajahi).
  *   tk_url_tinjau()    URL tradisi untuk kurator (publik bila terbit, pratinjau bila belum).
+ *   tk_ip_pengunjung() IP pengunjung, juga di belakang proxy Cloudflare.
+ *   tk_batas_per_ip()  Batas jumlah kiriman per jam per IP (anti-spam).
  *
  * @package TradisiKeagamaan
  */
@@ -147,4 +149,90 @@ function tk_url_tinjau( $post_id ) {
     return 'publish' === get_post_status( $post_id )
         ? get_permalink( $post_id )
         : get_preview_post_link( $post_id );
+}
+
+/**
+ * Alamat IP pengunjung.
+ *
+ * Di belakang proxy Cloudflare, REMOTE_ADDR berisi IP Cloudflare (sama untuk
+ * banyak pengunjung), sehingga IP asli diambil dari header CF-Connecting-IP.
+ * Header itu hanya dipercaya bila permintaan memang datang dari IP Cloudflare
+ * (TK_CLOUDFLARE_IP), karena siapa pun bisa mengirim header palsu.
+ *
+ * @return string IP, atau '' bila tidak diketahui.
+ */
+function tk_ip_pengunjung() {
+    $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+    if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) && tk_ip_cloudflare( $ip ) ) {
+        $asli = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_CONNECTING_IP'] ) );
+        if ( filter_var( $asli, FILTER_VALIDATE_IP ) ) {
+            return $asli;
+        }
+    }
+    return filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
+}
+
+/**
+ * Apakah IP ini milik proxy Cloudflare?
+ *
+ * @param string $ip
+ * @return bool
+ */
+function tk_ip_cloudflare( $ip ) {
+    foreach ( TK_CLOUDFLARE_IP as $rentang ) {
+        if ( tk_ip_dalam_rentang( $ip, $rentang ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Apakah IP berada dalam rentang CIDR (IPv4 atau IPv6), mis. "104.16.0.0/13"?
+ *
+ * @param string $ip
+ * @param string $cidr
+ * @return bool
+ */
+function tk_ip_dalam_rentang( $ip, $cidr ) {
+    list( $subnet, $bit ) = explode( '/', $cidr );
+    if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+        return false;
+    }
+    $ip_bin     = inet_pton( $ip );
+    $subnet_bin = inet_pton( $subnet );
+    if ( strlen( $ip_bin ) !== strlen( $subnet_bin ) ) {
+        return false; // IPv4 vs IPv6.
+    }
+
+    $bit   = (int) $bit;
+    $penuh = intdiv( $bit, 8 ); // Byte yang harus sama persis.
+    $sisa  = $bit % 8;          // Bit di byte berikutnya.
+    if ( substr( $ip_bin, 0, $penuh ) !== substr( $subnet_bin, 0, $penuh ) ) {
+        return false;
+    }
+    if ( ! $sisa ) {
+        return true;
+    }
+    $mask = chr( ( 0xff << ( 8 - $sisa ) ) & 0xff );
+    return ( $ip_bin[ $penuh ] & $mask ) === ( $subnet_bin[ $penuh ] & $mask );
+}
+
+/**
+ * Hitung satu kiriman dari IP pengunjung dan periksa batas per jam.
+ *
+ * @param string $awalan Nama penghitung, mis. 'tk_tamu' atau 'tk_kontak'.
+ * @param int    $batas  Jumlah maksimum per jam.
+ * @return bool false bila batas sudah terlampaui (kiriman tidak dihitung).
+ */
+function tk_batas_per_ip( $awalan, $batas ) {
+    $kunci  = $awalan . '_' . md5( tk_ip_pengunjung() );
+    $hitung = (int) get_transient( $kunci );
+
+    if ( $hitung >= $batas ) {
+        return false;
+    }
+    set_transient( $kunci, $hitung + 1, HOUR_IN_SECONDS );
+    return true;
 }

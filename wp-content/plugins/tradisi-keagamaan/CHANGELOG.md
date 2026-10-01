@@ -2,6 +2,12 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.10.2 (1 Oktober 2026): Batas per IP di belakang Cloudflare
+
+**Diperbaiki**
+- Batas kiriman tamu & pesan Hubungi Kami per IP kini memakai IP asli pengunjung bila situs di belakang proxy Cloudflare (header `CF-Connecting-IP`, hanya dipercaya dari rentang IP Cloudflare `TK_CLOUDFLARE_IP` di config.php). Sebelumnya semua pengunjung terbaca sebagai IP Cloudflare dan berbagi satu batas.
+- Penghitung kedua form disatukan di `tk_batas_per_ip()` (`includes/core/helpers.php`); `tk_kontak_cek_batas()` dihapus.
+
 ## 2.10.1 (30 September 2026): Bersih-bersih kode
 
 **Diubah**

@@ -1,3 +1,4 @@
+
 # Panduan Pengembang: Plugin WARISI
 
 Panduan untuk siapa pun yang akan membaca, mengubah, atau menambah kode plugin ini. Untuk cara pakai fitur, lihat [README.md](README.md).
@@ -161,6 +162,7 @@ function tk_nama_fungsi( $post_id ) { ... }
 | Jenis sebuah post | `tk_get_jenis( $id )` (slug); label: `TK_JENIS[ tk_get_jenis( $id ) ]` | core/jenis.php |
 | URL halaman form / dashboard | `tk_url_tambah()`, `tk_url_kurasi()` | core/helpers.php |
 | URL tradisi untuk kurator | `tk_url_tinjau( $id )` (publik atau pratinjau) | core/helpers.php |
+| IP pengunjung / batas per IP | `tk_ip_pengunjung()`, `tk_batas_per_ip( $awalan, $batas )` | core/helpers.php |
 | Semua data satu tradisi | `tk_single_get_data( $id )` | core/single-data.php |
 | ID gambar galeri (Image/Gallery) | `tk_get_galeri_ids( $value )` | core/single-data.php |
 | Jumlah pembaca | `tk_get_view_count( $id )` | core/view-counter.php |
@@ -274,7 +276,7 @@ Option WordPress: `tk_roles_version`, `tk_user_tamu`, `tk_penanda_kurator_v1`.
 
 | Titik | Perlindungan |
 |---|---|
-| Form depan | Nonce & honeypot ACF; izin dicek ulang di `tk_form_guard()`; status tidak pernah langsung `publish`; uploader "basic" (tanpa Media Library); batas kiriman tamu per IP |
+| Form depan | Nonce & honeypot ACF; izin dicek ulang di `tk_form_guard()`; status tidak pernah langsung `publish`; uploader "basic" (tanpa Media Library); batas kiriman tamu per IP (`tk_batas_per_ip()`, IP asli di belakang Cloudflare) |
 | Revisi tamu | Token acak 32 karakter, dibandingkan dengan `hash_equals()`, hanya berlaku selama status draf |
 | Aksi kurasi | POST ke `admin-post.php`, nonce per tradisi, cek `tk_kurasi` + `edit_post`, cek aksi sah untuk status saat ini |
 | Output | Semua di-escape; peta memakai `textContent` di JS |
