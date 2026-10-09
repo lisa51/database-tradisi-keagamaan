@@ -98,6 +98,10 @@ Langkah lengkap, termasuk pengaturan menu, ada di README plugin.
 
 WARISI dikembangkan dengan metode **Agile** dan kerangka kerja **Scrum**. Pengembangan berjalan secara berulang dan bertahap, dengan fokus pada kolaborasi antar-*stakeholder* dan adaptasi terhadap perubahan kebutuhan, sehingga konten dan fungsionalitasnya terus berkembang.
 
+## Lisensi
+
+Kode plugin WARISI dirilis di bawah lisensi [GNU General Public License v2.0 atau versi setelahnya](LICENSE) (GPL-2.0-or-later). Tema dan plugin pihak ketiga di repositori ini mengikuti lisensinya masing-masing.
+
 ---
 
 Dikelola oleh Pusat Riset Khazanah Keagamaan dan Peradaban · OR Arkeologi, Bahasa, dan Sastra · BRIN.
