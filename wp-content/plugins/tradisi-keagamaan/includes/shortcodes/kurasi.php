@@ -267,7 +267,8 @@ function tk_kurasi_render_massal( $f ) {
           <option value="<?php echo esc_attr( $k ); ?>"><?php echo esc_html( $label ); ?></option>
         <?php endforeach; ?>
       </select>
-      <textarea name="catatan" rows="1" placeholder="Catatan (wajib untuk Kembalikan ke Antrean, Minta Revisi, Tolak; dikirim ke pengirim)"></textarea>
+      <label for="tk-massal-catatan" class="screen-reader-text">Catatan</label>
+      <textarea id="tk-massal-catatan" name="catatan" rows="1" placeholder="Catatan (wajib untuk Kembalikan ke Antrean, Minta Revisi, Tolak; dikirim ke pengirim)"></textarea>
       <button type="submit" class="tk-btn-kecil tk-btn-kecil--terbit">Terapkan</button>
     </form>
     <?php

@@ -59,3 +59,5 @@ Thumbs.db
 wp-content/themes/twentytwentyfive/
 wp-content/themes/twentytwentyfour/
 wp-content/themes/twentytwentythree/
+# Terjemahan WordPress (dikelola WP lewat Dashboard → Updates)
+wp-content/languages/

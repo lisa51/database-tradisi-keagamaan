@@ -11,7 +11,7 @@
   }
 
   input.addEventListener( 'change', function () {
-    var maks = parseInt( input.getAttribute( 'data-maks' ), 10 );
+    var maks = Number.parseInt( input.getAttribute( 'data-maks' ), 10 );
     var file = input.files && input.files[0];
 
     if ( file && maks && file.size > maks ) {

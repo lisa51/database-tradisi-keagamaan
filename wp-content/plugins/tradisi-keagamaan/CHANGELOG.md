@@ -2,6 +2,16 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.14.1 (9 Oktober 2026): Lisensi & temuan SonarQube
+
+**Diubah**
+- Header plugin mencantumkan lisensi **GPL-2.0-or-later** (sama dengan file `LICENSE` di root repositori).
+- Kunci penghitung batas per IP (`tk_batas_per_ip()`) memakai `wp_hash()` (HMAC dengan salt situs), bukan `md5()`. Penghitung yang sedang berjalan mulai dari nol sekali setelah pembaruan.
+- `kontak.js`: `Number.parseInt` menggantikan `parseInt`.
+
+**Diperbaiki**
+- Kolom Catatan di aksi massal Dashboard Kurasi kini punya `<label>` (tersembunyi, untuk pembaca layar).
+
 ## 2.14.0 (2 Oktober 2026): Tombol Bagikan & ikon situs
 
 **Baru**

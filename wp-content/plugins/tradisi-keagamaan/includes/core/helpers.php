@@ -237,7 +237,7 @@ function tk_ip_dalam_rentang( $ip, $cidr ) {
  * @return bool false bila batas sudah terlampaui (kiriman tidak dihitung).
  */
 function tk_batas_per_ip( $awalan, $batas ) {
-    $kunci  = $awalan . '_' . md5( tk_ip_pengunjung() );
+    $kunci  = $awalan . '_' . wp_hash( tk_ip_pengunjung() );
     $hitung = (int) get_transient( $kunci );
 
     if ( $hitung >= $batas ) {
