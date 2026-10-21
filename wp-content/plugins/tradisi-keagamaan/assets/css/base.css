@@ -213,6 +213,19 @@ a:hover { color: var(--tk-accent-gelap); }
    5. Komponen bersama
    ============================================================================= */
 
+/* --- Kotak foto ber-aspect-ratio (.tk-media-cover) -------------------------
+   Foto absolut: foto potret tidak ikut memanjangkan kotak (min-height:auto
+   bawaan aspect-ratio). Rasio diatur di kelas kotaknya masing-masing. */
+.tk-media-cover { position: relative; overflow: hidden; }
+.tk-media-cover > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* --- Tombol besar (.tk-btn) ------------------------------------------------ */
 .tk-btn {
   display: inline-flex;

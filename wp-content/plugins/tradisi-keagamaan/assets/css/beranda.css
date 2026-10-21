@@ -78,29 +78,86 @@
 .tk-dot-emas   { background: var(--tk-emas); }
 .tk-dot-oranye { background: var(--tk-accent); }
 
-/* Kartu tradisi unggulan (kanan) */
-.tk-hero-kartu {
-  display: block;
+/* Slideshow koleksi terbaru (kanan). Bingkai miring di .tk-hero-slider;
+   jalur slide memakai scroll-snap (bisa digeser), hero.js mengatur putarnya. */
+.tk-hero-slider {
+  min-width: 0;
   padding: 10px;
   border: 1px solid var(--tk-garis);
   border-radius: 18px;
   background: #fff;
-  color: inherit;
-  text-decoration: none;
   box-shadow: var(--tk-bayangan-besar);
   transform: rotate(1deg);
   transition: transform .25s;
 }
-.tk-hero-kartu:hover { transform: rotate(0) translateY(-3px); }
+.tk-hero-slider:hover,
+.tk-hero-slider:focus-within { transform: rotate(0) translateY(-3px); }
+.tk-hero-slides {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  border-radius: var(--tk-radius);
+}
+.tk-hero-slides::-webkit-scrollbar { display: none; }
+.tk-hero-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.tk-hero-kartu {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Navigasi: ‹ titik-titik › */
+.tk-hero-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+}
+.tk-hero-nav[hidden] { display: none; }
+.tk-hero-panah {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--tk-garis);
+  border-radius: 50%;
+  background: #fff;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--tk-teks);
+  cursor: pointer;
+}
+.tk-hero-panah:hover,
+.tk-hero-panah:focus-visible { border-color: var(--tk-accent); color: var(--tk-accent); }
+.tk-hero-titik { display: flex; gap: 6px; }
+.tk-hero-titik button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--tk-garis);
+  cursor: pointer;
+  transition: width .25s, background .25s;
+}
+.tk-hero-titik button[aria-current="true"] { width: 20px; background: var(--tk-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-hero-slides { scroll-behavior: auto; }
+}
+/* Foto: .tk-media-cover (base.css). */
 .tk-hero-media {
-  position: relative;
   aspect-ratio: 4 / 3.2;
-  overflow: hidden;
   border-radius: var(--tk-radius);
   background: var(--tk-krem-tua);
   line-height: 0;
 }
-.tk-hero-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tk-hero-overlay {
   position: absolute;
   left: 0;
@@ -206,7 +263,7 @@
    ============================================================================= */
 @media (max-width: 900px) {
   .tk-hero       { grid-template-columns: 1fr; gap: 32px; }
-  .tk-hero-kartu { transform: none; }
+  .tk-hero-slider { transform: none; }
 }
 
 @media (max-width: 600px) {

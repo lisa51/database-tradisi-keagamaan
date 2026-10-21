@@ -103,13 +103,24 @@ function tk_kabkota_provinsi_dikirim() {
     // phpcs:enable
 
     foreach ( array_filter( array_map( 'absint', $ids ) ) as $id ) {
-        $induk = get_ancestors( $id, 'wilayah', 'taxonomy' );
-        $term  = get_term( $induk ? end( $induk ) : $id, 'wilayah' );
-        if ( $term && ! is_wp_error( $term ) ) {
-            return $term->name;
+        $nama = tk_wilayah_provinsi( $id );
+        if ( $nama ) {
+            return $nama;
         }
     }
     return '';
+}
+
+/**
+ * Nama provinsi (term "wilayah" level teratas) dari sebuah term wilayah.
+ *
+ * @param int $term_id Term provinsi atau turunannya.
+ * @return string Nama provinsi, atau ''.
+ */
+function tk_wilayah_provinsi( $term_id ) {
+    $induk = get_ancestors( $term_id, 'wilayah', 'taxonomy' );
+    $term  = get_term( $induk ? end( $induk ) : $term_id, 'wilayah' );
+    return ( $term && ! is_wp_error( $term ) ) ? $term->name : '';
 }
 
 add_filter( 'acf/validate_value/name=asal_daerah', 'tk_kabkota_validasi', 10, 2 );

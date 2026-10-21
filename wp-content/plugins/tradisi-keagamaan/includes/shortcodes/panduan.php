@@ -28,15 +28,16 @@ function tk_panduan_shortcode() {
     $url_daftar  = get_option( 'users_can_register' ) ? wp_registration_url() : '';
 
     $bagian = array(
-        'apa'     => 'Koleksi yang dapat dikirim',
-        'cara'    => 'Dua cara berkontribusi',
-        'langkah' => 'Langkah pengiriman',
-        'isian'   => 'Isian dan kelengkapan',
-        'foto'    => 'Ketentuan foto',
-        'lisensi' => 'Hak cipta dan lisensi foto',
-        'kurasi'  => 'Proses kurasi',
-        'ubah'    => 'Mengubah koleksi yang telah terbit',
-        'etika'   => 'Etika berkontribusi',
+        'apa'      => 'Koleksi yang dapat dikirim',
+        'kategori' => 'Kategori koleksi',
+        'cara'     => 'Dua cara berkontribusi',
+        'langkah'  => 'Langkah pengiriman',
+        'isian'    => 'Isian dan kelengkapan',
+        'foto'     => 'Ketentuan foto',
+        'lisensi'  => 'Hak cipta dan lisensi foto',
+        'kurasi'   => 'Proses kurasi',
+        'ubah'     => 'Mengubah koleksi yang telah terbit',
+        'etika'    => 'Etika berkontribusi',
     );
 
     ob_start();
@@ -75,6 +76,27 @@ function tk_panduan_shortcode() {
         </div>
       </section>
 
+      <section id="kategori" class="tk-panduan__bagian">
+        <h2><?php echo esc_html( $bagian['kategori'] ); ?></h2>
+        <p>Setiap koleksi diberi satu kategori atau lebih sesuai jenisnya. Pilih semua kategori yang sesuai.</p>
+        <div class="tk-panduan__kartu-grup">
+          <?php foreach ( array( 'tradisi' => 'buku', 'budaya-material' => 'benda' ) as $jenis => $ikon ) : ?>
+            <div class="tk-panduan__kartu">
+              <h3><?php echo tk_icon( $ikon, 18 ); // phpcs:ignore WordPress.Security.EscapeOutput -- SVG statis. ?> <?php echo esc_html( TK_JENIS[ $jenis ] ); ?></h3>
+              <dl class="tk-panduan__kategori">
+                <?php foreach ( tk_panduan_kategori( $jenis ) as $term ) : ?>
+                  <dt><?php echo esc_html( $term->name ); ?></dt>
+                  <?php if ( $term->description ) : ?>
+                    <dd><?php echo esc_html( $term->description ); ?></dd>
+                  <?php endif; ?>
+                <?php endforeach; ?>
+              </dl>
+            </div>
+          <?php endforeach; ?>
+        </div>
+        <p class="tk-panduan__contoh">Rujukan: Catherine Bell, <em>Ritual: Perspectives and Dimensions</em> (Oxford University Press, 1997); Pooyan Tamimi Arab, Jennifer Scheper Hughes &amp; S. Brent Rodríguez-Plate (ed.), <em>The Routledge Handbook of Material Religion</em> (Routledge, 2024); Tracy Pintchman &amp; Corinne G. Dempsey, <em>Sacred Matters: Material Religion in South Asian Traditions</em> (State University of New York Press, 2015).</p>
+      </section>
+
       <section id="cara" class="tk-panduan__bagian">
         <h2><?php echo esc_html( $bagian['cara'] ); ?></h2>
         <div class="tk-panduan__kartu-grup">
@@ -105,9 +127,9 @@ function tk_panduan_shortcode() {
         <ol class="tk-panduan__langkah">
           <li><strong>Siapkan bahan.</strong> Persiapkan tulisan, foto, sumber rujukan, serta keterangan lokasi (provinsi dan kabupaten/kota).</li>
           <li><strong>Buka halaman <a href="<?php echo esc_url( $url_kirim ); ?>">Kontribusi Koleksi</a>.</strong> Pengirim tanpa akun mengisi nama dan alamat email terlebih dahulu.</li>
-          <li><strong>Pilih jenis, kemudian kategori.</strong> Pilihan kategori akan menyesuaikan jenis yang dipilih.</li>
+          <li><strong>Pilih jenis, kemudian kategori.</strong> Pilihan kategori akan menyesuaikan jenis yang dipilih. Lihat <a href="#kategori">penjelasan setiap kategori</a>.</li>
           <li><strong>Isi nama, abstrak, dan isi artikel.</strong> Untuk tradisi, uraikan sejarah, makna, dan tata caranya. Untuk budaya material, uraikan asal-usul, wujud, dan maknanya.</li>
-          <li><strong>Lengkapi lokasi.</strong> Isi provinsi dan kabupaten/kota (pilih dari saran yang muncul). Apabila diketahui, isi juga koordinat agar koleksi tampil di peta.</li>
+          <li><strong>Lengkapi lokasi.</strong> Isi provinsi dan kabupaten/kota (pilih dari saran yang muncul). Titik di peta ditentukan otomatis dari lokasi ini.</li>
           <li><strong>Unggah foto.</strong> Unggah satu foto utama dan, apabila ada, foto pendukung lainnya. Pastikan seluruh foto <a href="#lisensi">bebas digunakan</a>.</li>
           <li><strong>Cantumkan sumber.</strong> Tuliskan tautan rujukan utama pada isian Sumber Referensi, daftar pustaka atau narasumber di bagian akhir isi artikel, serta pembuat dan lisensi foto pada isian Kredit Foto.</li>
           <li><strong>Klik "Kirim untuk Dikurasi".</strong> Pengguna akun juga dapat memilih "Simpan Draf" untuk melanjutkannya di lain waktu. Setelah terkirim, Anda akan menerima email konfirmasi.</li>
@@ -219,6 +241,22 @@ function tk_panduan_shortcode() {
 }
 
 /**
+ * Kategori satu jenis untuk bagian "Kategori koleksi" (nama + keterangan
+ * dari Koleksi → Kategori Tradisi), urut abjad.
+ *
+ * @param string $jenis Slug dari TK_JENIS.
+ * @return WP_Term[]
+ */
+function tk_panduan_kategori( $jenis ) {
+    $ids = tk_kategori_ids_jenis( $jenis );
+    if ( ! $ids ) {
+        return array();
+    }
+    $terms = get_terms( array( 'taxonomy' => 'kategori-tradisi', 'include' => $ids, 'hide_empty' => false, 'orderby' => 'name' ) );
+    return is_wp_error( $terms ) ? array() : $terms;
+}
+
+/**
  * Baris tabel isian: nama, keterangan, status (Wajib / Dianjurkan / Opsional).
  * "Dianjurkan" = masuk checklist kelengkapan kurator (tk_kelengkapan()).
  *
@@ -232,10 +270,9 @@ function tk_panduan_isian() {
         array( 'Foto utama', 'Ditampilkan pada kartu dan bagian atas halaman.', 'Wajib' ),
         array( 'Abstrak', 'Ringkasan sepanjang dua sampai tiga kalimat.', 'Dianjurkan' ),
         array( 'Isi artikel', 'Minimal ' . TK_MIN_KATA_ISI . ' kata.', 'Dianjurkan' ),
-        array( 'Kabupaten/kota', 'Dipilih dari saran yang muncul saat mengetik.', 'Dianjurkan' ),
+        array( 'Kabupaten/kota', 'Dipilih dari saran yang muncul saat mengetik. Menentukan titik koleksi di peta.', 'Dianjurkan' ),
         array( 'Sumber referensi', 'Satu tautan (URL) rujukan utama. Rujukan berupa buku, artikel, atau wawancara dituliskan di bagian akhir isi artikel.', 'Dianjurkan' ),
         array( 'Kredit foto', 'Pembuat dan lisensi setiap foto, satu baris untuk setiap foto.', 'Dianjurkan' ),
-        array( 'Koordinat', 'Garis lintang (latitude) dan garis bujur (longitude), agar koleksi tampil di peta.', 'Dianjurkan' ),
         array( 'Foto tambahan', 'Hingga ' . TK_GALERI_MAKS . ' foto pendukung untuk Galeri Foto.', 'Opsional' ),
         array( 'Kata kunci', 'Dipisahkan dengan koma, misalnya: kremasi, Hindu Bali.', 'Opsional' ),
     );

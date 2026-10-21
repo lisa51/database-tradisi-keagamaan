@@ -276,7 +276,7 @@ function tk_koleksi_render_kartu( $id ) {
     ob_start();
     ?>
     <article class="tk-kartu">
-      <a class="tk-kartu-media" href="<?php echo esc_url( $link ); ?>">
+      <a class="tk-kartu-media tk-media-cover" href="<?php echo esc_url( $link ); ?>">
         <?php echo get_the_post_thumbnail( $id, 'medium_large', array( 'loading' => 'lazy' ) ); ?>
         <?php if ( $kategori ) : ?>
           <span class="tk-badge-kat"><?php echo esc_html( $kategori ); ?></span>

@@ -85,7 +85,7 @@ Peran **Kontributor**, **Kontributor Tamu**, dan **Kurator**, serta akun sistem 
 | ACF | `terkait` | Relationship dua arah (ACF bidirectional): "Digunakan dalam Tradisi" / "Budaya Material Terkait" di halaman detail |
 | ACF | `sumber_referensi` | URL |
 | ACF | `galeri_foto` | Gallery (ACF Pro), maks. 12 foto. Diatur kurator di wp-admin; dari form depan lewat "Foto Tambahan" |
-| ACF | `latitude`, `longitude` | Number: titik peta. Kosong = tidak tampil di peta |
+| ACF | `latitude`, `longitude` | Number: titik peta. Diisi otomatis dari Kabupaten/Kota atau Provinsi (`includes/core/koordinat.php`); kosong = tidak tampil di peta |
 | Meta | `tk_view_count` | Jumlah pembaca (otomatis; kurator/admin & pratinjau tidak dihitung) |
 
 Meta alur kurasi (identitas tamu, riwayat, catatan, token) dijelaskan di [PANDUAN-PENGEMBANG.md](PANDUAN-PENGEMBANG.md#post-meta).
@@ -100,7 +100,7 @@ Tulis shortcode di block **Shortcode** (bukan Paragraph), dengan tanda kutip lur
 
 ```
 [tk_hero]
-[tk_hero id="62"]
+[tk_hero jumlah="3"]
 [tk_hero judul="..." deskripsi="..." label="..."]
 ```
 
@@ -109,7 +109,7 @@ Tulis shortcode di block **Shortcode** (bukan Paragraph), dengan tanda kutip lur
 | `label` | Database Digital Khazanah Keagamaan Indonesia | Teks kecil di atas judul |
 | `judul` | Merawat Khazanah Keagamaan Nusantara | Judul besar |
 | `deskripsi` | Telusuri tradisi dan benda budaya keagamaan ... | Paragraf |
-| `id` | otomatis | ID koleksi unggulan. Kosong = pembaca terbanyak |
+| `jumlah` | 5 | Banyak slide (1–10) di slideshow kanan: koleksi terbit terbaru |
 
 ### `[tk_stats]`: empat kotak angka
 
@@ -137,7 +137,8 @@ Tanpa atribut. Menghitung tradisi terbit, budaya material terbit (term `jenis`),
 - Pin untuk setiap tradisi yang punya koordinat. Klik pin → detail di panel kanan (di HP, di bawah peta).
 - Tradisi dengan koordinat sama (±11 m) digabung jadi **pin cokelat berangka**; klik untuk melihat daftarnya.
 - Halaman detail tradisi otomatis menampilkan peta kecil bila koordinat ada.
-- **Mengisi koordinat:** buka Google Maps, klik kanan lokasi, klik angka koordinat untuk menyalin (contoh `-8.4095, 115.1889`). Angka pertama → **Latitude**, kedua → **Longitude**. Sebisa mungkin isi **lokasi upacara**, bukan pusat kota.
+- **Koordinat otomatis:** saat koleksi disimpan, Latitude/Longitude diisi titik ibu kota Kabupaten/Kota (bila kosong, ibu kota Provinsi), data `includes/data/koordinat-wilayah.php`. Di form depan field ini tidak tampil. Titik ikut berubah bila lokasi diganti, kecuali koordinat diisi sendiri di wp-admin.
+- **Titik lebih tepat (kurator, wp-admin):** buka Google Maps, klik kanan lokasi, klik angka koordinat untuk menyalin (contoh `-8.4095, 115.1889`). Angka pertama → **Latitude**, kedua → **Longitude**. Sebisa mungkin isi **lokasi upacara**, bukan pusat kota.
 
 ### `[tk_kontak]`: form Hubungi Kami
 

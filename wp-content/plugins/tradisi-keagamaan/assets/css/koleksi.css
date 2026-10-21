@@ -91,15 +91,13 @@
   transform: translateY(-2px);
 }
 
-/* Gambar + badge di atasnya */
+/* Gambar + badge di atasnya. Foto: .tk-media-cover (base.css). */
 .tk-kartu-media {
-  position: relative;
   display: block;
   aspect-ratio: 4 / 3;
   background: var(--tk-krem-tua);
   line-height: 0;
 }
-.tk-kartu-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tk-badge-kat,
 .tk-badge-jenis {
   position: absolute;

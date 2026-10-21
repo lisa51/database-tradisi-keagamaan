@@ -97,6 +97,12 @@
 .tk-panduan__kartu p:last-child { margin-bottom: 0; }
 .tk-panduan__contoh { font-size: 14px; color: var(--tk-abu); }
 
+/* Daftar kategori per jenis: nama tebal, keterangan abu di bawahnya */
+.tk-panduan__kategori    { margin: 0; }
+.tk-panduan__kategori dt { margin-top: 12px; font-weight: 700; color: var(--tk-teks); }
+.tk-panduan__kategori dt:first-child { margin-top: 0; }
+.tk-panduan__kategori dd { margin: 2px 0 0; font-size: 14px; line-height: 1.5; color: var(--tk-abu); }
+
 /* Hak cipta: kartu boleh (hijau) & jangan (merah) */
 .tk-panduan__kartu--boleh  { border-top: 4px solid var(--tk-hijau); }
 .tk-panduan__kartu--larang { border-top: 4px solid var(--tk-merah); }

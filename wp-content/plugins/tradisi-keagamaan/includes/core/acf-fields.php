@@ -34,6 +34,8 @@
  *   longitude          number       Garis bujur titik peta (Indonesia: ±95 s.d. 141).
  *                                   Keduanya dipakai [tk_peta] dan peta di
  *                                   halaman single. Kosong = tidak tampil di peta.
+ *                                   Diisi otomatis dari lokasi & disembunyikan di form
+ *                                   depan (includes/core/koordinat.php).
  *
  * CARA MEMPERBARUI:
  *   1. Ubah field lewat menu ACF → Field Groups.
@@ -91,7 +93,7 @@ function tk_register_acf_fields() {
         'type'          => 'taxonomy',
         'taxonomy'      => 'kategori-tradisi',
         'field_type'    => 'checkbox',
-        'instructions'  => 'Boleh memilih lebih dari satu.',
+        'instructions'  => 'Boleh memilih lebih dari satu.', // + tautan panduan, lihat tk_kategori_tautan_panduan().
         'required'      => 1,
         'add_term'      => 0,
         'save_terms'    => 1,
@@ -131,7 +133,7 @@ function tk_register_acf_fields() {
                 'label'        => 'Kabupaten/Kota',
                 'name'         => 'asal_daerah',
                 'type'         => 'text',
-                'instructions' => 'Ketik sebagian nama, lalu pilih dari saran. Saran mengikuti Provinsi yang dipilih.',
+                'instructions' => 'Opsional. Ketik sebagian nama, lalu pilih dari saran. Saran mengikuti Provinsi yang dipilih. Titik di peta ditentukan otomatis: ibu kota kabupaten/kota ini, atau ibu kota provinsi bila dikosongkan.',
                 'placeholder'  => 'Contoh: Kabupaten Tana Toraja', // Diganti kabkota.js sesuai provinsi.
             ),
             array(
@@ -251,7 +253,7 @@ function tk_register_acf_fields() {
                 'label'        => 'Latitude',
                 'name'         => 'latitude',
                 'type'         => 'number',
-                'instructions' => 'Klik kanan lokasi di Google Maps, lalu salin koordinatnya. Angka pertama (contoh: -8.4095).',
+                'instructions' => 'Diisi otomatis dari ibu kota Kabupaten/Kota (atau Provinsi). Untuk titik yang lebih tepat: klik kanan lokasi di Google Maps, salin koordinatnya, angka pertama (contoh: -8.4095). Kosongkan untuk kembali ke titik otomatis.',
                 'min'          => -90,
                 'max'          => 90,
                 'step'         => 'any',
@@ -281,4 +283,19 @@ function tk_register_acf_fields() {
         'position'    => 'normal',
         'active'      => true,
     ) );
+}
+
+add_filter( 'acf/prepare_field/key=field_tk_kategori_tradisi', 'tk_kategori_tautan_panduan' );
+add_filter( 'acf/prepare_field/key=field_tk_kategori_material', 'tk_kategori_tautan_panduan' );
+
+/**
+ * Tambahkan tautan "Penjelasan setiap kategori" (Panduan Kontribusi) di bawah
+ * field Kategori. Dibuat saat field tampil saja, bukan di setiap request.
+ *
+ * @param array $field
+ * @return array
+ */
+function tk_kategori_tautan_panduan( $field ) {
+    $field['instructions'] .= ' <a href="' . esc_url( tk_url_panduan() . '#kategori' ) . '" target="_blank" rel="noopener">Penjelasan setiap kategori</a>.';
+    return $field;
 }

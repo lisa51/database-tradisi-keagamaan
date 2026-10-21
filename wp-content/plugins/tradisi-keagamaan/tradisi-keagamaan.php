@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Database Tradisi Keagamaan (WARISI)
  * Description: Struktur data, kontribusi, kurasi, dan tampilan untuk WARISI (Warisan Religi Indonesia).
- * Version:     2.14.1
+ * Version:     2.14.2
  * Author:      Tim WARISI
  * Text Domain: tradisi-keagamaan
  * Requires PHP: 7.4
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Cegah akses langsung ke file.
 }
 
-define( 'TK_VERSION', '2.14.1' );
+define( 'TK_VERSION', '2.14.2' );
 define( 'TK_PATH', plugin_dir_path( __FILE__ ) ); // Path folder plugin (untuk require).
 define( 'TK_URL', plugin_dir_url( __FILE__ ) );   // URL folder plugin (untuk CSS/JS).
 
@@ -50,6 +50,8 @@ $tk_modules = array(
     'includes/core/jenis.php',         // Jenis: Tradisi / Budaya Material.
     'includes/core/acf-fields.php',    // Field ACF "Detail Koleksi".
     'includes/core/kabupaten-kota.php', // Saran, validasi & penyeragaman Kabupaten/Kota.
+    'includes/core/koordinat.php',     // Latitude/Longitude otomatis dari lokasi.
+    'includes/core/kategori-migrasi.php', // Sekali jalan: kategori lama → kategori baru (2.14.2).
     'includes/core/single-data.php',   // Data untuk templates/single-tradisi.php.
     'includes/core/view-counter.php',  // Penghitung pembaca.
     'includes/core/assets.php',        // Font, CSS per fitur, script peta.

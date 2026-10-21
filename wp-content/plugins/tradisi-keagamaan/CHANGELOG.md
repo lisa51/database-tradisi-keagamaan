@@ -2,6 +2,20 @@
 
 Riwayat perubahan plugin WARISI. Format: versi, tanggal, lalu perubahan yang dikelompokkan sebagai **Baru**, **Diubah**, atau **Diperbaiki**.
 
+## 2.14.2 (21 Oktober 2026): Slideshow hero, koordinat otomatis, kategori baru
+
+**Baru**
+- **Koordinat otomatis** (`includes/core/koordinat.php`): Latitude/Longitude diisi titik ibu kota Kabupaten/Kota, atau ibu kota Provinsi bila kabupaten/kota kosong, saat koleksi disimpan. Data 514 kabupaten/kota + 38 provinsi di `includes/data/koordinat-wilayah.php` (cahyadsn/wilayah, MIT; koreksi Ogan Komering Ilir & Wakatobi). Field Latitude/Longitude tidak tampil lagi di form depan. Di wp-admin tetap bisa diisi titik yang lebih tepat; titik manual tidak ditimpa, dan dikosongkan = kembali otomatis. Koleksi lama tanpa koordinat diisi sekali saat admin/kurator membuka wp-admin.
+
+- **Kategori baru** (`includes/core/kategori-migrasi.php`, migrasi sekali jalan saat admin/kurator membuka wp-admin): Tradisi memakai 6 kategori ritual menurut Catherine Bell (1997): Peralihan Kehidupan, Kalender Keagamaan, Pertukaran & Komunal, Penyembuhan & Perlindungan, Bersantap/Berpuasa & Festival, Politik & Kekuasaan. Budaya Material memakai 10 kategori jenis benda: Arsitektur Sakral, Benda Pemakaman, Objek Tekstual, Benda Ibadah, Benda Ritual, Benda Visual, Zat Sakral, Busana Keagamaan, Benda Bersuara & Musik, Benda Peringatan. Setiap kategori berketerangan (istilah Inggris + contoh). Koleksi lama dipindahkan per judul (koleksi lain mengikuti kategori lamanya), lalu 15 kategori lama dihapus.
+- Panduan Kontribusi: bagian **Kategori koleksi** (nama + keterangan, dibaca dari kategori di database) beserta rujukannya; field Kategori di form menautkan ke bagian ini.
+
+**Diubah**
+- Kartu unggulan di `[tk_hero]` menjadi **slideshow 5 koleksi terbit terbaru** (`assets/js/hero.js`, gaya di `beranda.css`): bisa digeser, tombol ‹ ›, titik navigasi, putar otomatis tiap 6 detik (berhenti saat kursor/fokus di slider, dan mati bila pengguna memilih kurangi animasi). Atribut baru `jumlah`; atribut `id` (koleksi unggulan, cadangan pembaca terbanyak) dihapus.
+
+**Diperbaiki**
+- Card koleksi kini sama tinggi: foto potret tidak lagi memanjangkan kotak gambar 4:3. Aturan bersama `.tk-media-cover` (`base.css`) dipakai card koleksi dan slide hero.
+
 ## 2.14.1 (9 Oktober 2026): Lisensi & temuan SonarQube
 
 **Diubah**
