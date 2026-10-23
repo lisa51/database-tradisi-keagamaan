@@ -92,7 +92,7 @@ Langkah lengkap, termasuk pengaturan menu, ada di README plugin.
 |---|---|
 | [README plugin](wp-content/plugins/tradisi-keagamaan/README.md) | Fitur, struktur data, shortcode, kontribusi, kurasi, pengaturan, deployment |
 | [Panduan Pengembang](wp-content/plugins/tradisi-keagamaan/PANDUAN-PENGEMBANG.md) | Struktur kode, konvensi, resep perubahan, keamanan, pengujian manual |
-| [Changelog](wp-content/plugins/tradisi-keagamaan/CHANGELOG.md) | Riwayat versi (saat ini 2.14.0) |
+| [Changelog](wp-content/plugins/tradisi-keagamaan/CHANGELOG.md) | Riwayat versi (saat ini 2.14.2) |
 
 ## Metode pengembangan
 
